@@ -29,19 +29,19 @@
 			<h2 class="nivix-bookmark">General</h2>
 			
 			<button id="selectSpace-settings" class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="This feature will be available soon." disabled><svgPlaceholder>assets/svg/settings.svg</svgPlaceholder> Settings</button>
-			<button id="selectSpace-manage" class="nivix-primary-button"><svgPlaceholder>assets/svg/manageSpaces.svg</svgPlaceholder> Manage Spaces</button>
+			<button class="nivix-primary-button" data-tab-navigation="manageSpaces" data-tab-display="flex"><svgPlaceholder>assets/svg/manageSpaces.svg</svgPlaceholder> Manage Spaces</button>
 			<button id="selectSpace-quit" class="nivix-primary-button"><svgPlaceholder>assets/svg/exit.svg</svgPlaceholder> Exit Store</button>
 			
 			<h2 class="nivix-bookmark">Advanced</h2>
 			
-			<button id="selectSpace-connectDatabase" class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="Connect to a remote SQL-based server."><svgPlaceholder>assets/svg/database.svg</svgPlaceholder> Connect to Remote Database</button>
+			<button class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="Connect to a remote SQL-based server." data-tab-navigation="connectDatabase" data-tab-display="flex"><svgPlaceholder>assets/svg/database.svg</svgPlaceholder> Connect to Remote Database</button>
 			<button id="selectSpace-start-interface" class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="This feature will be available soon." disabled><svgPlaceholder>assets/svg/interface.svg</svgPlaceholder> Start Remote Interface</button>
 			<button id="selectSpace-issues" class="nivix-primary-button"><svgPlaceholder>assets/svg/issue.svg</svgPlaceholder> Report a Problem</button>
 			
 			<h2 class="nivix-bookmark">Developers</h2>
 			
 			<button id="selectSpace-source" class="nivix-primary-button"><svgPlaceholder>assets/svg/source.svg</svgPlaceholder> Source Code</button>
-			<button id="selectSpace-credits" class="nivix-primary-button"><svgPlaceholder>assets/svg/credits.svg</svgPlaceholder> Credits</button>
+			<button class="nivix-primary-button" data-tab-navigation="credits"><svgPlaceholder>assets/svg/credits.svg</svgPlaceholder> Credits</button>
 		</div>
 		<div class="main-container">
 			<div class="center">
@@ -72,16 +72,16 @@
 	<div id="manageSpaces" class="tab">
 		<div id="manageSpaces-list"></div>
 		<div class="nivix-horizontal-navigation divider-top">
-			<button id="manageSpaces-back" class="nivix-primary-button">Back</button>
+			<button class="nivix-primary-button" data-tab-navigation="previous">Back</button>
 			<button id="manageSpaces-refresh" class="nivix-primary-button">Refresh</button>
 			<div class="filler"></div>
-			<button id="manageSpaces-create" class="nivix-primary-button">Create New</button>
+			<button class="nivix-primary-button" data-tab-navigation="createSpace">Create New</button>
 		</div>
 	</div>
 	
 	<div id="credits" class="tab">
 		<div class="nivix-horizontal-navigation divider-top distribute-contents">
-			<button id="credits-back" class="nivix-primary-button">Back</button>
+			<button class="nivix-primary-button" data-tab-navigation="previous">Back</button>
 		</div>
 	</div>
 	
@@ -108,13 +108,13 @@
 	
 	<div id="connectDatabase" class="tab">
 		<div class="nivix-horizontal-navigation divider-bottom distribute-contents">
-			<button class="nivix-primary-button" id="navigation:connectDatabase-profiles">Connection Profiles</button>
-			<button class="nivix-primary-button" id="navigation:connectDatabase-quickConnect">Quick Connect</button>
-			<button class="nivix-primary-button" id="navigation:connectDatabase-urlConnect">Custom URL Connection</button>
+			<button class="nivix-primary-button" data-tab-navigation="connectDatabase_profiles" data-tab-display="flex" data-tab-log-previous="false">Connection Profiles</button>
+			<button class="nivix-primary-button" data-tab-navigation="connectDatabase_quickConnect" data-tab-display="flex" data-tab-log-previous="false">Quick Connect</button>
+			<button class="nivix-primary-button" data-tab-navigation="connectDatabase_urlConnect" data-tab-display="flex" data-tab-log-previous="false">Custom URL Connection</button>
 		</div>
 		
 		<div class="tab-container">
-			<div class="tab previsible-flex" id="tab:connectDatabase-profiles">
+			<div class="tab previsible-flex" id="connectDatabase_profiles">
 				<span class="nivix-label">Load Saved Profile</span>
 				<hr>
 				<div class="horizontal-container">
@@ -137,20 +137,22 @@
 					<input id="connectDatabase-save-last-profile" class="nivix-input" type="checkbox">
 				</div>
 			</div>
-			<div class="tab" id="tab:connectDatabase-quickConnect">
-				<form id="connectDatabase-form">
-					<div class="horizontal-container">
-						<input id="connectDatabase-prefix" class="nivix-input" type="text" placeholder="Prefix" value="mysql://" required>
-						<input id="connectDatabase-hostname" class="nivix-input" type="text" placeholder="Hostname" required>
-						<input id="connectDatabase-port" class="nivix-input" type="number" min="0" max="65535" placeholder="Port" required>
-					</div>
-					<input id="connectDatabase-database" class="nivix-input" type="text" placeholder="Database Name" required>
-					<input id="connectDatabase-username" class="nivix-input" type="text" placeholder="Username" required>
-					<input id="connectDatabase-password" class="nivix-input" type="password" placeholder="Password" required>
-					<button id="connectDatabase-connect" class="nivix-primary-button" type="submit">Connect</button>
-				</form>
+			<div class="tab" id="connectDatabase_quickConnect">
+				<div class="form-container horizontal-center">
+					<form id="connectDatabase-form">
+						<div class="horizontal-container">
+							<input id="connectDatabase-prefix" class="nivix-input" type="text" placeholder="Prefix" value="mysql://" required>
+							<input id="connectDatabase-hostname" class="nivix-input" type="text" placeholder="Hostname" required>
+							<input id="connectDatabase-port" class="nivix-input" type="number" min="0" max="65535" placeholder="Port" required>
+						</div>
+						<input id="connectDatabase-database" class="nivix-input" type="text" placeholder="Database Name" required>
+						<input id="connectDatabase-username" class="nivix-input" type="text" placeholder="Username" required>
+						<input id="connectDatabase-password" class="nivix-input" type="password" placeholder="Password" required>
+						<button id="connectDatabase-connect" class="nivix-primary-button" type="submit">Connect</button>
+					</form>
+				</div>
 			</div>
-			<div class="tab" id="tab:connectDatabase-urlConnect">
+			<div class="tab" id="connectDatabase_urlConnect">
 				<input id="connectDatabase-url" class="nivix-input" type="url" placeholder="Custom URL (Optional)">
 				<button id="connectDatabase-url-submit" class="nivix-primary-button">Connect with Custom URL</button>
 				<p class="nivix-disclaimer">Use this if the Quick Connect scheme doesn't work.</p>
@@ -162,7 +164,7 @@
 			<button id="connectDatabase-disconnect" class="nivix-primary-button" disabled>Disconnect</button>
 		</div>
 		<div class="nivix-horizontal-navigation divider-top distribute-contents">
-			<button id="connectDatabase-back" class="nivix-primary-button">Back</button>
+			<button class="nivix-primary-button" data-tab-navigation="previous">Back</button>
 		</div>
 	</div>
 	

@@ -16,15 +16,12 @@ const shapeAnimToggle = getEBD('selectSpace-shapeAnimToggle') as HTMLInputElemen
 let isInitialized: boolean = false;
 let populateRequest = 0;
 
-const manageBtn = getEBD('selectSpace-manage') as HTMLButtonElement;
 const closeBtn = getEBD('selectSpace-quit') as HTMLButtonElement;
 const refreshBtn = getEBD('selectSpace-refresh') as HTMLButtonElement;
 
-const connectRemoteServerBtn = getEBD('selectSpace-connectDatabase') as HTMLButtonElement;
 const issuesBtn = getEBD('selectSpace-issues') as HTMLButtonElement;
 
 const sourceCodeBtn = getEBD('selectSpace-source') as HTMLButtonElement;
-const creditsBtn = getEBD('selectSpace-credits') as HTMLButtonElement;
 
 const choiceSelection = getEBD('selectSpace-option') as HTMLSelectElement;
 const continueBtn = getEBD('selectSpace-continue') as HTMLButtonElement;
@@ -33,18 +30,6 @@ export async function init() {
     if (isInitialized) return;
     
     loadCSS('sheets/selectSpace.css');
-
-    manageBtn.addEventListener('click', function() {
-        tabs.goto('manageSpaces', { display: 'flex' });
-    });
-
-    connectRemoteServerBtn.addEventListener('click', function() {
-        tabs.goto('connectDatabase', { display: 'flex' });
-    });
-
-    creditsBtn.addEventListener('click', function() {
-        tabs.goto('credits');
-    });
 
     refreshBtn.addEventListener('click', populateSpacesPrompt);
     

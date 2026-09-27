@@ -50,7 +50,6 @@ export async function init() {
     cancelBtn.addEventListener('click', function() {
         errorOutput.innerText = '';
         nameInput.value = '';
-        tabs.goto('previous');
     });
     
     isInitialized = true;

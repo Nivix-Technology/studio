@@ -2,8 +2,6 @@ import { loadCSS } from "./file-loader";
 import { showNotification, showPopup } from "./notifications";
 import { preferences } from "./settings";
 
-import * as tabs from './tabs';
-
 import { electroview } from "./index";
 import { type TabChangeEventDetail } from "../../shared/bun/store-types";
 
@@ -22,25 +20,15 @@ const fadeInAnimation = "nivixFadeIn 0.3s ease-out forwards";
 const programaticAnimationDuration = 200;
 const itemDelay = 25; // Adjust this (in ms) to make the staggered pops faster or slower
 
-const backBtn = getEBD<HTMLButtonElement>('manageSpaces-back');
 const refreshBtn = getEBD<HTMLButtonElement>('manageSpaces-refresh');
-const createBtn = getEBD<HTMLButtonElement>('manageSpaces-create');
 
 export function init(): void {
     if (isInitialized) return;
 
     loadCSS('sheets/manageSpaces.css');
 
-    backBtn.addEventListener('click', () => {
-        tabs.goto('previous');
-    });
-
     refreshBtn.addEventListener('click', (e: MouseEvent) => {
         populateSpacesList(true, !e.shiftKey);
-    });
-
-    createBtn.addEventListener('click', () => {
-        tabs.goto('createSpace');
     });
 
     isInitialized = true;

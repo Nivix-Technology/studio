@@ -1,5 +1,4 @@
 import { loadCSS } from "./file-loader.ts";
-import * as tabs from './tabs.ts';
 import * as notifications from './notifications.ts';
 import * as selectSpace from './selectSpace.ts';
 import { preferences, setPreference } from './settings.ts';
@@ -15,7 +14,6 @@ function getEBD<T extends HTMLElement>(id: string): T {
     return el as T;
 }
 
-const backBtn = getEBD<HTMLButtonElement>('connectDatabase-back');
 const form = getEBD<HTMLFormElement>('connectDatabase-form');
 const submitBtn = getEBD<HTMLButtonElement>('connectDatabase-connect');
 
@@ -199,10 +197,6 @@ function isValidConnectionString(connectionString: string): boolean {
 
 export function init() {
     if (isInitialized) return false;
-    
-    backBtn?.addEventListener('click', () => {
-        tabs.goto('previous');
-    });
     
     form?.addEventListener('submit', (event) => {
         event.preventDefault();

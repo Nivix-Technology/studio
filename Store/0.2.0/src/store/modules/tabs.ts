@@ -9,6 +9,26 @@ interface NavigationHistoryItem {
 let navigationHistory: NavigationHistoryItem[] = [];
 let navigationQueue: Promise<void> = Promise.resolve();
 
+document.addEventListener('click', (event: MouseEvent) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const button = target.closest<HTMLButtonElement>('button[data-tab-navigation]');
+    if (!button) return;
+
+    const targetId = (button.dataset.tabNavigation ?? '')
+        .split(',')
+        .map((id) => id.trim())
+        .find((id) => id === 'previous' || getEBD(id) !== null);
+    if (!targetId) return;
+
+    event.preventDefault();
+    void goto(targetId, {
+        display: button.dataset.tabDisplay,
+        logPrevious: button.dataset.tabLogPrevious !== 'false',
+    });
+});
+
 function getEBD(id: string): HTMLElement | null {
     return document.getElementById(id);
 }

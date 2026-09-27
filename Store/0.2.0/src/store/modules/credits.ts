@@ -1,21 +1,14 @@
 import type { TabChangeEventDetail } from "../../shared/bun/store-types";
 import { loadCSS } from "./file-loader";
-import * as tabs from './tabs';
 
 function getEBD(id: string) {return document.getElementById(id)}
 
 let isInitialized: boolean = false;
 
-const backBtn = getEBD('credits-back') as HTMLButtonElement;
-
 export function init() {
     if (isInitialized) return;
 
     loadCSS('sheets/credits.css');
-
-    backBtn.addEventListener('click', function() {
-        tabs.goto('previous');
-    });
 
     isInitialized = true;
 }
