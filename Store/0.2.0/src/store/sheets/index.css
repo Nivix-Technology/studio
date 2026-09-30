@@ -1,9 +1,9 @@
 @font-face {
-    font-family: "Roboto";
-    src: url("../fonts/Roboto.ttf");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Roboto";
+	src: url("../fonts/Roboto.ttf");
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
 }
 
 html, head, body {
@@ -16,8 +16,25 @@ body {
 	font-family: "Roboto", Arial, Helvetica, sans-serif;
 	width: 100%;
 	height: 100vh;
-
+	
 	font-size: 18px;
-
+	
 	color: var(--text-primary);
+}
+
+#screenTooSmall {
+	position: fixed;
+	inset: 0;
+	background: var(--background-primary);
+	z-index: 9999;
+}
+
+@media (max-width: 649px), (max-height: 349px) {
+	#screenTooSmall {
+		display: flex;
+	}
+	
+	body {
+		overflow: hidden;
+	}
 }

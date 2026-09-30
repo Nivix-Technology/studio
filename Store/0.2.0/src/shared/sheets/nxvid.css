@@ -33,6 +33,7 @@
     --text-quarternary: color-mix(in srgb, var(--text-tertiary), black var(--text-color-step-amount));
     
     --background-primary: #f6f6f6;
+    --background-secondary: color-mix(in srgb, var(--background-primary), black var(--background-color-step-amount));
     --background-darker: color-mix(in srgb, transparent, black var(--background-color-step-amount));
     --background-lighter: color-mix(in srgb, transparent, white var(--background-color-step-amount));
     
@@ -68,6 +69,11 @@ body {
     margin: 0;
 }
 
+hr {
+    border-style: none;
+    border: 1px solid var(--background-darker);
+}
+
 /* Heading Scaling Shorthand */
 
 h1 span { font-size: 1.5em; }
@@ -76,10 +82,6 @@ h3 span { font-size: 1em; }
 h4 span { font-size: 0.83em; }
 h5 span { font-size: 0.67em; }
 h6 span { font-size: 0.45em; }
-
-.hidden {
-    display: none !important;
-}
 
 /* Layout Elements */
 
@@ -149,7 +151,7 @@ h6 span { font-size: 0.45em; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--gap);
+    gap: calc(var(--gap) * 2);
     
     background: var(--background-darker);
     border: none;
@@ -198,6 +200,11 @@ h6 span { font-size: 0.45em; }
 }
 
 .nivix-secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--gap) * 2);
+    
     background: transparent;
     border: none;
     
@@ -207,15 +214,20 @@ h6 span { font-size: 0.45em; }
     
     cursor: pointer;
     padding: var(--clickable-area-padding);
-    transition: color var(--transition);
+    
+    & svg {
+        width: 2em;
+        aspect-ratio: 1;
+        fill: var(--text-primary);
+        transition: fill var(--transition);
+    }
     
     &:hover:not(&:disabled) {
-        color: var(--brand-primary);
+        font-weight: bold;
     }
     
     &:active {
-        color: var(--brand-darker);
-        font-weight: bold;
+        font-weight: bolder;
     }
     
     &:disabled {
@@ -225,6 +237,10 @@ h6 span { font-size: 0.45em; }
     
     &.primary {
         color: var(--brand-primary);
+        
+        & svg {
+            fill: var(--brand-primary);
+        }
     }
 }
 
@@ -297,10 +313,10 @@ h6 span { font-size: 0.45em; }
                 border-color: var(--brand-darker);
             }
         }
-    }
-    
-    &::placeholder {
-        color: var(--text-secondary);
+        
+        &::placeholder {
+            color: var(--text-secondary);
+        }
     }
     
     /* Checkboxes */
@@ -514,7 +530,7 @@ code {
     border: none;
     
     padding: calc(var(--resting-area-padding) / 2);
-
+    
     .filler {
         flex: 1;
     }
@@ -526,7 +542,7 @@ code {
     &.divider-top {
         border-top: 2px solid var(--background-darker);
     }
-
+    
     &.distribute-contents * {
         flex: 1;
     }

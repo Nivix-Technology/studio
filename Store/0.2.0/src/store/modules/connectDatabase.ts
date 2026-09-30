@@ -1,6 +1,4 @@
-import { loadCSS } from "./file-loader.ts";
 import * as notifications from './notifications.ts';
-import * as selectSpace from './selectSpace.ts';
 import { preferences, setPreference } from './settings.ts';
 
 import { electroview } from "./index";
@@ -23,6 +21,8 @@ const portInput = getEBD<HTMLInputElement>('connectDatabase-port');
 const databaseInput = getEBD<HTMLInputElement>('connectDatabase-database');
 const usernameInput = getEBD<HTMLInputElement>('connectDatabase-username');
 const passwordInput = getEBD<HTMLInputElement>('connectDatabase-password');
+const passwordVisibilityBtn = getEBD<HTMLButtonElement>('connectDatabase-password-toggle');
+const clearFieldsBtn = getEBD<HTMLButtonElement>('connectDatabase-clear');
 
 const urlInput = getEBD<HTMLInputElement>('connectDatabase-url');
 const urlSubmitBtn = getEBD<HTMLButtonElement>('connectDatabase-url-submit');
@@ -185,6 +185,17 @@ function setLoadingState(isLoading: boolean) {
     if (disconnectBtn) disconnectBtn.disabled = isLoading || !connected;
 }
 
+function clearConnectionFields() {
+    form?.reset();
+    if (urlInput) urlInput.value = '';
+    if (passwordInput) passwordInput.type = 'password';
+    if (passwordVisibilityBtn) {
+        passwordVisibilityBtn.textContent = 'Show';
+        passwordVisibilityBtn.setAttribute('aria-pressed', 'false');
+    }
+    hostnameInput?.focus();
+}
+
 function isValidConnectionString(connectionString: string): boolean {
     try {
         const parsableUrl = connectionString.replace(/^(mysql|mariadb|sqlite):\/\//i, 'http://');
@@ -197,7 +208,7 @@ function isValidConnectionString(connectionString: string): boolean {
 
 export function init() {
     if (isInitialized) return false;
-    
+
     form?.addEventListener('submit', (event) => {
         event.preventDefault();
         connectDatabase();
@@ -222,7 +233,16 @@ export function init() {
     profileSaveBtn?.addEventListener('click', () => void saveProfile());
     profileDeleteBtn?.addEventListener('click', () => void deleteSelectedProfile());
     
-    loadCSS('sheets/connectDatabase.css');
+    passwordVisibilityBtn?.addEventListener('click', () => {
+        const showPassword = passwordInput?.type === 'password';
+        if (passwordInput) passwordInput.type = showPassword ? 'text' : 'password';
+        if (passwordVisibilityBtn) {
+            passwordVisibilityBtn.textContent = showPassword ? 'Hide' : 'Show';
+            passwordVisibilityBtn.setAttribute('aria-pressed', String(showPassword));
+        }
+    });
+    clearFieldsBtn?.addEventListener('click', clearConnectionFields);
+    
     isInitialized = true;
     renderProfiles();
     void syncConnectionState();
@@ -334,8 +354,6 @@ async function connectDatabase(customURL?: string) {
         }
         notifications?.showNotification('Successfully connected to database!');
         if (statusOutput) statusOutput.innerText = 'Connected to Database';
-        
-        await selectSpace.populateSpacesPrompt();
     } catch (err) {
         connected = false;
         const message = getErrorMessage(err);
@@ -365,7 +383,6 @@ async function disconnectDatabase() {
         await electroview.rpc.request.setDatabase({ database: 'sqlite' });
         
         connected = false;
-        await selectSpace.populateSpacesPrompt();
         if (statusOutput) statusOutput.innerText = 'Not Connected';
         notifications?.showNotification('Disconnected from remote database. Switched to local SQLite.');
     } catch (err) {

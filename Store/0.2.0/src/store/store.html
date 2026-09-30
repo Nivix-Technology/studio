@@ -5,14 +5,33 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://nivixtech.com https://*.nivixtech.com ws://localhost:50000; img-src 'self' data: https://nivixtech.com https://*.nivixtech.com ws://localhost:50000;">
 	
+	<!-- Nivix Visual Identity Stylesheet -->
 	<link rel="stylesheet" type="text/css" href="sheets/nxvid.css">
 	
-	<link rel="stylesheet" type="text/css" href="sheets/tabs.css">
+	<!-- Utility, Module and Library Stylesheets -->
 	<link rel="stylesheet" type="text/css" href="sheets/index.css">
-	<link rel="stylesheet" type="text/css" href="sheets/load.css">
+	<link rel="stylesheet" type="text/css" href="sheets/tabs.css">
+	<link rel="stylesheet" type="text/css" href="sheets/notifications.css">
+	<link rel="stylesheet" type="text/css" href="sheets/spaceFillers.css">
+	<link rel="stylesheet" type="text/css" href="sheets/tooltips.css">
+
+	<!-- Tab Stylesheets -->
+	<link rel="stylesheet" type="text/css" href="sheets/tabs/load.css">
+	<link rel="stylesheet" type="text/css" href="sheets/tabs/connectDatabase.css">
+	<link rel="stylesheet" type="text/css" href="sheets/tabs/createSpace.css">
+	<link rel="stylesheet" type="text/css" href="sheets/tabs/selectSpace.css">
+	<link rel="stylesheet" type="text/css" href="sheets/tabs/workspace.css">
 </head>
 <body>
 	<div id="space-filler-container"></div>
+	
+	<div id="screenTooSmall" class="tab">
+		<div class="center">
+			<svgPlaceholder>assets/svg/issue.svg</svgPlaceholder>
+			<span>Please increase the size of your screen to keep using Nivix Store</span>
+		</div>
+	</div>
+	
 	<div id="loadMenu" class="tab previsible-flex">
 		<div class="center">
 			<svgPlaceholder>assets/svg/favicon.svg</svgPlaceholder>
@@ -28,60 +47,38 @@
 		<div class="action-container">
 			<h2 class="nivix-bookmark">General</h2>
 			
-			<button id="selectSpace-settings" class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="This feature will be available soon." disabled><svgPlaceholder>assets/svg/settings.svg</svgPlaceholder> Settings</button>
-			<button class="nivix-primary-button" data-tab-navigation="manageSpaces" data-tab-display="flex"><svgPlaceholder>assets/svg/manageSpaces.svg</svgPlaceholder> Manage Spaces</button>
-			<button id="selectSpace-quit" class="nivix-primary-button"><svgPlaceholder>assets/svg/exit.svg</svgPlaceholder> Exit Store</button>
+			<button id="selectSpace-settings" class="nivix-secondary-button tooltip-support-button tip-right" data-tooltip-content="This feature will be available soon." disabled><svgPlaceholder>assets/svg/settings.svg</svgPlaceholder>Settings</button>
+			<button id="selectSpace-quit" class="nivix-secondary-button"><svgPlaceholder>assets/svg/exit.svg</svgPlaceholder>Exit Store</button>
 			
 			<h2 class="nivix-bookmark">Advanced</h2>
 			
-			<button class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="Connect to a remote SQL-based server." data-tab-navigation="connectDatabase" data-tab-display="flex"><svgPlaceholder>assets/svg/database.svg</svgPlaceholder> Connect to Remote Database</button>
-			<button id="selectSpace-start-interface" class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="This feature will be available soon." disabled><svgPlaceholder>assets/svg/interface.svg</svgPlaceholder> Start Remote Interface</button>
-			<button id="selectSpace-issues" class="nivix-primary-button"><svgPlaceholder>assets/svg/issue.svg</svgPlaceholder> Report a Problem</button>
+			<button class="nivix-secondary-button tooltip-support-button tip-right" data-tooltip-content="Connect to a remote SQL-based server." data-tab-navigation="connectDatabase" data-tab-display="flex"><svgPlaceholder>assets/svg/database.svg</svgPlaceholder>Connect to Remote Database</button>
+			<button id="selectSpace-start-interface" class="nivix-secondary-button tooltip-support-button tip-right" data-tooltip-content="This feature will be available soon." disabled><svgPlaceholder>assets/svg/interface.svg</svgPlaceholder>Start Remote Interface</button>
+			<button id="selectSpace-issues" class="nivix-secondary-button"><svgPlaceholder>assets/svg/issue.svg</svgPlaceholder>Report a Problem</button>
 			
 			<h2 class="nivix-bookmark">Developers</h2>
 			
-			<button id="selectSpace-source" class="nivix-primary-button"><svgPlaceholder>assets/svg/source.svg</svgPlaceholder> Source Code</button>
-			<button class="nivix-primary-button" data-tab-navigation="credits"><svgPlaceholder>assets/svg/credits.svg</svgPlaceholder> Credits</button>
+			<button id="selectSpace-source" class="nivix-secondary-button"><svgPlaceholder>assets/svg/source.svg</svgPlaceholder>Source Code</button>
+			<button class="nivix-secondary-button" data-tab-navigation="credits"><svgPlaceholder>assets/svg/credits.svg</svgPlaceholder>Credits</button>
+			<div class="nivix-checkbox-wrapper nivix-secondary-button">
+				<label>Disable Shape Motion</label>
+				<input id="selectSpace-shapeAnimToggle" class="nivix-input" type="checkbox">
+			</div>
 		</div>
 		<div class="main-container">
-			<div class="center">
-				<span id="selectSpace-status"></span>
-				<div class="container">
-					<svgPlaceholder>assets/svg/favicon.svg</svgPlaceholder>
-					<h1><span class="nivix-accent" aria-label="Nivix">NiViX</span> Store<sup aria-label="Trademark">TM</sup></h1>
-					<div class="button-container">
-						<p>Select a Space or Create a New One<button class="tooltip-button tip-right" data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;.">i</button></p>
-						<select id="selectSpace-option" class="nivix-select primary"></select>
-						<button id="selectSpace-continue" class="nivix-primary-button primary">Continue</button>
-						<div class="nivix-checkbox-wrapper centered">
-							<label>Disable Shape Animation</label>
-							<input id="selectSpace-shapeAnimToggle" class="nivix-input" type="checkbox">
-						</div>
-					</div>
-				</div>
+			<div id="selectSpace-list"></div>
+			<div class="nivix-horizontal-navigation">
+				<input type="search" class="nivix-input filler" placeholder="Search Spaces">
+				<button class="nivix-primary-button tooltip-support-button tip-top" data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;.">What is a space?</button>
+				<button id="selectSpace-refresh" class="nivix-primary-button">Refresh</button>
+				<button id="selectSpace-create" class="nivix-primary-button primary" data-tab-navigation="createSpace">Create New Space</button>
 			</div>
-			<div class="nivix-footer">
-				<span>Store </span><span id="selectSpace-footer-version">vX.X.X</span><span> | &copy; 2026 Nivix Technology. All rights reserved.</span>
-			</div>
-			<div class="nivix-horizontal-navigation divider-top distribute-contents">
-				<button id="selectSpace-refresh" class="nivix-primary-button tooltip-support-button tip-top" data-tooltip-content="Reloads the contents of the Space Selection dropdown">Refresh</button>
-			</div>
-		</div>
-	</div>
-	
-	<div id="manageSpaces" class="tab">
-		<div id="manageSpaces-list"></div>
-		<div class="nivix-horizontal-navigation divider-top">
-			<button class="nivix-primary-button" data-tab-navigation="previous">Back</button>
-			<button id="manageSpaces-refresh" class="nivix-primary-button">Refresh</button>
-			<div class="filler"></div>
-			<button class="nivix-primary-button" data-tab-navigation="createSpace">Create New</button>
 		</div>
 	</div>
 	
 	<div id="credits" class="tab">
 		<div class="nivix-horizontal-navigation divider-top distribute-contents">
-			<button class="nivix-primary-button" data-tab-navigation="previous">Back</button>
+			<button class="nivix-primary-button" data-tab-navigation="previous, selectSpace">Back</button>
 		</div>
 	</div>
 	
@@ -89,10 +86,12 @@
 		<div class="center">
 			<h1 class="nivix-accent">Create a Space</h1>
 			<div class="button-container">
-				<p>Learn what a space is: <button class="tooltip-button tip-right" data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;.">i</button></p>
 				<form id="createSpace-form">
 					<input id="createSpace-name" class="nivix-input" type="text" placeholder="Space Name">
-					<button id="createSpace-continue" class="nivix-primary-button primary" type="submit">Create</button>
+					<button id="createSpace-continue" class="nivix-primary-button" type="submit">Create</button>
+
+					<hr>
+					<button class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;." type="button">What is a space?</button>
 				</form>
 				
 				<hr>
@@ -100,7 +99,7 @@
 				<button id="createSpace-convert" class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="This feature will be available soon." disabled>Import from old inventory</button>
 				
 				<hr>
-				<button id="createSpace-cancel" class="nivix-secondary-button">Cancel</button>
+				<button id="createSpace-cancel" class="nivix-secondary-button" data-tab-navigation="previous, selectSpace">Cancel</button>
 			</div>
 			<p id="createSpace-output"></p>
 		</div>
@@ -138,24 +137,51 @@
 				</div>
 			</div>
 			<div class="tab" id="connectDatabase_quickConnect">
-				<div class="form-container horizontal-center">
+				<div class="horizontal-center">
 					<form id="connectDatabase-form">
-						<div class="horizontal-container">
-							<input id="connectDatabase-prefix" class="nivix-input" type="text" placeholder="Prefix" value="mysql://" required>
-							<input id="connectDatabase-hostname" class="nivix-input" type="text" placeholder="Hostname" required>
-							<input id="connectDatabase-port" class="nivix-input" type="number" min="0" max="65535" placeholder="Port" required>
+						<div class="connection-fields">
+							<label class="connection-field">
+								<span>Protocol</span>
+								<input id="connectDatabase-prefix" class="nivix-input" type="text" placeholder="mysql://" value="mysql://" required>
+							</label>
+							<label class="connection-field">
+								<span>Hostname or IP address</span>
+								<input id="connectDatabase-hostname" class="nivix-input" type="text" placeholder="db.example.com" autocomplete="url" required>
+							</label>
+							<label class="connection-field">
+								<span>Port <span class="field-hint">(optional)</span></span>
+								<input id="connectDatabase-port" class="nivix-input" type="number" min="1" max="65535" placeholder="3306">
+							</label>
+							<label class="connection-field connection-field-wide">
+								<span>Database name</span>
+								<input id="connectDatabase-database" class="nivix-input" type="text" placeholder="Database name" required>
+							</label>
+							<label class="connection-field">
+								<span>Username <span class="field-hint">(optional)</span></span>
+								<input id="connectDatabase-username" class="nivix-input" type="text" placeholder="Username" autocomplete="username">
+							</label>
+							<label class="connection-field">
+								<span>Password <span class="field-hint">(optional)</span></span>
+								<span class="password-field">
+									<input id="connectDatabase-password" class="nivix-input" type="password" placeholder="Password" autocomplete="current-password">
+									<button id="connectDatabase-password-toggle" class="nivix-secondary-button" type="button" aria-pressed="false">Show</button>
+								</span>
+							</label>
 						</div>
-						<input id="connectDatabase-database" class="nivix-input" type="text" placeholder="Database Name" required>
-						<input id="connectDatabase-username" class="nivix-input" type="text" placeholder="Username" required>
-						<input id="connectDatabase-password" class="nivix-input" type="password" placeholder="Password" required>
-						<button id="connectDatabase-connect" class="nivix-primary-button" type="submit">Connect</button>
+						<div class="connection-actions">
+							<button id="connectDatabase-connect" class="nivix-primary-button" type="submit">Connect</button>
+							<button id="connectDatabase-clear" class="nivix-secondary-button" type="button">Clear fields</button>
+						</div>
 					</form>
 				</div>
 			</div>
 			<div class="tab" id="connectDatabase_urlConnect">
-				<input id="connectDatabase-url" class="nivix-input" type="url" placeholder="Custom URL (Optional)">
-				<button id="connectDatabase-url-submit" class="nivix-primary-button">Connect with Custom URL</button>
-				<p class="nivix-disclaimer">Use this if the Quick Connect scheme doesn't work.</p>
+				<label class="connection-field">
+					<span>Custom connection URL</span>
+					<input id="connectDatabase-url" class="nivix-input" type="url" placeholder="mysql://user:password@host:3306/database" autocomplete="url">
+				</label>
+				<button id="connectDatabase-url-submit" class="nivix-primary-button" type="button">Connect with Custom URL</button>
+				<p class="nivix-disclaimer">Use this if Quick Connect doesn’t support your connection format. Passwords and URL secrets are not saved in profiles.</p>
 			</div>
 		</div>
 		
@@ -164,11 +190,11 @@
 			<button id="connectDatabase-disconnect" class="nivix-primary-button" disabled>Disconnect</button>
 		</div>
 		<div class="nivix-horizontal-navigation divider-top distribute-contents">
-			<button class="nivix-primary-button" data-tab-navigation="previous">Back</button>
+			<button class="nivix-primary-button" data-tab-navigation="previous, selectSpace">Back</button>
 		</div>
 	</div>
 	
-	<div class="tab" id="workspace">
+	<div id="workspace" class="tab">
 		<div class="navigation">
 			<button id="workspace-navigation-dashboard"><svgPlaceholder>assets/svg/home.svg</svgPlaceholder>Home</button>
 			<button id="workspace-navigation-query"><svgPlaceholder>assets/svg/query.svg</svgPlaceholder>Query</button>

@@ -1,5 +1,3 @@
-import { loadCSS } from "./file-loader";
-
 import * as tabs from './tabs';
 
 import { type TabChangeEventDetail } from "../../shared/bun/store-types";
@@ -8,8 +6,6 @@ let isInitialized = false;
 
 export function init(): void {
     if (isInitialized) return;
-
-    loadCSS('sheets/workspace.css');
 
     isInitialized = true;
 }

@@ -1,4 +1,3 @@
-import { loadCSS } from './file-loader';
 import { preferences } from './settings';
 
 function getEBD(id: string) { return document.getElementById(id); }
@@ -33,7 +32,6 @@ function waitForAnimation(element: HTMLElement, instant: boolean, fallbackMs: nu
 }
 
 export async function init() {
-    await loadCSS('sheets/spaceFillers.css');
     fillSpaceContainer();
 }
 

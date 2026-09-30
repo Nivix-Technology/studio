@@ -12,7 +12,7 @@
     width: 30%;
     min-height: 2.5em;
     
-    background: var(--background-darker);
+    background: color-mix(in srgb, var(--background-primary), black calc(var(--background-color-step-amount) * 2));
     border: none;
     border-radius: var(--radius);
     box-shadow: var(--outset-shadow);

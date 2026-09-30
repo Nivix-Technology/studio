@@ -1,0 +1,121 @@
+#connectDatabase {
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+
+    .tab-container {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .tab {
+        position: unset;
+        flex-direction: column;
+        flex: 1;
+        gap: var(--gap);
+
+        box-sizing: border-box;
+        width: 100%;
+
+        padding: calc(var(--resting-area-padding) * 2);
+
+        hr {
+            box-sizing: border-box;
+            width: 100%;
+        }
+    }
+
+    .horizontal-container {
+        display: flex;
+        flex-direction: row;
+        gap: var(--gap);
+
+        width: 100%;
+
+        .flex-primary {
+            flex: 1;
+        }
+    }
+
+    #connectDatabase-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap);
+    }
+
+    .connection-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--gap);
+    }
+
+    .connection-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        min-width: 0;
+
+        font-size: 0.95em;
+    }
+
+    .connection-field-wide {
+        grid-column: 1 / -1;
+    }
+
+    .field-hint {
+        opacity: 0.7;
+        font-size: 0.9em;
+    }
+
+    .password-field {
+        display: flex;
+        gap: var(--gap);
+
+        min-width: 0;
+
+        input {
+            flex: 1;
+            min-width: 0;
+        }
+    }
+
+    .connection-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--gap);
+    }
+
+    #connectDatabase_urlConnect > .connection-field {
+        width: min(100%, 540px);
+    }
+
+    #connectDatabase_url-submit {
+        align-self: flex-start;
+    }
+
+    #connectDatabase-status {
+        text-align: center;
+    }
+
+    :is(input, select, button):focus-visible {
+        outline: 2px solid var(--nivix-accent, currentColor);
+        outline-offset: 2px;
+    }
+
+    @media (max-width: 560px) {
+        .connection-fields {
+            grid-template-columns: 1fr;
+        }
+
+        .connection-field-wide {
+            grid-column: auto;
+        }
+
+        .horizontal-container {
+            flex-wrap: wrap;
+        }
+    }
+}

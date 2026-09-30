@@ -1,4 +1,3 @@
-import { loadCSS } from "./file-loader";
 import { preferences } from "./settings";
 
 interface NotificationItem {
@@ -51,13 +50,6 @@ export interface PopupInputAttributes {
 
 const queue: NotificationItem[] = [];
 let isProcessing = false;
-let isInitialized = false;
-
-export function init(): void {
-    if (isInitialized) return;
-    loadCSS("sheets/notifications.css");
-    isInitialized = true;
-}
 
 export function showNotification(
     message: string, 
@@ -161,7 +153,7 @@ export function showPopup<T = any>(
         messageContainer.className = "message-container";
 
         const span = document.createElement("span");
-        span.textContent = message;
+        span.innerHTML = message;
         messageContainer.appendChild(span);
 
         let inputElement: HTMLInputElement | null = null;

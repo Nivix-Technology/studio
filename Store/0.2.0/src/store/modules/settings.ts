@@ -37,4 +37,14 @@ export async function setPreference(key: string, value: any) {
     });
     preferenceWrite = write.catch(() => undefined);
     await write;
+    applySettings();
+}
+
+function applySettings() {
+    if (preferences['disableAnimations']) {
+        const allElements = document.querySelectorAll<HTMLElement>('*');
+        allElements.forEach(function(element) {
+            element.style.transition = 'none';
+        });
+    }
 }

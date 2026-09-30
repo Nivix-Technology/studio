@@ -1,5 +1,4 @@
-Copyright (c) 2011, Juan Pablo del Peral (juan@huertatipografica.com.ar), 
-with Reserved Font Names 'Gochi' and 'Gochi Hand'
+Copyright 2011 The Roboto Project Authors (https://github.com/googlefonts/roboto-classic)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
@@ -27,22 +26,22 @@ requirement for fonts to remain under this license does not apply
 to any document created using the fonts or their derivatives.
 
 DEFINITIONS
-'Font Software' refers to the set of files released by the Copyright
+"Font Software" refers to the set of files released by the Copyright
 Holder(s) under this license and clearly marked as such. This may
 include source files, build scripts and documentation.
 
-'Reserved Font Name' refers to any names specified as such after the
+"Reserved Font Name" refers to any names specified as such after the
 copyright statement(s).
 
-'Original Version' refers to the collection of Font Software components as
+"Original Version" refers to the collection of Font Software components as
 distributed by the Copyright Holder(s).
 
-'Modified Version' refers to any derivative made by adding to, deleting,
+"Modified Version" refers to any derivative made by adding to, deleting,
 or substituting -- in part or in whole -- any of the components of the
 Original Version, by changing formats or by porting the Font Software to a
 new environment.
 
-'Author' refers to any designer, engineer, programmer, technical
+"Author" refers to any designer, engineer, programmer, technical
 writer or other person who contributed to the Font Software.
 
 PERMISSION & CONDITIONS
@@ -83,7 +82,7 @@ This license becomes null and void if any of the above conditions are
 not met.
 
 DISCLAIMER
-THE FONT SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
 OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE

@@ -1,5 +1,3 @@
-import { loadCSS } from './file-loader';
-
 import * as settings from './settings';
 import * as tabs from './tabs';
 import * as index from './index';
@@ -8,13 +6,11 @@ import * as notifications from './notifications';
 import { initTooltips } from './tooltips';
 
 import { electroview } from './index';
-import { populateSVGs } from "./file-loader";
+import { populateSVGs } from "./fileLoader";
 
 // Import all modules that listen for tabchange events, so electrobun can package them, and all top-level code is ran.
 import './connectDatabase';
 import './createSpace';
-import './credits';
-import './manageSpaces';
 import './selectSpace';
 
 function getEBD(id: string) {return document.getElementById(id)}
@@ -38,17 +34,9 @@ export function init(): Promise<void> {
 async function initialize() {
     versionLabel!.innerText = `v${index.store.sessionVersion}` || "Failed to get session version";
     
-    loadCSS('sheets/tooltips.css');
     initTooltips();
     
     let menuDelay: number = 750;
-    
-    try {
-        notifications.init();
-    } catch (err) {
-        const message = err as string;
-        console.warn(`Failed to load notifications module: ${message}`);
-    }
     
     // Load User Preferences
     try {

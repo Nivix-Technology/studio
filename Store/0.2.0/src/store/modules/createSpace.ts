@@ -1,6 +1,4 @@
-import { loadCSS } from './file-loader';
 import * as tabs from './tabs';
-import * as selectSpace from './selectSpace';
 
 import { electroview } from './index';
 import type { TabChangeEventDetail } from '../../shared/bun/store-types';
@@ -18,7 +16,6 @@ const errorOutput = getEBD('createSpace-output') as HTMLSpanElement;
 
 export async function init() {
     if (isInitialized) return;
-    loadCSS('sheets/createSpace.css');
     
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
@@ -35,9 +32,7 @@ export async function init() {
                 errorOutput.innerText = 'Haha. Very Funny';
                 await wait(500);
             }
-            await selectSpace.populateSpacesPrompt();
             tabs.goto('previous');
-            await wait(tabs.programaticAnimationDuration);
             errorOutput.innerText = '';
             nameInput.value = '';
         } catch (err) {
@@ -61,5 +56,5 @@ window.addEventListener('tabchange', (event) => {
     if (tabId === 'createSpace') {
         init();
         nameInput.focus();
-    };
+    }
 });

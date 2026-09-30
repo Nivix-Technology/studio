@@ -16,7 +16,7 @@ document.addEventListener('click', (event: MouseEvent) => {
     const button = target.closest<HTMLButtonElement>('button[data-tab-navigation]');
     if (!button) return;
 
-    const targetId = (button.dataset.tabNavigation ?? '')
+    const targetId = (button.dataset['tabNavigation'] ?? '')
         .split(',')
         .map((id) => id.trim())
         .find((id) => id === 'previous' || getEBD(id) !== null);
@@ -24,8 +24,8 @@ document.addEventListener('click', (event: MouseEvent) => {
 
     event.preventDefault();
     void goto(targetId, {
-        display: button.dataset.tabDisplay,
-        logPrevious: button.dataset.tabLogPrevious !== 'false',
+        display: button.dataset['tabDisplay'],
+        logPrevious: button.dataset['tabLogPrevious'] !== 'false',
     });
 });
 
