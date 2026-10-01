@@ -278,6 +278,6 @@ ANIMATIONS
 }
 
 @keyframes fadeOut {
-    from { opacity: 0.4; filter: blur(0); }
-    to { opacity: 0; filter: blur(10px); }
+    from { opacity: 0.4; }
+    to { opacity: 0; }
 }

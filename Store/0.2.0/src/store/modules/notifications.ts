@@ -8,9 +8,9 @@ interface NotificationItem {
 }
 
 export type ValidNotificationType =
-    | "warning"
-    | "info"
-    | "error"
+| "warning"
+| "info"
+| "error"
 
 export interface PopupOption {
     content: string;
@@ -19,16 +19,16 @@ export interface PopupOption {
 }
 
 export type ValidInputType = 
-    | "text" 
-    | "number" 
-    | "password" 
-    | "email" 
-    | "url" 
-    | "tel" 
-    | "search" 
-    | "date" 
-    | "time" 
-    | "datetime-local";
+| "text" 
+| "number" 
+| "password" 
+| "email" 
+| "url" 
+| "tel" 
+| "search" 
+| "date" 
+| "time" 
+| "datetime-local";
 
 export type PopupType = "options" | ValidInputType;
 
@@ -84,6 +84,13 @@ function renderNotification(item: NotificationItem): Promise<void> {
         container.className = `notification-box ${item.type}`;
         container.setAttribute("role", "status");
         container.setAttribute("aria-live", "polite");
+
+        const header = document.createElement("div");
+        header.className = "notification-header";
+
+        const title = document.createElement("strong");
+        title.className = "notification-title";
+        title.textContent = `${item.type[0].toUpperCase()}${item.type.slice(1)}`;
         
         const messageOutput = document.createElement("p");
         messageOutput.className = "notification-message";
@@ -94,8 +101,10 @@ function renderNotification(item: NotificationItem): Promise<void> {
         closeBtn.setAttribute("aria-label", "Dismiss notification");
         closeBtn.innerHTML = "&times;";
         
+        header.appendChild(title);
+        header.appendChild(closeBtn);
+        container.appendChild(header);
         container.appendChild(messageOutput);
-        container.appendChild(closeBtn);
         if (!preferences['disableAnimations']) container.style.animation = "nivixFadeIn 0.3s ease-out forwards";
         document.body.appendChild(container);
         
@@ -115,7 +124,7 @@ function renderNotification(item: NotificationItem): Promise<void> {
                 resolve();
                 return;
             }
-
+            
             container.style.animation = "nivixFadeOut 0.25s ease-out forwards";
             
             container.addEventListener("animationend", () => {
@@ -132,7 +141,87 @@ function renderNotification(item: NotificationItem): Promise<void> {
     });
 }
 
+const popupMargin = 5;
+let cursorX: number | null = null;
+let cursorY: number | null = null;
+let dismissActivePopup: (() => void) | null = null;
+
+document.addEventListener("mousemove", (event) => {
+    cursorX = event.clientX;
+    cursorY = event.clientY;
+});
+
+function placePopup(container: HTMLDivElement, popup: HTMLDivElement, anchor: HTMLElement | null): void {
+    popup.style.position = "fixed";
+    popup.style.left = "0px";
+    popup.style.top = "0px";
+
+    const style = getComputedStyle(popup);
+    const width = parseFloat(style.width);
+    const height = parseFloat(style.height);
+    const minX = popupMargin;
+    const minY = popupMargin;
+    const maxX = window.innerWidth - width - popupMargin;
+    const maxY = window.innerHeight - height - popupMargin;
+
+    if (![width, height, maxX, maxY].every(Number.isFinite) || maxX < minX || maxY < minY) {
+        container.classList.add("center", "popup-container-shaded");
+        popup.style.position = "";
+        popup.style.left = "";
+        popup.style.top = "";
+        return;
+    }
+
+    const triggerRect = anchor?.getBoundingClientRect();
+    const triggerX = triggerRect
+        ? triggerRect.left + triggerRect.width / 2
+        : cursorX;
+    const triggerY = triggerRect?.bottom ?? cursorY;
+
+    if (triggerX === null || triggerY === null) {
+        container.classList.add("center", "popup-container-shaded");
+        popup.style.position = "";
+        popup.style.left = "";
+        popup.style.top = "";
+        return;
+    }
+
+    popup.style.left = `${triggerX - width / 2}px`;
+    popup.style.top = `${triggerY + popupMargin}px`;
+    const positionedStyle = getComputedStyle(popup);
+    const x = parseFloat(positionedStyle.left);
+    const y = parseFloat(positionedStyle.top);
+    if (![x, y].every(Number.isFinite)) {
+        container.classList.add("center", "popup-container-shaded");
+        popup.style.position = "";
+        popup.style.left = "";
+        popup.style.top = "";
+        return;
+    }
+
+    const clampX = (x: number) => Math.max(minX, Math.min(x, maxX));
+    const clampY = (y: number) => Math.max(minY, Math.min(y, maxY));
+    const candidates = [
+        { x, y },
+        ...(triggerRect ? [
+            { x: triggerX - width / 2, y: triggerRect.top - height - popupMargin },
+            { x: triggerRect.right + popupMargin, y: triggerRect.top + (triggerRect.height - height) / 2 },
+            { x: triggerRect.left - width - popupMargin, y: triggerRect.top + (triggerRect.height - height) / 2 }
+        ] : [])
+    ];
+
+    const placement = candidates.find(({ x, y }) =>
+        x >= minX && x <= maxX && y >= minY && y <= maxY
+    ) ?? {
+        x: clampX(candidates[0].x),
+        y: clampY(candidates[0].y)
+    };
+    popup.style.left = `${placement.x}px`;
+    popup.style.top = `${placement.y}px`;
+}
+
 export function showPopup<T = any>(
+    title: string,
     message: string, 
     type: PopupType = "options",
     options: PopupOption[] = [
@@ -140,83 +229,150 @@ export function showPopup<T = any>(
         { content: "Yes", value: true, highlighted: true }
     ],
     inputProps: PopupInputAttributes = {}
-): Promise<T> {
-    return new Promise((resolve) => {
-        // Create strict structural hierarchy
-        const popupContainer = document.createElement("div");
-        popupContainer.className = "popup-container center";
+): Promise<T | undefined> {
+    const activeElement = document.activeElement;
+    const anchor = activeElement instanceof HTMLElement
+        ? activeElement.closest("button")
+        : null;
 
+    dismissActivePopup?.();
+
+    return new Promise((resolve) => {
+        const popupContainer = document.createElement("div");
+        popupContainer.className = "popup-container";
+        
         const popup = document.createElement("div");
         popup.className = "popup";
 
+        const titleBar = document.createElement("div");
+        titleBar.className = "popup-title-bar";
+
+        const titleOutput = document.createElement("strong");
+        titleOutput.className = "popup-title";
+        titleOutput.textContent = title;
+        titleBar.appendChild(titleOutput);
+        
         const messageContainer = document.createElement("div");
         messageContainer.className = "message-container";
-
+        
         const span = document.createElement("span");
         span.innerHTML = message;
         messageContainer.appendChild(span);
-
+        
         let inputElement: HTMLInputElement | null = null;
-
+        
         // If type is not "options", generate the requested input field
         if (type !== "options") {
             inputElement = document.createElement("input");
             inputElement.type = type;
             inputElement.className = "nivix-input";
-
+            
             // Apply all passed attributes dynamically
             Object.entries(inputProps).forEach(([key, val]) => {
                 if (val !== undefined && val !== null) {
                     inputElement!.setAttribute(key, String(val));
                 }
             });
-
+            
             messageContainer.appendChild(inputElement);
         }
-
+        
         const actionContainer = document.createElement("div");
         actionContainer.className = "action-container";
-
+        let highlightedButton: HTMLButtonElement | null = null;
+        
         const disableAnimations = preferences['disableAnimations'];
-
-        // Apply distinct animations for container and popup wrapper
-        if (!disableAnimations) {
-            popupContainer.style.animation = "popupFadeIn 0.3s ease-out forwards";
-            popup.style.animation = "nivixFadeIn 0.3s ease-out forwards";
-        }
-
         let isClosing = false;
-        const closePopup = (selectedValue: any) => {
-            if (isClosing) return;
-            isClosing = true;
-
-            if (disableAnimations) {
+        let outsidePointerDown: ((event: PointerEvent) => void) | null = null;
+        let trapTabNavigation: ((event: KeyboardEvent) => void) | null = null;
+        let dismissThisPopup: (() => void) | null = null;
+        const clearActivePopup = () => {
+            if (dismissActivePopup === dismissThisPopup) {
+                dismissActivePopup = null;
+            }
+        };
+        const removeOutsideListener = () => {
+            if (outsidePointerDown) {
+                document.removeEventListener("pointerdown", outsidePointerDown);
+                outsidePointerDown = null;
+            }
+            if (trapTabNavigation) {
+                document.removeEventListener("keydown", trapTabNavigation);
+                trapTabNavigation = null;
+            }
+        };
+        
+        const closePopup = (selectedValue: any, immediately = false) => {
+            if (immediately) {
+                isClosing = true;
+                removeOutsideListener();
                 popupContainer.remove();
-                resolve(selectedValue as T);
+                clearActivePopup();
+                resolve(undefined);
                 return;
             }
+            if (isClosing) return;
+            isClosing = true;
+            removeOutsideListener();
+            
+            if (disableAnimations) {
+                popupContainer.remove();
+                clearActivePopup();
+                resolve(selectedValue as T | undefined);
+                return;
+            }
+            
+            const isShaded = popupContainer.classList.contains("popup-container-shaded");
+            const finishClose = () => {
+                popupContainer.remove();
+                clearActivePopup();
+                resolve(selectedValue as T | undefined);
+            };
 
-            popupContainer.style.animation = "popupFadeOut 0.3s ease-out forwards";
+            let pendingAnimations = isShaded ? 2 : 1;
+            const animationEnded = () => {
+                pendingAnimations -= 1;
+                if (pendingAnimations === 0) finishClose();
+            };
+
+            popup.addEventListener("animationend", () => {
+                animationEnded();
+            }, { once: true });
             popup.style.animation = "nivixFadeOut 0.3s ease-out forwards";
 
-            popupContainer.addEventListener("animationend", () => {
-                popupContainer.remove();
-                resolve(selectedValue as T);
-            }, { once: true });
+            if (isShaded) {
+                const onContainerAnimationEnd = (event: AnimationEvent) => {
+                    if (event.target !== popupContainer) return;
+                    popupContainer.removeEventListener("animationend", onContainerAnimationEnd);
+                    animationEnded();
+                };
+                popupContainer.addEventListener("animationend", onContainerAnimationEnd);
+                popupContainer.style.animation = "popupContainerFadeOut 0.3s ease-out forwards";
+            }
         };
-
-        // Render input single "OK" button OR custom option buttons
+        dismissThisPopup = () => closePopup(undefined, true);
+        dismissActivePopup = dismissThisPopup;
+        
+        // Render input "OK" button OR custom option buttons
         if (type !== "options") {
-            const okBtn = document.createElement("button");
-            okBtn.textContent = "OK";
-            okBtn.className = "nivix-primary-button";
-
+            const okBtn = document.createElement('button');
+            okBtn.textContent = 'Ok';
+            okBtn.className = 'nivix-primary-button primary';
+            
+            const cancelbtn = document.createElement('button');
+            cancelbtn.textContent = 'Cancel';
+            cancelbtn.className = 'nivix-secondary-button';
+            highlightedButton = okBtn;
+            
             const submitInput = () => {
                 closePopup(inputElement ? inputElement.value : "");
             };
-
+            
             okBtn.addEventListener("click", submitInput);
-
+            cancelbtn.addEventListener('click', () => {
+                closePopup(undefined);
+            });
+            
             // Allow pressing "Enter" inside the input to submit
             if (inputElement) {
                 inputElement.addEventListener("keydown", (e) => {
@@ -226,28 +382,87 @@ export function showPopup<T = any>(
                     }
                 });
             }
-
+            
+            actionContainer.appendChild(cancelbtn);
             actionContainer.appendChild(okBtn);
         } else {
             options.forEach((opt) => {
                 const btn = document.createElement("button");
                 btn.textContent = opt.content;
-                btn.className = opt.highlighted ? "nivix-primary-button" : "nivix-secondary-button";
+                btn.className = opt.highlighted ? "nivix-primary-button primary" : "nivix-secondary-button";
+                if (opt.highlighted) highlightedButton = btn;
                 
                 btn.addEventListener("click", () => closePopup(opt.value));
                 actionContainer.appendChild(btn);
             });
         }
-
+        
         // Assemble strict layout elements
+        popup.appendChild(titleBar);
         popup.appendChild(messageContainer);
         popup.appendChild(actionContainer);
         popupContainer.appendChild(popup);
         document.body.appendChild(popupContainer);
+        placePopup(popupContainer, popup, anchor);
 
-        // Auto-focus input field if present
-        if (inputElement) {
-            requestAnimationFrame(() => inputElement?.focus());
+        outsidePointerDown = (event: PointerEvent) => {
+            const target = event.target;
+            if (!(target instanceof Node)) return;
+            if (!popup.contains(target) && !anchor?.contains(target)) {
+                closePopup(undefined);
+            }
+        };
+        document.addEventListener("pointerdown", outsidePointerDown);
+
+        trapTabNavigation = (event: KeyboardEvent) => {
+            if (event.key !== "Tab" || isClosing) return;
+
+            const focusableElements = Array.from(popup.querySelectorAll<HTMLElement>(
+                'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [contenteditable="true"], [tabindex]:not([tabindex="-1"])'
+            )).filter((element) =>
+                element.tabIndex >= 0 &&
+                element.getClientRects().length > 0 &&
+                getComputedStyle(element).visibility !== "hidden"
+            );
+
+            if (focusableElements.length === 0) {
+                event.preventDefault();
+                popup.tabIndex = -1;
+                popup.focus();
+                return;
+            }
+
+            const first = focusableElements[0];
+            const last = focusableElements[focusableElements.length - 1];
+            const activeIndex = focusableElements.indexOf(document.activeElement as HTMLElement);
+
+            if (event.shiftKey && activeIndex <= 0) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && activeIndex === focusableElements.length - 1) {
+                event.preventDefault();
+                first.focus();
+            } else if (activeIndex === -1) {
+                event.preventDefault();
+                (event.shiftKey ? last : first).focus();
+            }
+        };
+        document.addEventListener("keydown", trapTabNavigation);
+
+        if (!disableAnimations) {
+            popup.style.animation = "nivixFadeIn 0.3s ease-out forwards";
+            if (popupContainer.classList.contains("popup-container-shaded")) {
+                popupContainer.style.animation = "popupContainerFadeIn 0.3s ease-out forwards";
+            }
         }
+        
+        requestAnimationFrame(() => {
+            if (isClosing || !popupContainer.isConnected) return;
+            if (highlightedButton) {
+                highlightedButton.focus();
+            } else {
+                inputElement?.focus();
+            }
+        });
     });
 }

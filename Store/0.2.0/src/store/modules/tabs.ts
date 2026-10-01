@@ -33,6 +33,20 @@ function getEBD(id: string): HTMLElement | null {
     return document.getElementById(id);
 }
 
+function focusFirstFocusable(element: HTMLElement): void {
+    const focusableElements = element.querySelectorAll<HTMLElement>(
+        'a[href], button, input, select, textarea, summary, [contenteditable="true"], [tabindex]'
+    );
+    const firstFocusable = Array.from(focusableElements).find((candidate) =>
+        candidate.tabIndex >= 0 &&
+        !candidate.hasAttribute('disabled') &&
+        candidate.getClientRects().length > 0 &&
+        getComputedStyle(candidate).visibility !== 'hidden'
+    );
+
+    firstFocusable?.focus();
+}
+
 function getPrefix(id: string): string | null {
     const separatorIndex = id.lastIndexOf('_');
     return separatorIndex === -1 ? null : id.substring(0, separatorIndex);
@@ -174,4 +188,5 @@ export async function show(id: string, options: TabOptions = {}): Promise<void> 
     await waitForAnimation(thisElement, instant);
 
     thisElement.classList.remove('is-fading-in');
+    focusFirstFocusable(thisElement);
 }

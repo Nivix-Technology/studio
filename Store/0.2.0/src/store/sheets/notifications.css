@@ -1,8 +1,8 @@
 .notification-box {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
     
     position: fixed;
     bottom: 20px;
@@ -17,8 +17,24 @@
     border-radius: var(--radius);
     box-shadow: var(--outset-shadow);
     
-    padding: 8px 12px 8px 16px;
+    padding: 8px 12px 10px 16px;
     z-index: 9999;
+
+    .notification-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid color-mix(in srgb, var(--text-primary), transparent 75%);
+        padding-bottom: 5px;
+    }
+
+    .notification-title {
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
     
     &.error {
         background: #ff9b9b;
@@ -64,9 +80,19 @@
     width: 100%;
     height: 100%;
     
-    background: var(--shade);
+    background: transparent;
+    pointer-events: none;
     
     z-index: 9998;
+
+    &.center {
+        position: fixed;
+    }
+
+    &.popup-container-shaded {
+        background: var(--shade);
+        pointer-events: auto;
+    }
     
     .popup {
         display: flex;
@@ -79,8 +105,20 @@
         
         background: var(--background-primary);
         border-radius: var(--radius);
+
+        box-shadow: var(--outset-shadow);
         
         padding: var(--resting-area-padding);
+        pointer-events: auto;
+
+        .popup-title-bar {
+            padding: 0.5rem 1.1rem;
+            border-bottom: 1px solid var(--background-darker);
+        }
+
+        .popup-title {
+            color: var(--text-primary);
+        }
         
         .message-container {
             display: flex;
@@ -114,12 +152,12 @@
     }
 }
 
-@keyframes popupFadeIn {
+@keyframes popupContainerFadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 
-@keyframes popupFadeOut {
+@keyframes popupContainerFadeOut {
     from { opacity: 1; }
     to { opacity: 0; }
 }

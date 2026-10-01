@@ -1,6 +1,8 @@
 import { Electroview } from "electrobun/view";
 import { type StoreRPCType } from '../../shared/bun/store-rpc-types';
 
+import { showPopup } from "./notifications";
+
 import * as load from './load';
 // Register tab listeners for the database screen (and its select-space dependency).
 import './connectDatabase';
@@ -19,6 +21,17 @@ export const store = {
 
 load.checkLoadState();
 
-export function quit() {
-    window.close();
+export async function quit() {
+    const confirmation = await showPopup(
+        "Exiting Nivix Store",
+        "Are you sure you want to exit Nivix Store?", "options", 
+        [
+            { content: "No", value: false, highlighted: true },
+            { content: "Yes", value: true, highlighted: false }
+        ]
+    );
+
+    if (confirmation === true) {
+        electroview.rpc?.send.closeStore();
+    }
 }

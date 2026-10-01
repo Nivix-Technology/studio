@@ -85,7 +85,7 @@
                         height: 22px;
                         border-radius: var(--radius);
                         background: var(--shade);
-                        color: var(--text-secondary);
+                        color: var(--text-tertiary);
                         opacity: 0;
                         transition: opacity var(--transition);
 
@@ -95,7 +95,7 @@
                             place-items: center;
                             width: 14px;
                             height: 14px;
-                            color: var(--text-secondary);
+                            color: var(--text-tertiary);
                             fill: currentColor;
                             stroke: currentColor;
                         }
@@ -103,7 +103,7 @@
                         svgplaceholder svg {
                             width: 100%;
                             height: 100%;
-                            color: var(--text-secondary);
+                            color: var(--text-tertiary);
                             fill: currentColor;
                             stroke: currentColor;
                         }
@@ -192,6 +192,21 @@
         
         .nivix-secondary-button {
             justify-content: left;
+        }
+
+        .nivix-svg-checkbox-wrapper {
+            justify-content: left;
+            gap: calc(var(--gap) * 2);
+            font-size: 16px;
+
+            > input[type="checkbox"] ~ svg {
+                flex: 0 0 2em;
+                width: 2em;
+                height: 2em;
+                aspect-ratio: 1;
+                fill: var(--text-primary);
+                transition: fill var(--transition);
+            }
         }
         
         .nivix-bookmark {

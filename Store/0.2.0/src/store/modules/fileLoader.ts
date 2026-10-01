@@ -48,6 +48,7 @@ export async function populateSVGs(rpcFetchSvg?: (path: string) => Promise<strin
         
         if (!path) {
             console.warn("Found an <svgPlaceholder> without a valid file path inside.");
+            placeholder.remove();
             continue;
         }
 
@@ -70,18 +71,18 @@ export async function populateSVGs(rpcFetchSvg?: (path: string) => Promise<strin
             const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
             const svgElement = svgDoc.querySelector('svg');
 
-            if (svgElement) {
-                // Preserve ID or class names from the placeholder if set
-                if (placeholder.id) svgElement.id = placeholder.id;
-                if (placeholder.className) svgElement.setAttribute('class', placeholder.className);
-
-                // Replace <svgPlaceholder> with the actual <svg>
-                placeholder.replaceWith(svgElement);
-            } else {
-                console.error(`No valid <svg> tag found in file at path: "${path}"`);
+            if (!svgElement || svgDoc.querySelector('parsererror')) {
+                throw new Error(`No valid <svg> tag found in file at path: "${path}"`);
             }
+
+            for (const attribute of Array.from(placeholder.attributes)) {
+                svgElement.setAttribute(attribute.name, attribute.value);
+            }
+
+            placeholder.replaceWith(svgElement);
         } catch (error) {
             console.error(`Failed to load SVG from path "${path}":`, error);
+            placeholder.remove();
         }
     }
 }

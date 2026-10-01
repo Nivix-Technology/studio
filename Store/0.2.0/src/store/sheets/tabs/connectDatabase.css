@@ -7,6 +7,7 @@
     .tab-container {
         display: flex;
         flex-direction: column;
+        align-items: center;
         flex: 1;
     }
 
@@ -17,7 +18,7 @@
         gap: var(--gap);
 
         box-sizing: border-box;
-        width: 100%;
+        width: 85%;
 
         padding: calc(var(--resting-area-padding) * 2);
 
@@ -86,6 +87,12 @@
         display: flex;
         flex-wrap: wrap;
         gap: var(--gap);
+
+        margin-top: var(--gap);
+
+        .nivix-primary-button {
+            flex: 1;
+        }
     }
 
     #connectDatabase_urlConnect > .connection-field {
@@ -116,6 +123,10 @@
 
         .horizontal-container {
             flex-wrap: wrap;
+        }
+
+        .tab-container .tab {
+            width: 100%;
         }
     }
 }

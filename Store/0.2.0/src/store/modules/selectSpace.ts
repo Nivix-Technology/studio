@@ -3,7 +3,7 @@ import { showNotification, showPopup } from "./notifications";
 import { preferences, setPreference } from "./settings";
 import { fillSpaceContainer } from "./spaceFillers";
 
-import { electroview } from "./index";
+import { electroview, quit } from "./index";
 import { type TabChangeEventDetail } from "../../shared/bun/store-types";
 
 function getEBD<T extends HTMLElement = HTMLElement>(id: string): T {
@@ -40,7 +40,7 @@ export async function init() {
     });
     
     quitBtn.addEventListener('click', function() {
-        electroview.rpc?.send.closeStore();
+        quit();
     });
     
     refreshBtn.addEventListener('click', (e: MouseEvent) => {
@@ -108,7 +108,7 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = !prefere
 
         iconButtonEl.type = 'button';
         iconButtonEl.className = 'space-icon-button tooltip-support-button tip-bottom';
-        iconButtonEl.dataset['tooltipContent'] = 'Changing icons will soon be available';
+        iconButtonEl.dataset['tooltipContent'] = 'This feature will be available soon.';
 
         iconEl.className = 'space-icon';
         iconEl.src = new URL('assets/favicon.png', import.meta.url).href;
@@ -133,10 +133,11 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = !prefere
         renameBtn.className = 'nivix-secondary-button';
         renameBtn.onclick = async () => {
             const newName = await showPopup(
-                `Renaming '${space.name}'`,
+                `Renaming Space "${space.name}"`,
+                `Enter the new name for the space below.`,
                 'text',
                 undefined,
-                { placeholder: 'New Name' }
+                { placeholder: 'New Name', maxlength: 128 }
             );
 
             if (newName && newName !== space.name) {
@@ -149,11 +150,11 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = !prefere
 
         deleteBtn.onclick = async (e: MouseEvent) => {
             const verified = e.shiftKey ? true : await showPopup(
-                `Are you sure you want to delete the space '${space.name} (ID: ${space.id})'? This cannot be undone.<button class="tooltip-button tip-right" data-tooltip-content="You can hold Shift while clicking the Delete button to bypass the popup.">i</button>`,
+                'Confirm Space Deletion?', `Name: "${space.name}"<br>ID: ${space.id}<br></div><br><b>This cannot be undone.</b>`,
                 'options',
                 [
-                    { content: 'No', value: false, highlighted: true },
-                    { content: 'Yes', value: true, highlighted: false }
+                    { content: 'Cancel', value: false, highlighted: true },
+                    { content: 'Delete', value: true, highlighted: false }
                 ]
             );
 

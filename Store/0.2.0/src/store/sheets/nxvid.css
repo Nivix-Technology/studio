@@ -207,6 +207,7 @@ h6 span { font-size: 0.45em; }
     
     background: transparent;
     border: none;
+    border-radius: var(--radius);
     
     font-family: var(--font-primary);
     font-size: 16px;
@@ -365,7 +366,8 @@ h6 span { font-size: 0.45em; }
 
 /* Checkbox Wrappers */
 
-.nivix-checkbox-wrapper {
+.nivix-checkbox-wrapper,
+.nivix-svg-checkbox-wrapper {
     display: flex;
     align-items: center;
     gap: var(--gap);
@@ -378,6 +380,71 @@ h6 span { font-size: 0.45em; }
         color: var(--text-primary);
         user-select: none;
         cursor: pointer;
+    }
+
+    & > input[type="checkbox"]:checked ~ .label-unchecked,
+    & > input[type="checkbox"]:not(:checked) ~ .label-checked {
+        display: none;
+    }
+}
+
+.nivix-svg-checkbox-wrapper {
+    position: relative;
+    display: inline-flex;
+    background: transparent;
+    border: none;
+    font-family: var(--font-primary);
+    font-size: 16px;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: var(--clickable-area-padding);
+
+    &:hover {
+        font-weight: bold;
+    }
+
+    &:active {
+        font-weight: bolder;
+    }
+
+    & > input[type="checkbox"] {
+        position: absolute;
+        left: 1.1rem;
+        top: 50%;
+        z-index: 1;
+        width: 20px;
+        height: 20px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        opacity: 0;
+        transform: translateY(-50%);
+    }
+
+    & > input[type="checkbox"]:checked::before {
+        content: none;
+    }
+
+    & > input[type="checkbox"] ~ .svg-checked,
+    & > input[type="checkbox"] ~ .svg-unchecked {
+        display: block;
+        flex: 0 0 20px;
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+        fill: var(--text-primary);
+    }
+
+    & > input[type="checkbox"]:not(:checked) ~ .svg-checked,
+    & > input[type="checkbox"]:checked ~ .svg-unchecked {
+        display: none;
+    }
+
+    & > input[type="checkbox"]:focus-visible ~ .svg-checked,
+    & > input[type="checkbox"]:focus-visible ~ .svg-unchecked {
+        outline: 1px solid var(--outline);
+        outline-offset: 2px;
+        border-radius: 3px;
     }
 }
 
