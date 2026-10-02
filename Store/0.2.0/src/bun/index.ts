@@ -2,7 +2,7 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 
-import { BrowserView, BrowserWindow } from "electrobun/bun";
+import { BrowserView, BrowserWindow, Screen } from "electrobun/bun";
 import Database from 'bun:sqlite';
 import mysql from 'mysql2/promise';
 
@@ -91,7 +91,7 @@ async function configureDatabase(database: string, databasePath?: string): Promi
 		}
 		return;
 	}
-
+	
 	if (database === 'sqlite') {
 		const localDb = new Database(databasePath ?? path.join(storePath, 'store.sqlite'));
 		const [{ default: createApi }, initModule] = await Promise.all([
@@ -100,7 +100,7 @@ async function configureDatabase(database: string, databasePath?: string): Promi
 		]);
 		initModule.initDatabase(localDb);
 		await closeDatabase();
-
+		
 		db = localDb;
 		functions = createApi(localDb, ctx);
 		activeDB = 'sqlite';
@@ -295,22 +295,36 @@ type StoreRPC = ReturnType<typeof BrowserView.defineRPC<StoreRPCType>>;
 let storeWindow: BrowserWindow<StoreRPC> | null = null;
 let updaterWindow: BrowserWindow<UpdaterRPC> | null = null;
 
+function getWindowSize() {
+	const screen = Screen.getPrimaryDisplay();
+	const width = screen.workArea.width;
+	const height = screen.workArea.height;
+	
+	const margin = 50;
+	let returnWidth = 1200;
+	let returnHeight = 675;
+	if (width !< (returnWidth + margin)) returnWidth = (width - margin);
+	if (height !< (returnHeight + margin)) returnHeight = (height - margin);
+	return { width: returnWidth, height: returnHeight }
+}
+
 function openStore() {
 	if (storeWindow) return;
-	const width = 800;
-	const height = 600;
+	const { width, height } = getWindowSize();
 	const { x, y } = utils.getCenterXY(width, height);
 	
 	storeWindow = new BrowserWindow({
 		title: "Nivix Store",
 		url: "views://store/store.html",
-		frame: {
-			width,
-			height,
-			x,
-			y
-		},
+		frame: { width, height, x, y },
 		rpc: storeRPC
+	});
+	
+	storeWindow = storeWindow;
+	
+	storeWindow.webview.on("dom-ready", () => {
+		storeWindow?.setSize(width, height - 1);
+		setTimeout(() => storeWindow?.setSize(width, height), 50);
 	});
 }
 

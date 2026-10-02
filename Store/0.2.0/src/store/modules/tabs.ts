@@ -188,5 +188,6 @@ export async function show(id: string, options: TabOptions = {}): Promise<void> 
     await waitForAnimation(thisElement, instant);
 
     thisElement.classList.remove('is-fading-in');
-    focusFirstFocusable(thisElement);
+    const focus = getPrefix(id) ? false : true;
+    if (focus) focusFirstFocusable(thisElement);
 }

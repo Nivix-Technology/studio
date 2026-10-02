@@ -4,7 +4,7 @@
     width: 100%;
     height: 100%;
 
-    .tab-container {
+    .sub-tab-container {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -12,7 +12,6 @@
     }
 
     .tab {
-        position: unset;
         flex-direction: column;
         flex: 1;
         gap: var(--gap);
@@ -107,11 +106,6 @@
         text-align: center;
     }
 
-    :is(input, select, button):focus-visible {
-        outline: 2px solid var(--nivix-accent, currentColor);
-        outline-offset: 2px;
-    }
-
     @media (max-width: 560px) {
         .connection-fields {
             grid-template-columns: 1fr;
@@ -125,7 +119,7 @@
             flex-wrap: wrap;
         }
 
-        .tab-container .tab {
+        .sub-tab-container .tab {
             width: 100%;
         }
     }

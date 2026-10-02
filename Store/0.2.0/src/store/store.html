@@ -21,6 +21,7 @@
 	<link rel="stylesheet" type="text/css" href="sheets/tabs/createSpace.css">
 	<link rel="stylesheet" type="text/css" href="sheets/tabs/selectSpace.css">
 	<link rel="stylesheet" type="text/css" href="sheets/tabs/workspace.css">
+	<link rel="stylesheet" type="text/css" href="sheets/tabs/settings.css">
 </head>
 <body>
 	<div id="space-filler-container"></div>
@@ -47,7 +48,7 @@
 		<div class="action-container">
 			<h2 class="nivix-bookmark">General</h2>
 			
-			<button id="selectSpace-settings" class="nivix-secondary-button tooltip-support-button tip-right" data-tooltip-content="This feature will be available soon." disabled><svgPlaceholder>assets/svg/settings.svg</svgPlaceholder>Settings</button>
+			<button id="selectSpace-settings" class="nivix-secondary-button" data-tab-navigation="settings" data-tab-display="flex"><svgPlaceholder>assets/svg/settings.svg</svgPlaceholder>Settings</button>
 			<div class="nivix-svg-checkbox-wrapper">
 				<input id="selectSpace-shapeAnimToggle" class="nivix-input" type="checkbox">
 				<svgPlaceholder class="svg-unchecked">assets/svg/pauseShapeAnimation.svg</svgPlaceholder>
@@ -115,7 +116,7 @@
 			<button class="nivix-primary-button" data-tab-navigation="connectDatabase_urlConnect" data-tab-display="flex" data-tab-log-previous="false">Custom URL Connection</button>
 		</div>
 		
-		<div class="tab-container">
+		<div class="sub-tab-container">
 			<div class="tab previsible-flex" id="connectDatabase_profiles">
 				<span class="nivix-label">Load Saved Profile</span>
 				<hr>
@@ -199,6 +200,39 @@
 		<div class="navigation">
 			<button id="workspace-navigation-dashboard"><svgPlaceholder>assets/svg/home.svg</svgPlaceholder>Home</button>
 			<button id="workspace-navigation-query"><svgPlaceholder>assets/svg/query.svg</svgPlaceholder>Query</button>
+		</div>
+	</div>
+	
+	<div id="settings" class="tab">
+		<div class="nivix-horizontal-navigation divider-bottom distribute-contents">
+			<button class="nivix-primary-button" data-tab-navigation="settings_performance" data-tab-log-previous="false">Performance</button>
+			<button class="nivix-primary-button" data-tab-navigation="settings_theme" data-tab-log-previous="false">Theme Editor</button>
+			<button class="nivix-primary-button" data-tab-navigation="settings_accessibility" data-tab-log-previous="false">Accessibility</button>
+		</div>
+		<div class="sub-tab-container">
+			<div id="settings_performance" class="tab previsible-flex">
+				<span class="nivix-label">Animations</span>
+				
+				<hr>
+				<div class="nivix-checkbox-wrapper">
+					<input id="settings-toggleTransitionAnimations" class="nivix-input" type="checkbox" checked>
+					<label for="settings-toggleTransitionAnimations">Transition Animations</label>
+					<span class="tooltip-button tip-right" data-tooltip-content="Enabling this after already being disabled will require a reload to take effect.">i</span>
+				</div>
+				<div class="nivix-checkbox-wrapper">
+					<input id="settings-toggleShapeAnimations" class="nivix-input" type="checkbox" checked>
+					<label for="settings-toggleShapeAnimations">Shape Floating Animation</label>
+				</div>
+			</div>
+			<div id="settings_theme" class="tab">
+				Theme Editor
+			</div>
+			<div id="settings_accessibility" class="tab">
+				Accessibility
+			</div>
+		</div>
+		<div class="nivix-horizontal-navigation divider-top">
+			<button class="nivix-primary-button" data-tab-navigation="previous, selectSpace">Back</button>
 		</div>
 	</div>
 	<script src="./index.js" type="module"></script>

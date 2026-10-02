@@ -442,7 +442,7 @@ h6 span { font-size: 0.45em; }
 
     & > input[type="checkbox"]:focus-visible ~ .svg-checked,
     & > input[type="checkbox"]:focus-visible ~ .svg-unchecked {
-        outline: 1px solid var(--outline);
+        outline: 2px solid var(--outline);
         outline-offset: 2px;
         border-radius: 3px;
     }
