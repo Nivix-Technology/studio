@@ -88,7 +88,7 @@ function renderNotification(item: NotificationItem): Promise<void> {
         const header = document.createElement("div");
         header.className = "notification-header";
 
-        const title = document.createElement("strong");
+        const title = document.createElement("span");
         title.className = "notification-title";
         title.textContent = `${item.type[0].toUpperCase()}${item.type.slice(1)}`;
         
@@ -105,7 +105,7 @@ function renderNotification(item: NotificationItem): Promise<void> {
         header.appendChild(closeBtn);
         container.appendChild(header);
         container.appendChild(messageOutput);
-        if (!preferences['disableAnimations']) container.style.animation = "nivixFadeIn 0.3s ease-out forwards";
+        if (!preferences['disableAnimations']) container.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style) forwards";
         document.body.appendChild(container);
         
         let dismissTimer: number | null = null;
@@ -125,7 +125,7 @@ function renderNotification(item: NotificationItem): Promise<void> {
                 return;
             }
             
-            container.style.animation = "nivixFadeOut 0.25s ease-out forwards";
+            container.style.animation = "nivixFadeOut 0.25s var(--transition-easing-style) forwards";
             
             container.addEventListener("animationend", () => {
                 container.remove();
@@ -201,20 +201,27 @@ function placePopup(container: HTMLDivElement, popup: HTMLDivElement, anchor: HT
 
     const clampX = (x: number) => Math.max(minX, Math.min(x, maxX));
     const clampY = (y: number) => Math.max(minY, Math.min(y, maxY));
+    const belowTrigger = { x, y };
+    const aboveTrigger = triggerRect
+        ? { x: triggerX - width / 2, y: triggerRect.top - height - popupMargin }
+        : null;
     const candidates = [
-        { x, y },
+        belowTrigger,
+        ...(aboveTrigger ? [aboveTrigger] : []),
         ...(triggerRect ? [
-            { x: triggerX - width / 2, y: triggerRect.top - height - popupMargin },
             { x: triggerRect.right + popupMargin, y: triggerRect.top + (triggerRect.height - height) / 2 },
             { x: triggerRect.left - width - popupMargin, y: triggerRect.top + (triggerRect.height - height) / 2 }
         ] : [])
     ];
+    const fallback = triggerRect && triggerRect.top > window.innerHeight / 2 && aboveTrigger
+        ? aboveTrigger
+        : belowTrigger;
 
     const placement = candidates.find(({ x, y }) =>
         x >= minX && x <= maxX && y >= minY && y <= maxY
     ) ?? {
-        x: clampX(candidates[0].x),
-        y: clampY(candidates[0].y)
+        x: clampX(fallback.x),
+        y: clampY(fallback.y)
     };
     popup.style.left = `${placement.x}px`;
     popup.style.top = `${placement.y}px`;
@@ -247,7 +254,7 @@ export function showPopup<T = any>(
         const titleBar = document.createElement("div");
         titleBar.className = "popup-title-bar";
 
-        const titleOutput = document.createElement("strong");
+        const titleOutput = document.createElement("span");
         titleOutput.className = "popup-title";
         titleOutput.textContent = title;
         titleBar.appendChild(titleOutput);
@@ -338,7 +345,7 @@ export function showPopup<T = any>(
             popup.addEventListener("animationend", () => {
                 animationEnded();
             }, { once: true });
-            popup.style.animation = "nivixFadeOut 0.3s ease-out forwards";
+            popup.style.animation = "nivixFadeOut 0.3s var(--transition-easing-style) forwards";
 
             if (isShaded) {
                 const onContainerAnimationEnd = (event: AnimationEvent) => {
@@ -347,7 +354,7 @@ export function showPopup<T = any>(
                     animationEnded();
                 };
                 popupContainer.addEventListener("animationend", onContainerAnimationEnd);
-                popupContainer.style.animation = "popupContainerFadeOut 0.3s ease-out forwards";
+                popupContainer.style.animation = "popupContainerFadeOut 0.3s var(--transition-easing-style) forwards";
             }
         };
         dismissThisPopup = () => closePopup(undefined, true);
@@ -356,7 +363,7 @@ export function showPopup<T = any>(
         // Render input "OK" button OR custom option buttons
         if (type !== "options") {
             const okBtn = document.createElement('button');
-            okBtn.textContent = 'Ok';
+            okBtn.textContent = 'OK';
             okBtn.className = 'nivix-primary-button primary';
             
             const cancelbtn = document.createElement('button');
@@ -450,9 +457,9 @@ export function showPopup<T = any>(
         document.addEventListener("keydown", trapTabNavigation);
 
         if (!disableAnimations) {
-            popup.style.animation = "nivixFadeIn 0.3s ease-out forwards";
+            popup.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style) forwards";
             if (popupContainer.classList.contains("popup-container-shaded")) {
-                popupContainer.style.animation = "popupContainerFadeIn 0.3s ease-out forwards";
+                popupContainer.style.animation = "popupContainerFadeIn 0.3s var(--transition-easing-style) forwards";
             }
         }
         

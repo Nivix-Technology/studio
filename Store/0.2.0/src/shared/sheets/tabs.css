@@ -11,11 +11,11 @@
     overflow: auto;
     
     &.is-fading-out {
-        animation: nivixFadeOut 0.3s ease-out forwards;
+        animation: nivixFadeOut var(--transition) forwards;
     }
     
     &.is-fading-in {
-        animation: nivixFadeIn 0.3s ease-out forwards;
+        animation: nivixFadeIn var(--transition) forwards;
     }
     
     &.previsible-flex {

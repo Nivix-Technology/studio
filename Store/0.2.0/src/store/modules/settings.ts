@@ -1,4 +1,11 @@
-import { electroview } from './index';
+import { electroview, restart } from './index';
+import type { TabChangeEventDetail } from "../../shared/bun/store-types.ts";
+
+function getEBD<T extends HTMLElement = HTMLElement>(id: string): T {
+    return document.getElementById(id) as T;
+}
+
+let isInitialized = false;
 
 export let preferences: Record<string, any> = {
     disableAnimations: false,
@@ -48,3 +55,23 @@ function applySettings() {
         });
     }
 }
+
+// Tab Functionality
+
+const restartBtn = getEBD<HTMLButtonElement>('settings-restart');
+
+function initTab() {
+    if (isInitialized) return;
+
+    restartBtn.addEventListener('click', restart);
+
+    isInitialized = true;
+}
+
+window.addEventListener('tabchange', (event) => {
+    const eventDetails = event as CustomEvent<TabChangeEventDetail>;
+    const { tabId } = eventDetails.detail;
+    if (tabId === 'settings') {
+        initTab();
+    }
+});

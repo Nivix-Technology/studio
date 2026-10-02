@@ -4,12 +4,8 @@ import { preferences, setPreference } from './settings.ts';
 import { electroview } from "./index";
 import type { TabChangeEventDetail } from "../../shared/bun/store-types.ts";
 
-function getEBD<T extends HTMLElement>(id: string): T {
-    const el = document.getElementById(id);
-    if (!el) {
-        console.warn(`[Connect Database] Required element with ID '${id}' was not found in the DOM.`);
-    }
-    return el as T;
+function getEBD<T extends HTMLElement = HTMLElement>(id: string): T {
+    return document.getElementById(id) as T;
 }
 
 const form = getEBD<HTMLFormElement>('connectDatabase-form');

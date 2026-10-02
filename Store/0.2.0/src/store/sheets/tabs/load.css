@@ -1,13 +1,17 @@
 #loadMenu {
     flex-direction: column;
+    gap: var(--gap);
     
     height: 100%;
     width: 100%;
     
-    margin: 0;
-    padding: 0;
+    padding: var(--resting-area-padding);
     
-    animation: nivixFadeIn 0.8s ease-out forwards;
+    animation: nivixFadeIn 0.8s var(--transition-easing-style) forwards;
+
+    .center {
+        flex: 1;
+    }
     
     svg {
         width: 10%;
@@ -24,10 +28,12 @@
     }
     
     .nivix-footer {
-        position: absolute;
-        bottom: 0;
-        
+        box-sizing: border-box;
         width: 100%;
+    }
+
+    .nivix-horizontal-navigation {
+        padding: 0;
     }
 }
 

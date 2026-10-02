@@ -27,18 +27,6 @@
         }
     }
 
-    .horizontal-container {
-        display: flex;
-        flex-direction: row;
-        gap: var(--gap);
-
-        width: 100%;
-
-        .flex-primary {
-            flex: 1;
-        }
-    }
-
     #connectDatabase-form {
         display: flex;
         flex-direction: column;
@@ -113,10 +101,6 @@
 
         .connection-field-wide {
             grid-column: auto;
-        }
-
-        .horizontal-container {
-            flex-wrap: wrap;
         }
 
         .sub-tab-container .tab {

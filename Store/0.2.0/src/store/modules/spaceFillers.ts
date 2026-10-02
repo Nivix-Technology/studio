@@ -44,6 +44,7 @@ let lastCombinationIndex: number | null = null;
 const floatAnimations = ['float', 'float-slow', 'float-fast', 'float-subtle'];
 
 export async function fillSpaceContainer() {
+    if (preferences['disableSpaceFillers']) return;
     const callId = ++currentCallId;
 
     const combinations = [

@@ -19,6 +19,10 @@
             width: 85%;
             
             padding: calc(var(--resting-area-padding) * 2);
+
+            .center {
+                flex: 1;
+            }
             
             hr {
                 box-sizing: border-box;

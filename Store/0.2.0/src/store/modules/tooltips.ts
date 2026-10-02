@@ -12,6 +12,7 @@ const delayedTooltipWait = 750;
 
 let tooltip: HTMLDivElement | null = null;
 let activeTrigger: HTMLElement | null = null;
+let touchFocusedTrigger: HTMLElement | null = null;
 let showTimer: ReturnType<typeof setTimeout> | undefined;
 
 export function initTooltips(): void {
@@ -25,6 +26,7 @@ export function initTooltips(): void {
 
     document.addEventListener('pointerover', handlePointerOver);
     document.addEventListener('pointerout', handlePointerOut);
+    document.addEventListener('pointerdown', handlePointerDown);
     document.addEventListener('focusin', handleFocusIn);
     document.addEventListener('focusout', handleFocusOut);
     document.addEventListener('scroll', repositionTooltip, true);
@@ -43,6 +45,7 @@ function getTooltipContent(trigger: HTMLElement): string {
 }
 
 function handlePointerOver(event: PointerEvent): void {
+    if (event.pointerType === 'touch') return;
     const trigger = findTrigger(event.target);
     if (!trigger || (event.relatedTarget instanceof Node && trigger.contains(event.relatedTarget))) return;
 
@@ -64,14 +67,25 @@ function handlePointerOut(event: PointerEvent): void {
     if (trigger === activeTrigger && !trigger.matches(':focus-within')) hideTooltip();
 }
 
+function handlePointerDown(event: PointerEvent): void {
+    if (event.pointerType === 'touch') {
+        touchFocusedTrigger = findTrigger(event.target);
+        hideTooltip();
+        return;
+    }
+
+    touchFocusedTrigger = null;
+}
+
 function handleFocusIn(event: FocusEvent): void {
     const trigger = findTrigger(event.target);
-    if (trigger) showTooltip(trigger);
+    if (trigger && trigger !== touchFocusedTrigger) showTooltip(trigger);
 }
 
 function handleFocusOut(event: FocusEvent): void {
     const trigger = findTrigger(event.target);
     if (!trigger || (event.relatedTarget instanceof Node && trigger.contains(event.relatedTarget))) return;
+    if (trigger === touchFocusedTrigger) touchFocusedTrigger = null;
     if (trigger === activeTrigger && !trigger.matches(':hover')) hideTooltip();
 }
 

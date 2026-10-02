@@ -38,9 +38,13 @@
 			<svgPlaceholder>assets/svg/favicon.svg</svgPlaceholder>
 			<h1><span class="nivix-accent" aria-label="Nivix">NiViX</span> Store<sup aria-label="Trademark">TM</sup></h1>
 			<div class="nivix-loader"></div>
-			<div class="nivix-footer">
-				<span>Store </span><span id="load-footer-version">vX.X.X</span><span> | &copy; 2026 Nivix Technology. All rights reserved.</span>
-			</div>
+		</div>
+		<div class="nivix-horizontal-navigation transparent">
+			<button class="nivix-primary-button" id="load-exit">Exit</button>
+			<button class="nivix-primary-button" id="load-restart">Restart</button>
+		</div>
+		<div class="nivix-footer">
+			<span>Store </span><span id="load-footer-version">vX.X.X</span><span> | &copy; 2026 Nivix Technology. All rights reserved.</span>
 		</div>
 	</div>
 	
@@ -56,7 +60,8 @@
 				<label for="selectSpace-shapeAnimToggle" class="label-unchecked">Disable Shape Motion</label>
 				<label for="selectSpace-shapeAnimToggle" class="label-checked">Enable Shape Motion</label>
 			</div>
-			<button id="selectSpace-quit" class="nivix-secondary-button"><svgPlaceholder>assets/svg/exit.svg</svgPlaceholder>Exit Store</button>
+			<button id="selectSpace-restart" class="nivix-secondary-button"><svgPlaceholder>assets/svg/refresh.svg</svgPlaceholder>Restart Store</button>
+			<button id="selectSpace-exit" class="nivix-secondary-button"><svgPlaceholder>assets/svg/exit.svg</svgPlaceholder>Exit Store</button>
 			
 			<h2 class="nivix-bookmark">Advanced</h2>
 			
@@ -205,9 +210,9 @@
 	
 	<div id="settings" class="tab">
 		<div class="nivix-horizontal-navigation divider-bottom distribute-contents">
-			<button class="nivix-primary-button" data-tab-navigation="settings_performance" data-tab-log-previous="false">Performance</button>
-			<button class="nivix-primary-button" data-tab-navigation="settings_theme" data-tab-log-previous="false">Theme Editor</button>
-			<button class="nivix-primary-button" data-tab-navigation="settings_accessibility" data-tab-log-previous="false">Accessibility</button>
+			<button class="nivix-primary-button" data-tab-navigation="settings_performance" data-tab-display="flex" data-tab-log-previous="false">Performance</button>
+			<button class="nivix-primary-button" data-tab-navigation="settings_theme" data-tab-display="flex" data-tab-log-previous="false">Theme Editor</button>
+			<button class="nivix-primary-button" data-tab-navigation="settings_accessibility" data-tab-display="flex" data-tab-log-previous="false">Accessibility</button>
 		</div>
 		<div class="sub-tab-container">
 			<div id="settings_performance" class="tab previsible-flex">
@@ -217,7 +222,6 @@
 				<div class="nivix-checkbox-wrapper">
 					<input id="settings-toggleTransitionAnimations" class="nivix-input" type="checkbox" checked>
 					<label for="settings-toggleTransitionAnimations">Transition Animations</label>
-					<span class="tooltip-button tip-right" data-tooltip-content="Enabling this after already being disabled will require a reload to take effect.">i</span>
 				</div>
 				<div class="nivix-checkbox-wrapper">
 					<input id="settings-toggleShapeAnimations" class="nivix-input" type="checkbox" checked>
@@ -225,14 +229,26 @@
 				</div>
 			</div>
 			<div id="settings_theme" class="tab">
-				Theme Editor
+				<span class="nivix-label">Theme Editor</span>
+				
+				<hr>
+				<div class="center">
+					<span>Coming Soon</span>
+				</div>
 			</div>
 			<div id="settings_accessibility" class="tab">
-				Accessibility
+				<span class="nivix-label">Accessibility</span>
+				
+				<hr>
+				<div class="center">
+					<span>Coming Soon</span>
+				</div>
 			</div>
 		</div>
 		<div class="nivix-horizontal-navigation divider-top">
 			<button class="nivix-primary-button" data-tab-navigation="previous, selectSpace">Back</button>
+			<button id="settings-restart" class="nivix-primary-button">Restart</button>
+			<button class="tooltip-button tip-right" data-tooltip-content="Some of these settings may require an app restart to take affect.">i</button>
 		</div>
 	</div>
 	<script src="./index.js" type="module"></script>

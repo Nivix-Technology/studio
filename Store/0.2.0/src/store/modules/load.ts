@@ -8,20 +8,22 @@ import { initTooltips } from './tooltips';
 import { electroview } from './index';
 import { populateSVGs } from "./fileLoader";
 
-// Import all modules that listen for tabchange events, so electrobun can package them, and all top-level code is ran.
-import './connectDatabase';
-import './createSpace';
-import './selectSpace';
-
-function getEBD(id: string) {return document.getElementById(id)}
+function getEBD<T extends HTMLElement = HTMLElement>(id: string): T {
+    return document.getElementById(id) as T;
+}
 function wait(ms: number) {return new Promise((resolve) => { setTimeout(resolve, ms)})}
 
-const versionLabel = getEBD('load-footer-version');
+const versionLabel = getEBD<HTMLSpanElement>('load-footer-version');
+const exitBtn = getEBD<HTMLButtonElement>('load-exit');
+const restartBtn = getEBD<HTMLButtonElement>('load-restart');
 
 let isFinishing = false;
 let initialization: Promise<void> | null = null;
 
 export function init(): Promise<void> {
+    exitBtn?.addEventListener('click', index.exit);
+    restartBtn.addEventListener('click', index.restart);
+
     if (!initialization) {
         initialization = initialize().catch(error => {
             initialization = null;

@@ -3,7 +3,7 @@ import { showNotification, showPopup } from "./notifications";
 import { preferences, setPreference } from "./settings";
 import { fillSpaceContainer } from "./spaceFillers";
 
-import { electroview, quit } from "./index";
+import { electroview, exit, restart } from "./index";
 import { type TabChangeEventDetail } from "../../shared/bun/store-types";
 
 function getEBD<T extends HTMLElement = HTMLElement>(id: string): T {
@@ -16,14 +16,15 @@ function wait(ms: number): Promise<void> {
 
 let isInitialized: boolean = false;
 
-const fadeOutAnimation = "nivixFadeOut 0.1s ease-out forwards";
-const fadeInAnimation = "nivixFadeIn 0.2s ease-out forwards";
+const fadeOutAnimation = "nivixFadeOut 0.1s var(--transition-easing-style) forwards";
+const fadeInAnimation = "nivixFadeIn 0.2s var(--transition-easing-style) forwards";
 const programaticAnimationDuration = 200;
 const itemDelay = 25; // Adjust this (in ms) to make the staggered pops faster or slower
 
 const sourceCodeBtn = getEBD<HTMLButtonElement>('selectSpace-source');
 const issuesBtn = getEBD<HTMLButtonElement>('selectSpace-issues');
-const quitBtn = getEBD<HTMLButtonElement>('selectSpace-quit');
+const exitBtn = getEBD<HTMLButtonElement>('selectSpace-exit');
+const restartBtn = getEBD<HTMLButtonElement>('selectSpace-restart');
 const shapeAnimToggle = getEBD<HTMLInputElement>('selectSpace-shapeAnimToggle');
 const refreshBtn = getEBD<HTMLButtonElement>('selectSpace-refresh');
 const createBtn = getEBD<HTMLButtonElement>('selectSpace-create');
@@ -39,9 +40,8 @@ export async function init() {
         window.open('https://github.com/SqueakyLlama1/nivix-studio-dev/issues', '_blank');
     });
     
-    quitBtn.addEventListener('click', function() {
-        quit();
-    });
+    exitBtn.addEventListener('click', exit);
+    restartBtn.addEventListener('click', restart);
     
     refreshBtn.addEventListener('click', (e: MouseEvent) => {
         populateSpacesList(true, !preferences['disableAnimations'] && !e.shiftKey);
@@ -133,8 +133,8 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = !prefere
         renameBtn.className = 'nivix-secondary-button';
         renameBtn.onclick = async () => {
             const newName = await showPopup(
-                `Renaming Space "${space.name}"`,
-                `Enter the new name for the space below.`,
+                `Renaming Space`,
+                `Enter a new name for "${space.name}"`,
                 'text',
                 undefined,
                 { placeholder: 'New Name', maxlength: 128 }

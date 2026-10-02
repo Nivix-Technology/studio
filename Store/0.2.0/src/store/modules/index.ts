@@ -4,8 +4,11 @@ import { type StoreRPCType } from '../../shared/bun/store-rpc-types';
 import { showPopup } from "./notifications";
 
 import * as load from './load';
-// Register tab listeners for the database screen (and its select-space dependency).
+
+// Import all modules that listen for tabchange events, so electrobun can package them, and all top-level code is ran.
 import './connectDatabase';
+import './createSpace';
+import './selectSpace';
 
 const rpc = Electroview.defineRPC<StoreRPCType>({
     handlers: {
@@ -21,17 +24,31 @@ export const store = {
 
 load.checkLoadState();
 
-export async function quit() {
+export async function exit() {
     const confirmation = await showPopup(
         "Exiting Nivix Store",
         "Are you sure you want to exit Nivix Store?", "options", 
         [
-            { content: "No", value: false, highlighted: true },
-            { content: "Yes", value: true, highlighted: false }
+            { content: "Cancel", value: false, highlighted: true },
+            { content: "Exit", value: true, highlighted: false }
         ]
     );
-
+    
     if (confirmation === true) {
         electroview.rpc?.send.closeStore();
     }
+}
+
+export async function restart() {
+    const confirmation = await showPopup(
+        'Restart Nivix Store',
+        `All unsaved progress will be lost.`,
+        "options",
+        [
+            { content: "Cancel", value: false, highlighted: true },
+            { content: "Restart", value: true, highlighted: false }
+        ]
+    );
+    
+    if (confirmation) window.location.reload();
 }

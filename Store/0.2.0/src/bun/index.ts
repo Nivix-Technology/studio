@@ -312,6 +312,7 @@ function openStore() {
 	if (storeWindow) return;
 	const { width, height } = getWindowSize();
 	const { x, y } = utils.getCenterXY(width, height);
+	let appliedInitialSize = false;
 	
 	storeWindow = new BrowserWindow({
 		title: "Nivix Store",
@@ -320,11 +321,13 @@ function openStore() {
 		rpc: storeRPC
 	});
 	
-	storeWindow = storeWindow;
+	const windowInstance = storeWindow;
 	
-	storeWindow.webview.on("dom-ready", () => {
-		storeWindow?.setSize(width, height - 1);
-		setTimeout(() => storeWindow?.setSize(width, height), 50);
+	windowInstance.webview.on("dom-ready", () => {
+		if (appliedInitialSize) return;
+		appliedInitialSize = true;
+		windowInstance.setSize(width, height - 1);
+		setTimeout(() => windowInstance.setSize(width, height), 50);
 	});
 }
 

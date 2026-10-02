@@ -18,11 +18,11 @@
 }
 
 #space-filler-container.is-fading-out {
-    animation: fadeOut 0.3s ease-out forwards;
+    animation: fadeOut 0.3s var(--transition-easing-style) forwards;
 }
 
 .space-filler-shape.is-appearing {
-    animation: fadeInShape 0.3s ease-out forwards;
+    animation: fadeInShape 0.3s var(--transition-easing-style) forwards;
 }
 
 .space-filler-shape.is-floating.float {
