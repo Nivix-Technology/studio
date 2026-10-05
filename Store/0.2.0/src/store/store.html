@@ -210,21 +210,29 @@
 	
 	<div id="settings" class="tab">
 		<div class="nivix-horizontal-navigation divider-bottom distribute-contents">
-			<button class="nivix-primary-button" data-tab-navigation="settings_performance" data-tab-display="flex" data-tab-log-previous="false">Performance</button>
+			<button class="nivix-primary-button" data-tab-navigation="settings_general" data-tab-display="flex" data-tab-log-previous="false">General</button>
 			<button class="nivix-primary-button" data-tab-navigation="settings_theme" data-tab-display="flex" data-tab-log-previous="false">Theme Editor</button>
 			<button class="nivix-primary-button" data-tab-navigation="settings_accessibility" data-tab-display="flex" data-tab-log-previous="false">Accessibility</button>
 		</div>
 		<div class="sub-tab-container">
-			<div id="settings_performance" class="tab previsible-flex">
-				<span class="nivix-label">Animations</span>
-				
+			<div id="settings_general" class="tab previsible-flex">
+				<span class="nivix-label">Features</span>
 				<hr>
+
+				<div class="nivix-checkbox-wrapper">
+					<input id="settings-toggleSpaceFillers" class="nivix-input" type="checkbox" checked>
+					<label for="settings-toggleSpaceFillers">Space Fillers</label>
+				</div>
+
+				<span class="nivix-label">Animations</span>
+				<hr>
+
 				<div class="nivix-checkbox-wrapper">
 					<input id="settings-toggleTransitionAnimations" class="nivix-input" type="checkbox" checked>
 					<label for="settings-toggleTransitionAnimations">Transition Animations</label>
 				</div>
 				<div class="nivix-checkbox-wrapper">
-					<input id="settings-toggleShapeAnimations" class="nivix-input" type="checkbox" checked>
+					<input id="settings-toggleShapeAnimations" class="nivix-input" type="checkbox" checked data-depends="settings-toggleSpaceFillers:checked">
 					<label for="settings-toggleShapeAnimations">Shape Floating Animation</label>
 				</div>
 			</div>

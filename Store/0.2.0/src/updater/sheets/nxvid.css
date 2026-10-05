@@ -362,7 +362,7 @@ h6 span { font-size: 0.45em; }
             border-color: #26a65b;
             background: #26a65b;
             
-            &::before {
+            &:not(&:disabled)::before {
                 content: '';
                 position: absolute;
                 top: 2px;
@@ -374,12 +374,18 @@ h6 span { font-size: 0.45em; }
             }
         }
         
-        &:hover:not(:disabled) {
+        &:not(&:disabled):hover {
             filter: brightness(1.2);
         }
         
         &:disabled {
+            border-color: #ff4d4d;
+            background: #ff4d4d;
             cursor: not-allowed;
+
+            & ~ label {
+                color: var(--text-secondary);
+            }
         }
     }
 }

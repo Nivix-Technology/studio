@@ -73,7 +73,6 @@ function handlePointerDown(event: PointerEvent): void {
         hideTooltip();
         return;
     }
-
     touchFocusedTrigger = null;
 }
 

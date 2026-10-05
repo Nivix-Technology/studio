@@ -7,6 +7,7 @@ import { initTooltips } from './tooltips';
 
 import { electroview } from './index';
 import { populateSVGs } from "./fileLoader";
+import { init as initNxlib } from './nxlib';
 
 function getEBD<T extends HTMLElement = HTMLElement>(id: string): T {
     return document.getElementById(id) as T;
@@ -36,6 +37,7 @@ export function init(): Promise<void> {
 async function initialize() {
     versionLabel!.innerText = `v${index.store.sessionVersion}` || "Failed to get session version";
     
+    initNxlib();
     initTooltips();
     
     let menuDelay: number = 750;

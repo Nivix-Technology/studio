@@ -1,5 +1,4 @@
 import { electroview, restart } from './index';
-import type { TabChangeEventDetail } from "../../shared/bun/store-types.ts";
 
 function getEBD<T extends HTMLElement = HTMLElement>(id: string): T {
     return document.getElementById(id) as T;
@@ -24,6 +23,7 @@ export async function init() {
         preferences = { ...preferences, ...savedPreferences };
         return;
     }
+    initTab();
 }
 
 export async function setPreference(key: string, value: any) {
@@ -67,11 +67,3 @@ function initTab() {
 
     isInitialized = true;
 }
-
-window.addEventListener('tabchange', (event) => {
-    const eventDetails = event as CustomEvent<TabChangeEventDetail>;
-    const { tabId } = eventDetails.detail;
-    if (tabId === 'settings') {
-        initTab();
-    }
-});
