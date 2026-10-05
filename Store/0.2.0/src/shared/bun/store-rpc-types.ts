@@ -129,6 +129,12 @@ export type StoreRPCType = {
         };
         messages: {
             closeStore: void;
+            updateRPC: {
+                params: {
+                    details: string;
+                    state: string;
+                };
+            };
         };
     }>;
     webview: RPCSchema<{
