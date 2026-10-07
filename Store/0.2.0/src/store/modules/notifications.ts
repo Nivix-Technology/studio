@@ -105,7 +105,7 @@ function renderNotification(item: NotificationItem): Promise<void> {
         header.appendChild(closeBtn);
         container.appendChild(header);
         container.appendChild(messageOutput);
-        if (!preferences['disableAnimations']) container.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style) forwards";
+        if (preferences['transitionAnimations']) container.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style) forwards";
         document.body.appendChild(container);
         
         let dismissTimer: number | null = null;
@@ -119,7 +119,7 @@ function renderNotification(item: NotificationItem): Promise<void> {
                 clearTimeout(dismissTimer);
             }
             
-            if (preferences['disableAnimations']) {
+            if (!preferences['transitionAnimations']) {
                 container.remove();
                 resolve();
                 return;
@@ -288,7 +288,7 @@ export function showPopup<T = any>(
         actionContainer.className = "action-container";
         let highlightedButton: HTMLButtonElement | null = null;
         
-        const disableAnimations = preferences['disableAnimations'];
+        const transitionAnimations = preferences['transitionAnimations'];
         let isClosing = false;
         let outsidePointerDown: ((event: PointerEvent) => void) | null = null;
         let trapTabNavigation: ((event: KeyboardEvent) => void) | null = null;
@@ -322,7 +322,7 @@ export function showPopup<T = any>(
             isClosing = true;
             removeOutsideListener();
             
-            if (disableAnimations) {
+            if (!transitionAnimations) {
                 popupContainer.remove();
                 clearActivePopup();
                 resolve(selectedValue as T | undefined);
@@ -456,7 +456,7 @@ export function showPopup<T = any>(
         };
         document.addEventListener("keydown", trapTabNavigation);
 
-        if (!disableAnimations) {
+        if (transitionAnimations) {
             popup.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style) forwards";
             if (popupContainer.classList.contains("popup-container-shaded")) {
                 popupContainer.style.animation = "popupContainerFadeIn 0.3s var(--transition-easing-style) forwards";

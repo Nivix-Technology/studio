@@ -1,10 +1,9 @@
 import { populateSVGs } from "./fileLoader";
 import { showNotification, showPopup } from "./notifications";
-import { preferences, setPreference } from "./settings";
-import { fillSpaceContainer } from "./spaceFillers";
+import { preferences } from "./settings";
 
 import { electroview, exit, restart } from "./index";
-import { type TabChangeEventDetail } from "../../shared/bun/store-types";
+import { type tabChangeEventDetail } from "../../shared/bun/store-types";
 
 function getEBD<T extends HTMLElement = HTMLElement>(id: string): T {
     return document.getElementById(id) as T;
@@ -25,7 +24,6 @@ const sourceCodeBtn = getEBD<HTMLButtonElement>('selectSpace-source');
 const issuesBtn = getEBD<HTMLButtonElement>('selectSpace-issues');
 const exitBtn = getEBD<HTMLButtonElement>('selectSpace-exit');
 const restartBtn = getEBD<HTMLButtonElement>('selectSpace-restart');
-const shapeAnimToggle = getEBD<HTMLInputElement>('selectSpace-shapeAnimToggle');
 const refreshBtn = getEBD<HTMLButtonElement>('selectSpace-refresh');
 const createBtn = getEBD<HTMLButtonElement>('selectSpace-create');
 
@@ -44,25 +42,13 @@ export async function init() {
     restartBtn.addEventListener('click', restart);
     
     refreshBtn.addEventListener('click', (e: MouseEvent) => {
-        populateSpacesList(true, !preferences['disableAnimations'] && !e.shiftKey);
+        populateSpacesList(true, preferences['transitionAnimations'] && !e.shiftKey);
     });
-    
-    shapeAnimToggle.addEventListener('change', toggleShapeAnimations);
-    shapeAnimToggle.checked = preferences['disableShapeAnimations'];
-    
-    toggleShapeAnimations();
     
     isInitialized = true;
 }
 
-function toggleShapeAnimations() {
-    void setPreference('disableShapeAnimations', shapeAnimToggle.checked).catch((error: unknown) => {
-        console.error('Failed to save animation preference:', error);
-    });
-    fillSpaceContainer();
-}
-
-async function populateSpacesList(fadeOut?: boolean, animate: boolean = !preferences['disableAnimations']): Promise<void> {
+async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferences['transitionAnimations']): Promise<void> {
     const spacesList = getEBD<HTMLDivElement>('selectSpace-list');
 
     // Smoothly fade out existing items
@@ -162,7 +148,7 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = !prefere
                 try {
                     await electroview.rpc!.request.deleteSpace(space.id);
                     showNotification(`Deleted Space '${space.name}'`);
-                    populateSpacesList(true, !preferences['disableAnimations'] && !e.shiftKey);
+                    populateSpacesList(true, preferences['transitionAnimations'] && !e.shiftKey);
                 } catch (err) {
                     const message = err instanceof Error ? err.message : String(err);
                     showNotification(`Failed to delete space '${space.name}': ${message}`, 'error');
@@ -186,8 +172,8 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = !prefere
     populateSVGs();
 }
 
-window.addEventListener('tabchange', (event) => {
-    const eventDetails = event as CustomEvent<TabChangeEventDetail>;
+window.addEventListener('tabChange', (event) => {
+    const eventDetails = event as CustomEvent<tabChangeEventDetail>;
     const { tabId } = eventDetails.detail;
     if (tabId === 'selectSpace') {
         init();

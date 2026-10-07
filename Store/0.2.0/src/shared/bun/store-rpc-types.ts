@@ -111,6 +111,14 @@ export type StoreRPCType = {
                 };
                 response: string;
             };
+            manageStoreFile: {
+                params: {
+                    operation: 'read' | 'write' | 'list' | 'createDirectory' | 'delete' | 'clearDirectory';
+                    path: string;
+                    content?: string;
+                };
+                response: string | string[] | boolean | null;
+            };
             setDatabase: {
                 params: {
                     database: string;
@@ -129,12 +137,6 @@ export type StoreRPCType = {
         };
         messages: {
             closeStore: void;
-            updateRPC: {
-                params: {
-                    details: string;
-                    state: string;
-                };
-            };
         };
     }>;
     webview: RPCSchema<{

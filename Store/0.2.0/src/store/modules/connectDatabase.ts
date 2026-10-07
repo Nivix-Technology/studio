@@ -1,8 +1,8 @@
 import * as notifications from './notifications.ts';
-import { preferences, setPreference } from './settings.ts';
+import { preferences } from './settings.ts';
 
 import { electroview } from "./index";
-import type { TabChangeEventDetail } from "../../shared/bun/store-types.ts";
+import type { tabChangeEventDetail } from "../../shared/bun/store-types.ts";
 
 function getEBD<T extends HTMLElement = HTMLElement>(id: string): T {
     return document.getElementById(id) as T;
@@ -28,8 +28,6 @@ const profileLoadBtn = getEBD<HTMLButtonElement>('connectDatabase-profile-load')
 const profileNameInput = getEBD<HTMLInputElement>('connectDatabase-profile-name');
 const profileSaveBtn = getEBD<HTMLButtonElement>('connectDatabase-profile-save');
 const profileDeleteBtn = getEBD<HTMLButtonElement>('connectDatabase-profile-delete');
-const saveLastProfileToggle = getEBD<HTMLInputElement>('connectDatabase-save-last-profile');
-
 const statusOutput = getEBD<HTMLSpanElement>('connectDatabase-status');
 const disconnectBtn = getEBD<HTMLButtonElement>('connectDatabase-disconnect');
 
@@ -40,6 +38,94 @@ type ConnectionDetails =
 | { mode: 'fields'; prefix: string; hostname: string; port: string; database: string; username: string }
 | { mode: 'url'; url: string };
 type ConnectionProfile = { name: string; connection: ConnectionDetails };
+
+let lastConnection: ConnectionDetails | null = null;
+let profiles: ConnectionProfile[] = [];
+let profilesLoaded = false;
+let profilesLoading: Promise<void> | null = null;
+let lastConnectionLoading: Promise<void> | null = null;
+
+function isConnectionDetails(value: unknown): value is ConnectionDetails {
+    if (typeof value !== 'object' || value === null || !('mode' in value)) return false;
+    if (value.mode === 'url') return 'url' in value && typeof value.url === 'string';
+    return value.mode === 'fields' &&
+        'prefix' in value && typeof value.prefix === 'string' &&
+        'hostname' in value && typeof value.hostname === 'string' &&
+        'port' in value && typeof value.port === 'string' &&
+        'database' in value && typeof value.database === 'string' &&
+        'username' in value && typeof value.username === 'string';
+}
+
+function isConnectionProfile(value: unknown): value is ConnectionProfile {
+    if (typeof value !== 'object' || value === null || !('name' in value) || !('connection' in value)) return false;
+    return typeof value.name === 'string' && isConnectionDetails(value.connection);
+}
+
+function loadProfiles(): Promise<void> {
+    if (profilesLoaded) return Promise.resolve();
+    if (!profilesLoading) {
+        profilesLoading = (async () => {
+            const contents = await electroview.rpc?.request.manageStoreFile({
+                operation: 'read',
+                path: 'profiles.json'
+            });
+            if (contents !== null && typeof contents !== 'string') {
+                throw new Error('Saved connection profiles could not be read.');
+            }
+            const storedProfiles: unknown = contents === null ? [] : JSON.parse(contents);
+            if (!Array.isArray(storedProfiles) || !storedProfiles.every(isConnectionProfile)) {
+                throw new Error('Saved connection profiles have an invalid format.');
+            }
+            profiles = storedProfiles;
+            profilesLoaded = true;
+            renderProfiles();
+        })().finally(() => {
+            profilesLoading = null;
+        });
+    }
+    return profilesLoading;
+}
+
+function loadLastConnection(): Promise<void> {
+    if (!lastConnectionLoading) {
+        lastConnectionLoading = (async () => {
+            const contents = await electroview.rpc?.request.manageStoreFile({
+                operation: 'read',
+                path: 'connectDatabase.json'
+            });
+            if (contents !== null && typeof contents !== 'string') {
+                throw new Error('The last database connection could not be read.');
+            }
+            const storedConnection: unknown = contents === null ? null : JSON.parse(contents);
+            if (storedConnection !== null && !isConnectionDetails(storedConnection)) {
+                throw new Error('The last database connection has an invalid format.');
+            }
+            lastConnection = storedConnection;
+        })().finally(() => {
+            lastConnectionLoading = null;
+        });
+    }
+    return lastConnectionLoading;
+}
+
+async function saveLastConnection(connection: ConnectionDetails | null) {
+    const saved = await electroview.rpc?.request.manageStoreFile({
+        operation: 'write',
+        path: 'connectDatabase.json',
+        content: JSON.stringify(connection, null, 2)
+    });
+    if (saved !== true) throw new Error('Failed to save the last database connection.');
+    lastConnection = connection;
+}
+
+async function saveProfiles() {
+    const saved = await electroview.rpc?.request.manageStoreFile({
+        operation: 'write',
+        path: 'profiles.json',
+        content: JSON.stringify(profiles, null, 2)
+    });
+    if (saved !== true) throw new Error('Failed to save connection profiles.');
+}
 
 function sanitizeCustomURL(connectionString: string): string | null {
     try {
@@ -72,8 +158,7 @@ function currentConnectionDetails(): ConnectionDetails | null {
 }
 
 function getProfiles(): ConnectionProfile[] {
-    const profiles = preferences['databaseConnectionProfiles'];
-    return Array.isArray(profiles) ? profiles as ConnectionProfile[] : [];
+    return profiles;
 }
 
 function renderProfiles() {
@@ -81,7 +166,6 @@ function renderProfiles() {
     const selected = profileSelection.value;
     profileSelection.replaceChildren(new Option('Select a saved profile', ''));
     
-    const lastConnection = preferences['lastDatabaseConnection'] as ConnectionDetails | null;
     if (lastConnection) profileSelection.add(new Option('Last Connection', '__last_connection__'));
     for (const profile of getProfiles()) profileSelection.add(new Option(profile.name, profile.name));
     
@@ -97,7 +181,7 @@ function updateProfileActions() {
 
 function loadConnectionDetails(connection: ConnectionDetails) {
     if (connection.mode === 'url') {
-        // Sanitize again in case an older preferences file was edited manually.
+        // Sanitize again in case a saved profile was edited manually.
         if (urlInput) urlInput.value = sanitizeCustomURL(connection.url) || '';
     } else {
         if (prefixInput) prefixInput.value = connection.prefix;
@@ -114,7 +198,7 @@ function loadSelectedProfile() {
     const selected = profileSelection?.value;
     if (!selected) return;
     const connection = selected === '__last_connection__'
-    ? preferences['lastDatabaseConnection'] as ConnectionDetails | null
+    ? lastConnection
     : getProfiles().find(profile => profile.name === selected)?.connection;
     if (!connection) return;
     loadConnectionDetails(connection);
@@ -122,6 +206,7 @@ function loadSelectedProfile() {
 }
 
 async function saveProfile() {
+    await loadProfiles();
     const name = profileNameInput?.value.trim() || '';
     const connection = currentConnectionDetails();
     if (!name) {
@@ -138,9 +223,15 @@ async function saveProfile() {
         return;
     }
     
-    const profiles = getProfiles().filter(profile => profile.name.toLocaleLowerCase() !== name.toLocaleLowerCase());
+    const previousProfiles = profiles;
+    profiles = getProfiles().filter(profile => profile.name.toLocaleLowerCase() !== name.toLocaleLowerCase());
     profiles.push({ name, connection });
-    await setPreference('databaseConnectionProfiles', profiles);
+    try {
+        await saveProfiles();
+    } catch (error) {
+        profiles = previousProfiles;
+        throw error;
+    }
     renderProfiles();
     if (profileSelection) profileSelection.value = name;
     updateProfileActions();
@@ -149,17 +240,22 @@ async function saveProfile() {
 }
 
 async function deleteSelectedProfile() {
+    await loadProfiles();
     const selected = profileSelection?.value;
     if (!selected) return;
     
     if (selected === '__last_connection__') {
-        await setPreference('lastDatabaseConnection', null);
+        await saveLastConnection(null);
         notifications.showNotification('Deleted "Last Connection" profile.');
     } else {
-        await setPreference(
-            'databaseConnectionProfiles', 
-            getProfiles().filter(profile => profile.name !== selected)
-        );
+        const previousProfiles = profiles;
+        profiles = getProfiles().filter(profile => profile.name !== selected);
+        try {
+            await saveProfiles();
+        } catch (error) {
+            profiles = previousProfiles;
+            throw error;
+        }
         notifications.showNotification(`Deleted connection profile “${selected}”.`);
     }
     
@@ -173,6 +269,16 @@ function getErrorMessage(err: unknown): string {
         return String((err as { message: unknown }).message);
     }
     return 'An unknown error occurred.';
+}
+
+function reportProfileError(action: string, error: unknown) {
+    console.error(`Failed to ${action} connection profiles:`, error);
+    notifications.showNotification(`Failed to ${action} connection profiles: ${getErrorMessage(error)}`, 'error');
+}
+
+function reportConnectionError(action: string, error: unknown) {
+    console.error(`Failed to ${action} the last database connection:`, error);
+    notifications.showNotification(`Failed to ${action} the last database connection: ${getErrorMessage(error)}`, 'error');
 }
 
 function setLoadingState(isLoading: boolean) {
@@ -216,18 +322,14 @@ export function init() {
     });
     
     disconnectBtn?.addEventListener('click', disconnectDatabase);
-    if (saveLastProfileToggle) {
-        saveLastProfileToggle.checked = Boolean(preferences['saveLastConnection']);
-        saveLastProfileToggle.addEventListener('change', () => {
-            void setPreference('saveLastConnection', saveLastProfileToggle.checked)
-            .then(renderProfiles)
-            .catch(error => console.error('Failed to save Last Connection preference:', error));
-        });
-    }
     profileSelection?.addEventListener('change', updateProfileActions);
     profileLoadBtn?.addEventListener('click', loadSelectedProfile);
-    profileSaveBtn?.addEventListener('click', () => void saveProfile());
-    profileDeleteBtn?.addEventListener('click', () => void deleteSelectedProfile());
+    profileSaveBtn?.addEventListener('click', () => {
+        void saveProfile().catch(error => reportProfileError('save', error));
+    });
+    profileDeleteBtn?.addEventListener('click', () => {
+        void deleteSelectedProfile().catch(error => reportProfileError('delete', error));
+    });
     
     passwordVisibilityBtn?.addEventListener('click', () => {
         const showPassword = passwordInput?.type === 'password';
@@ -241,6 +343,10 @@ export function init() {
     
     isInitialized = true;
     renderProfiles();
+    void loadProfiles().catch(error => reportProfileError('load', error));
+    void loadLastConnection()
+        .then(renderProfiles)
+        .catch(error => reportConnectionError('load', error));
     void syncConnectionState();
     return true;
 }
@@ -345,8 +451,12 @@ async function connectDatabase(customURL?: string) {
         connected = true;
         const lastConnection = currentConnectionDetails();
         if (lastConnection && preferences['saveLastConnection']) {
-            await setPreference('lastDatabaseConnection', lastConnection);
-            renderProfiles();
+            try {
+                await saveLastConnection(lastConnection);
+                renderProfiles();
+            } catch (error) {
+                reportConnectionError('save', error);
+            }
         }
         notifications?.showNotification('Successfully connected to database!');
         if (statusOutput) statusOutput.innerText = 'Connected to Database';
@@ -390,8 +500,8 @@ async function disconnectDatabase() {
     }
 }
 
-window.addEventListener('tabchange', (event) => {
-    const eventDetails = event as CustomEvent<TabChangeEventDetail>;
+window.addEventListener('tabChange', (event) => {
+    const eventDetails = event as CustomEvent<tabChangeEventDetail>;
     const { tabId } = eventDetails.detail;
     if (tabId === 'connectDatabase') {
         if (!init()) void syncConnectionState();

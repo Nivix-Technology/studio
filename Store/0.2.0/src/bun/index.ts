@@ -6,14 +6,36 @@ import { BrowserView, BrowserWindow, Screen } from "electrobun/bun";
 import Database from 'bun:sqlite';
 import mysql from 'mysql2/promise';
 
-import * as updater from "./updater.js";
+import * as updater from "./updater";
 import * as utils from "./updater-utils";
 import { type UpdaterRPCType } from '../shared/bun/updater-rpc-types';
-import { type StoreRPCType } from '../shared/bun/store-rpc-types.js';
+import { type StoreRPCType } from '../shared/bun/store-rpc-types';
 
 const studioPath = path.join(os.homedir(), 'nvxstdo');
 const storePath = path.join(studioPath, 'store');
 const preferencesPath = path.join(storePath, 'preferences.json');
+
+type StoreFileOperation = 'read' | 'write' | 'list' | 'createDirectory' | 'delete' | 'clearDirectory';
+type StoreFilePermission = 'read' | 'write' | 'list' | 'create' | 'delete' | 'clear';
+type StoreFileAccess = {
+	path: string;
+	type: 'file' | 'directory';
+} & Partial<Record<StoreFilePermission, boolean>>;
+
+const storeFileAccess: StoreFileAccess[] = [
+	{ path: 'profiles.json', type: 'file', read: true, write: true, delete: false },
+	{ path: 'connectDatabase.json', type: 'file', read: true, write: true, delete: false },
+	{
+		path: 'UserData',
+		type: 'directory',
+		read: true,
+		write: true,
+		list: true,
+		create: true,
+		delete: false,
+		clear: false
+	}
+] as const;
 
 const oldFormats = {
 	"0.1.0-hub": path.join('appdata', 'store', 'inventory.ndjson'),
@@ -27,8 +49,185 @@ let db: Database | mysql.Pool | null = null;
 let initialization: Promise<void> | null = null;
 let databaseQueue: Promise<void> = Promise.resolve();
 let preferencesWrite: Promise<void> = Promise.resolve();
+let storeFileWrite: Promise<void> = Promise.resolve();
 
 let activeDB: string;
+
+function validateStoreFilePath(relativePath: string): string[] {
+	if (typeof relativePath !== 'string' || relativePath.length === 0) {
+		throw new Error('A relative storage path is required.');
+	}
+
+	const segments = relativePath.split(/[\\/]/);
+	if (segments.some(segment =>
+		!segment ||
+		segment === '.' ||
+		segment === '..' ||
+		segment.includes(':') ||
+		/[. ]$/.test(segment) ||
+		/[\0-\x1f]/.test(segment)
+	)) {
+		throw new Error('The storage path is invalid.');
+	}
+
+	return segments;
+}
+
+function hasErrorCode(error: unknown, code: string): boolean {
+	return typeof error === 'object' && error !== null && 'code' in error && error.code === code;
+}
+
+function getStoreFilePermission(segments: string[], operation: StoreFileOperation) {
+	const normalizedPath = segments.join('/').toLocaleLowerCase('en-US');
+	const permissionNames: Record<StoreFileOperation, StoreFilePermission> = {
+		read: 'read',
+		write: 'write',
+		list: 'list',
+		createDirectory: 'create',
+		delete: 'delete',
+		clearDirectory: 'clear'
+	};
+	const permissionName = permissionNames[operation];
+	for (const access of storeFileAccess) {
+		const allowedPath = access.path.toLocaleLowerCase('en-US');
+		if (
+			access.type === 'file' &&
+			normalizedPath === allowedPath &&
+			(permissionName === 'read' || permissionName === 'write' || permissionName === 'delete') &&
+			access[permissionName]
+		) {
+			return access;
+		}
+		if (
+			access.type === 'directory' &&
+			(normalizedPath === allowedPath || normalizedPath.startsWith(`${allowedPath}/`)) &&
+			(normalizedPath !== allowedPath || permissionName !== 'read') &&
+			access[permissionName]
+		) {
+			return access;
+		}
+	}
+	throw new Error('The requested storage operation is not allowed for this path.');
+}
+
+async function resolveStoreFilePath(segments: string[], createParents = false): Promise<string> {
+	const studioInfo = await fs.lstat(studioPath);
+	if (!studioInfo.isDirectory() || studioInfo.isSymbolicLink()) {
+		throw new Error('The application storage directory is not a safe directory.');
+	}
+	const rootInfo = await fs.lstat(storePath);
+	if (!rootInfo.isDirectory() || rootInfo.isSymbolicLink()) {
+		throw new Error('The storage directory is not a safe directory.');
+	}
+
+	let currentPath = storePath;
+	for (let index = 0; index < segments.length; index++) {
+		currentPath = path.join(currentPath, segments[index]);
+		try {
+			const info = await fs.lstat(currentPath);
+			if (info.isSymbolicLink()) throw new Error('Symbolic links are not allowed in storage paths.');
+			if (index < segments.length - 1 && !info.isDirectory()) {
+				throw new Error('A storage path component is not a directory.');
+			}
+		} catch (error) {
+			if (!hasErrorCode(error, 'ENOENT')) throw error;
+			if (createParents && index < segments.length - 1) {
+				await fs.mkdir(currentPath);
+			}
+		}
+	}
+	return currentPath;
+}
+
+async function manageStoreFile({
+	operation,
+	path: relativePath,
+	content
+}: {
+	operation: StoreFileOperation;
+	path: string;
+	content?: string;
+}): Promise<string | string[] | boolean | null> {
+	if (!['read', 'write', 'list', 'createDirectory', 'delete', 'clearDirectory'].includes(operation)) {
+		throw new Error('The storage operation is not recognized.');
+	}
+	const segments = validateStoreFilePath(relativePath);
+	getStoreFilePermission(segments, operation);
+
+	const fileContent = content;
+	const mutate = async () => {
+		if (operation === 'write') {
+			if (typeof fileContent !== 'string') {
+				throw new Error('File content must be provided as a string.');
+			}
+			const targetPath = await resolveStoreFilePath(segments, true);
+			try {
+				const info = await fs.lstat(targetPath);
+				if (!info.isFile()) throw new Error('Only regular files can be written.');
+				if (info.nlink > 1) throw new Error('Files linked outside the storage directory cannot be written.');
+			} catch (error) {
+				if (!hasErrorCode(error, 'ENOENT')) throw error;
+			}
+			await fs.writeFile(targetPath, fileContent, 'utf-8');
+			return true;
+		}
+
+		if (operation === 'createDirectory') {
+			const targetPath = await resolveStoreFilePath(segments, true);
+			await fs.mkdir(targetPath, { recursive: true });
+			return true;
+		}
+
+		if (operation === 'delete') {
+			const targetPath = await resolveStoreFilePath(segments);
+			const info = await fs.lstat(targetPath);
+			if (!info.isFile()) throw new Error('Only regular files can be deleted.');
+			await fs.unlink(targetPath);
+			return true;
+		}
+
+		if (operation === 'clearDirectory') {
+			const targetPath = await resolveStoreFilePath(segments);
+			const info = await fs.lstat(targetPath);
+			if (!info.isDirectory()) throw new Error('Only directories can be cleared.');
+			await fs.rm(targetPath, { recursive: true });
+			await fs.mkdir(targetPath);
+			return true;
+		}
+
+		return false;
+	};
+
+	if (operation === 'write' || operation === 'createDirectory' || operation === 'delete' || operation === 'clearDirectory') {
+		const write = storeFileWrite.then(mutate, mutate);
+		storeFileWrite = write.then(() => undefined, () => undefined);
+		return write;
+	}
+
+	const targetPath = await resolveStoreFilePath(segments);
+	if (operation === 'read') {
+		try {
+			const info = await fs.lstat(targetPath);
+			if (!info.isFile()) throw new Error('Only regular files can be read.');
+			if (info.nlink > 1) throw new Error('Files linked outside the storage directory cannot be read.');
+			return await fs.readFile(targetPath, 'utf-8');
+		} catch (error) {
+			if (hasErrorCode(error, 'ENOENT')) return null;
+			throw error;
+		}
+	}
+
+	if (operation === 'list') {
+		if (segments.length === 1 && segments[0].toLocaleLowerCase('en-US') === 'userdata') {
+			await fs.mkdir(targetPath, { recursive: true });
+		}
+		const info = await fs.lstat(targetPath);
+		if (!info.isDirectory()) throw new Error('Only directories can be listed.');
+		return await fs.readdir(targetPath);
+	}
+
+	throw new Error('The storage operation could not be completed.');
+}
 
 function enqueueDatabaseTask<T>(task: () => Promise<T> | T): Promise<T> {
 	const result = databaseQueue.then(task, task);
@@ -159,6 +358,13 @@ const storeRPC = BrowserView.defineRPC<StoreRPCType>({
 				preferencesWrite = write.catch(() => undefined);
 				await write;
 				return true;
+			},
+			async manageStoreFile(request: {
+				operation: StoreFileOperation;
+				path: string;
+				content?: string;
+			}) {
+				return manageStoreFile(request);
 			},
 			async createSpace(name: string) {
 				return withDatabase(api => api['createSpace'](name));

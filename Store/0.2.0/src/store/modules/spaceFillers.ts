@@ -1,10 +1,11 @@
+import type { preferenceUpdateEventDetail } from '../../shared/bun/store-types';
 import { preferences } from './settings';
 
 function getEBD(id: string) { return document.getElementById(id); }
 function wait(ms: number) { return new Promise((resolve) => { setTimeout(resolve, ms); }); }
 
-function waitForAnimation(element: HTMLElement, instant: boolean, fallbackMs: number = 350): Promise<void> {
-    if (instant) return Promise.resolve();
+function waitForAnimation(element: HTMLElement, animationsEnabled: boolean, fallbackMs: number = 350): Promise<void> {
+    if (!animationsEnabled) return Promise.resolve();
 
     return new Promise((resolve) => {
         let timer: number;
@@ -44,8 +45,15 @@ let lastCombinationIndex: number | null = null;
 const floatAnimations = ['float', 'float-slow', 'float-fast', 'float-subtle'];
 
 export async function fillSpaceContainer() {
-    if (preferences['disableSpaceFillers']) return;
     const callId = ++currentCallId;
+    const container = getEBD('space-filler-container') as HTMLDivElement;
+    if (!container) return;
+    if (!preferences['spaceFillersEnabled']) {
+        container.classList.remove('is-fading-out');
+        container.style.animationDuration = '';
+        container.replaceChildren();
+        return;
+    }
 
     const combinations = [
         [ "circle1", "polygon4", "circle6", "triangle3", "triangle4", "polygon3", "polygon1", "circle2", "triangle5", "polygon6", "circle7" ],
@@ -60,28 +68,22 @@ export async function fillSpaceContainer() {
         [ "circle3", "polygon2", "triangle4", "polygon1", "triangle5", "circle2", "circle6", "polygon6", "triangle7", "circle4", "polygon5" ]
     ];
     
-    const container = getEBD('space-filler-container') as HTMLDivElement;
-    if (!container) return;
+    const transitionAnimations = preferences['transitionAnimations'];
+    const spaceFillerAnimations = preferences['spaceFillerAnimations'];
 
-    const disableAnimations = !!preferences['disableAnimations'];
-    const disableShapeAnimations = !!preferences['disableShapeAnimations'];
-
-    // Fade out container if it has active elements
     if (container.children.length > 0) {
-        container.style.animationDuration = disableAnimations ? '0s' : '';
-
-        // Restart container fade-out animation via class toggle + reflow
-        container.classList.remove('is-fading-out');
-        void container.offsetWidth; // Force CSS reflow to reset keyframe sequence
-        container.classList.add('is-fading-out');
-
-        await waitForAnimation(container, disableAnimations);
+        if (transitionAnimations) {
+            container.classList.remove('is-fading-out');
+            void container.offsetWidth;
+            container.classList.add('is-fading-out');
+            await waitForAnimation(container, transitionAnimations);
+        }
     }
 
     if (callId !== currentCallId) return;
 
-    // Reset container state and clear children
     container.classList.remove('is-fading-out');
+    container.style.animationDuration = '';
     container.replaceChildren();
 
     // Pick new combination strictly different from previous
@@ -100,31 +102,37 @@ export async function fillSpaceContainer() {
         const randomFloatClass = floatAnimations[Math.floor(Math.random() * floatAnimations.length)];
         shapeElement.classList.add(baseShapeClass, shapeClass);
 
-        if (disableAnimations) {
-            shapeElement.style.animationDuration = '0s';
-        }
-
-        if (disableShapeAnimations) {
-            if (!disableAnimations) {
-                shapeElement.classList.add('is-appearing');
-            }
-        } else {
-            shapeElement.addEventListener('animationend', (e: AnimationEvent) => {
-                if (e.animationName === 'fadeInShape') {
+        if (transitionAnimations) {
+            if (spaceFillerAnimations) {
+                shapeElement.addEventListener('animationend', (event: AnimationEvent) => {
+                    if (event.animationName !== 'fadeInShape') return;
                     shapeElement.classList.remove('is-appearing');
                     shapeElement.classList.add(randomFloatClass, 'is-floating');
-                }
-            }, { once: true });
-
+                }, { once: true });
+            }
             shapeElement.classList.add('is-appearing');
+        } else if (spaceFillerAnimations) {
+            shapeElement.classList.add(randomFloatClass, 'is-floating');
         }
 
         container.appendChild(shapeElement);
 
-        if (!disableAnimations) {
+        if (transitionAnimations) {
             await wait(delay);
         }
     }
 }
 
-window.addEventListener('tabchange', fillSpaceContainer);
+window.addEventListener('tabChange', fillSpaceContainer);
+window.addEventListener('preferencesUpdate', (event) => {
+    const triggerPreferenceKeys = new Set([
+        'spaceFillersEnabled',
+        'spaceFillerAnimations'
+    ]);
+    const eventDetails = event as CustomEvent<preferenceUpdateEventDetail>;
+    const { preference } = eventDetails.detail;
+
+    if (triggerPreferenceKeys.has(preference)) {
+        void fillSpaceContainer();
+    }
+});

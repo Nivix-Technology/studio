@@ -1,7 +1,7 @@
 import * as tabs from './tabs';
 
 import { electroview } from './index';
-import type { TabChangeEventDetail } from '../../shared/bun/store-types';
+import type { tabChangeEventDetail } from '../../shared/bun/store-types';
 
 function getEBD(id: string) {return document.getElementById(id)}
 function wait(ms: number) {return new Promise((resolve) => { setTimeout(resolve, ms)})}
@@ -50,8 +50,8 @@ export async function init() {
     isInitialized = true;
 }
 
-window.addEventListener('tabchange', (event) => {
-    const eventDetails = event as CustomEvent<TabChangeEventDetail>;
+window.addEventListener('tabChange', (event) => {
+    const eventDetails = event as CustomEvent<tabChangeEventDetail>;
     const { tabId } = eventDetails.detail;
     if (tabId === 'createSpace') {
         init();

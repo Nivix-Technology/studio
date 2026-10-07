@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://nivixtech.com https://*.nivixtech.com ws://localhost:50000; img-src 'self' data: https://nivixtech.com https://*.nivixtech.com ws://localhost:50000;">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://nivixtech.com https://*.nivixtech.com ws://localhost:50000 ws://127.0.0.1:50000; img-src 'self' data: https://nivixtech.com https://*.nivixtech.com ws://localhost:50000;">
 	
 	<!-- Nivix Visual Identity Stylesheet -->
 	<link rel="stylesheet" type="text/css" href="sheets/nxvid.css">
@@ -142,7 +142,7 @@
 				<hr>
 				<div class="nivix-checkbox-wrapper">
 					<label for="connectDatabase-save-last-profile">Automatically save my last connection as a profile</label>
-					<input id="connectDatabase-save-last-profile" class="nivix-input" type="checkbox">
+					<input id="connectDatabase-save-last-profile" data-settings-key="saveLastConnection" class="nivix-input" type="checkbox">
 				</div>
 			</div>
 			<div class="tab" id="connectDatabase_quickConnect">
@@ -220,19 +220,19 @@
 				<hr>
 
 				<div class="nivix-checkbox-wrapper">
-					<input id="settings-toggleSpaceFillers" class="nivix-input" type="checkbox" checked>
-					<label for="settings-toggleSpaceFillers">Space Fillers</label>
+					<input id="settings-spaceFillersEnabled" data-settings-key="spaceFillersEnabled" class="nivix-input" type="checkbox" checked>
+					<label for="settings-spaceFillersEnabled">Space Fillers</label>
 				</div>
 
 				<span class="nivix-label">Animations</span>
 				<hr>
 
 				<div class="nivix-checkbox-wrapper">
-					<input id="settings-toggleTransitionAnimations" class="nivix-input" type="checkbox" checked>
+					<input id="settings-toggleTransitionAnimations" data-settings-key="transitionAnimations" class="nivix-input" type="checkbox">
 					<label for="settings-toggleTransitionAnimations">Transition Animations</label>
 				</div>
 				<div class="nivix-checkbox-wrapper">
-					<input id="settings-toggleShapeAnimations" class="nivix-input" type="checkbox" checked data-depends="settings-toggleSpaceFillers:checked">
+					<input id="settings-toggleShapeAnimations" data-settings-key="spaceFillerAnimations" class="nivix-input" type="checkbox" data-depends="settings-spaceFillersEnabled:checked">
 					<label for="settings-toggleShapeAnimations">Shape Floating Animation</label>
 				</div>
 			</div>

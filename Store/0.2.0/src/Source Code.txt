@@ -1,0 +1,2 @@
+Production builds will be compiled and obfuscated for speed reasons.
+Nivix Store 0.2.0 source code is available at https://www.nivixtech.com/studio/store/0.2.0/source.zip

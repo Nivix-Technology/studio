@@ -46,8 +46,12 @@ export interface QueryUnifiedOptions {
     logicalOp?: 'AND' | 'OR';
 }
 
-export interface TabChangeEventDetail {
+export interface tabChangeEventDetail {
     tabId: string;
+}
+
+export interface preferenceUpdateEventDetail {
+    preference: string;
 }
 
 export type ChunkCap = 'auto' | 'max' | number;

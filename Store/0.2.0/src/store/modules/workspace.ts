@@ -1,6 +1,6 @@
 import * as tabs from './tabs';
 
-import { type TabChangeEventDetail } from "../../shared/bun/store-types";
+import { type tabChangeEventDetail } from "../../shared/bun/store-types";
 
 let isInitialized = false;
 
@@ -14,8 +14,8 @@ export function gotoWorkspace(_space: number) {
     tabs.goto('workspace', { display: 'flex' });
 }
 
-window.addEventListener('tabchange', (event) => {
-    const eventDetails = event as CustomEvent<TabChangeEventDetail>;
+window.addEventListener('tabChange', (event) => {
+    const eventDetails = event as CustomEvent<tabChangeEventDetail>;
     const { tabId } = eventDetails.detail;
     if (tabId === 'workspace') {
         init();

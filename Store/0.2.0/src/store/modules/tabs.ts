@@ -81,7 +81,7 @@ function waitForAnimation(element: HTMLElement, instant: boolean, fallbackMs: nu
 }
 
 export async function remove(id: string, options: TabOptions = {}): Promise<void> {
-    const instant = options.instant !== undefined ? options.instant : preferences['disableAnimations'];
+    const instant = options.instant !== undefined ? options.instant : !preferences['transitionAnimations'];
     const thisElement = getEBD(id);
 
     if (!thisElement) return;
@@ -102,7 +102,7 @@ export function goto(id: string, options: TabOptions = {}): Promise<void> {
 }
 
 async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
-    const instant = options.instant !== undefined ? options.instant : preferences['disableAnimations'];
+    const instant = options.instant !== undefined ? options.instant : !preferences['transitionAnimations'];
     let logPrevious = options.logPrevious !== undefined ? options.logPrevious : true;
     let display = options.display;
 
@@ -153,7 +153,7 @@ export async function hide(id: string, options: TabOptions = {}): Promise<void> 
     const thisElement = getEBD(id);
     if (!thisElement) return;
 
-    const instant = options.instant !== undefined ? options.instant : preferences['disableAnimations'];
+    const instant = options.instant !== undefined ? options.instant : !preferences['transitionAnimations'];
 
     thisElement.style.animationDuration = instant ? '0s' : '';
     thisElement.classList.remove('is-fading-in', 'is-fading-out');
@@ -170,11 +170,11 @@ export async function show(id: string, options: TabOptions = {}): Promise<void> 
     const thisElement = getEBD(id);
     if (!thisElement) return;
 
-    const instant = options.instant !== undefined ? options.instant : preferences['disableAnimations'];
+    const instant = options.instant !== undefined ? options.instant : !preferences['transitionAnimations'];
     const thisDisplay = options.display ? options.display : "block";
 
     window.dispatchEvent(
-        new CustomEvent('tabchange', {
+        new CustomEvent('tabChange', {
             detail: { tabId: id },
         })
     );

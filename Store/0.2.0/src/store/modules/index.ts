@@ -1,3 +1,4 @@
+//@ts-expect-error @electronbun/view doesn't supply a data type.
 import { Electroview } from "electrobun/view";
 import { type StoreRPCType } from '../../shared/bun/store-rpc-types';
 
@@ -5,7 +6,7 @@ import { showPopup } from "./notifications";
 
 import * as load from './load';
 
-// Import all modules that listen for tabchange events, so electrobun can package them, and all top-level code is ran.
+// Import all modules that listen for tabChange events, so electrobun can package them, and all top-level code is ran.
 import './connectDatabase';
 import './createSpace';
 import './selectSpace';
