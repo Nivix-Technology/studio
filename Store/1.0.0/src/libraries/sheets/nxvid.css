@@ -1,0 +1,734 @@
+/* Fonts */
+
+@font-face {
+    font-family: "GochiHand";
+    src: url("../fonts/GochiHand-Regular.ttf");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto.ttf");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Page Setup and Defaults */
+
+:root {
+    --brand-color-step-amount: 20%;
+    --background-color-step-amount: 12%;
+    --text-color-step-amount: 40%;
+    
+    --danger-primary: #ff3f3f;
+    --brand-darker: color-mix(in srgb, var(--danger-primary), black var(--background-color-step-amount));
+    --brand-lighter: color-mix(in srgb, var(--danger-primary), white var(--background-color-step-amount));
+    
+    --brand-primary: #43a4eb;
+    --brand-darker: color-mix(in srgb, var(--brand-primary), black var(--brand-color-step-amount));
+    --brand-lighter: color-mix(in srgb, var(--brand-primary), white var(--brand-color-step-amount));
+    
+    --text-primary: #313131;
+    --text-secondary: color-mix(in srgb, var(--text-primary), white var(--text-color-step-amount));
+    --text-tertiary: #ffffff;
+    --text-quarternary: color-mix(in srgb, var(--text-tertiary), black var(--text-color-step-amount));
+    
+    --background-primary: #f6f6f6;
+    --background-secondary: color-mix(in srgb, var(--background-primary), black var(--background-color-step-amount));
+    --background-darker: color-mix(in srgb, transparent, black var(--background-color-step-amount));
+    --background-lighter: color-mix(in srgb, transparent, white var(--background-color-step-amount));
+    
+    --radius: 4px;
+    
+    --transition-speed: 0.2s;
+    --transition-easing-style: ease-out;
+    --transition: var(--transition-speed) var(--transition-easing-style);
+    
+    --inset-shadow: inset 0 0 5px 5px rgba(0, 0, 0, 0.10);
+    --outset-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+    --shade: rgba(0, 0, 0, 0.3);
+    
+    --resting-area-padding: 5px;
+    --clickable-area-padding: 0.5rem 1.1rem;
+    --gap: 5px;
+    
+    --outline: #ff6b00;
+    --font-primary: 'Roboto', 'Arial', Helvetica, sans-serif;
+}
+
+*:focus { outline: 2px solid var(--outline); }
+
+html {
+    scroll-behavior: smooth;
+    
+    &, body {
+        height: 100%;
+    }
+}
+
+body {
+    background: var(--background-primary);
+    font-family: var(--font-primary);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+hr {
+    border-style: none;
+    border: 1px solid var(--background-darker);
+}
+
+/* Heading Scaling Shorthand */
+
+h1 span { font-size: 1.5em; }
+h2 span { font-size: 1.17em; }
+h3 span { font-size: 1em; }
+h4 span { font-size: 0.83em; }
+h5 span { font-size: 0.67em; }
+h6 span { font-size: 0.45em; }
+
+/* Layout Elements */
+
+.center, .justify-center, .align-center {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+}
+
+.center {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.align-center {
+    align-items: center;
+    text-align: center;
+    height: fit-content;
+}
+
+.horizontal-container {
+    display: flex;
+    flex-direction: row;
+    gap: var(--gap);
+    
+    .flex-primary {
+        flex: 1;
+    }
+}
+
+.vertical-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    
+    .flex-primary {
+        flex: 1;
+    }
+}
+
+.nivix-footer {
+    flex-shrink: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    
+    background: var(--background-darker);
+    border-radius: var(--radius);
+    
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    text-align: center;
+    
+    padding: var(--resting-area-padding);
+}
+
+/* Nivix Visual Identity Elements */
+
+.nivix-accent {
+    font-family: "GochiHand", "Lucida Handwriting", serif;
+    color: var(--brand-primary);
+    text-shadow: 3px 3px 2px #8d8d8d;
+}
+
+.nivix-loader {
+    width: 50px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+    radial-gradient(farthest-side, var(--brand-primary) 94%, #0000) top/8px 8px no-repeat,
+    conic-gradient(#0000 30%, var(--brand-primary));
+    mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+    -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
+    animation: load-spin 1s infinite linear;
+}
+
+
+.nivix-primary-button,
+.nivix-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--gap) * 2);
+    
+    background: var(--background-darker);
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    
+    font-family: var(--font-primary);
+    font-size: 16px;
+    color: var(--text-primary);
+    
+    cursor: pointer;
+    padding: var(--clickable-area-padding);
+    transition: background var(--transition), box-shadow var(--transition);
+    
+    &.danger {
+        background: var(--background-primary);
+        border-color: var(--danger-primary);
+        color: var(--danger-primary);
+
+        &:active {
+            filter: brightness(1.2);
+            background: var(--background-primary);
+        }
+    }
+    
+    &.danger-primary {
+        background: var(--danger-primary);
+        border-color: transparent;
+        color: var(--text-tertiary);
+
+        &:active {
+            filter: brightness(1.2);
+            background: var(--danger-primary);
+            color: var(--text-tertiary);
+        }
+    }
+    
+    svg {
+        width: 2em;
+        aspect-ratio: 1;
+        fill: var(--text-primary);
+        transition: fill var(--transition);
+    }
+    
+    &:hover:not(&:disabled) {
+        box-shadow: var(--inset-shadow);
+    }
+    
+    &:active {
+        background: color-mix(in srgb, var(--background-darker), black var(--background-color-step-amount));
+    }
+    
+    &:disabled {
+        color: var(--text-secondary);
+        cursor: not-allowed;
+    }
+    
+    &.primary {
+        background: var(--brand-primary);
+        color: var(--text-tertiary);
+        
+        & svg {
+            fill: var(--text-tertiary);
+        }
+        
+        &:active {
+            background: var(--brand-darker);
+        }
+    }
+}
+
+.nivix-secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--gap) * 2);
+    
+    background: transparent;
+    border: none;
+    border-radius: var(--radius);
+    
+    font-family: var(--font-primary);
+    font-size: 16px;
+    color: var(--text-primary);
+    
+    cursor: pointer;
+    padding: var(--clickable-area-padding);
+    
+    & svg {
+        width: 2em;
+        aspect-ratio: 1;
+        fill: var(--text-primary);
+        transition: fill var(--transition);
+    }
+    
+    &:hover:not(&:disabled) {
+        font-weight: bold;
+    }
+    
+    &:active {
+        font-weight: bolder;
+    }
+    
+    &:disabled {
+        color: var(--text-secondary);
+        cursor: not-allowed;
+    }
+    
+    &.primary {
+        color: var(--brand-primary);
+        
+        & svg {
+            fill: var(--brand-primary);
+        }
+    }
+}
+
+.nivix-bookmark {
+    display: block;
+    width: fit-content;
+    box-sizing: border-box;
+    
+    background: var(--background-darker);
+    color: var(--text-primary);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: var(--clickable-area-padding);
+    
+    &.right {
+        border-radius: var(--radius) 0 0 var(--radius);
+    }
+}
+
+/* Form Inputs */
+
+.nivix-input {
+    &:is(
+    input[type="text"],
+    input[type="number"],
+    input[type="password"],
+    input[type="email"],
+    input[type="url"],
+    input[type="tel"],
+    input[type="search"],
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"]
+    ) {
+        background: var(--background-darker);
+        border: 1px solid transparent;
+        border-radius: var(--radius);
+        
+        font-family: var(--font-primary);
+        font-size: 16px;
+        color: var(--text-primary);
+        
+        padding: var(--clickable-area-padding);
+        transition: box-shadow var(--transition), border-color var(--transition);
+        
+        &:focus {
+            box-shadow: var(--inset-shadow);
+            border-color: var(--background-darker);
+        }
+        
+        &:disabled {
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+        
+        &.primary {
+            background: var(--brand-primary);
+            border-color: var(--brand-primary);
+            color: var(--text-tertiary);
+            
+            &::placeholder {
+                color: var(--text-quarternary);
+                font-weight: lighter;
+            }
+            
+            &:disabled {
+                color: var(--text-quarternary);
+            }
+            
+            &:focus {
+                border-color: var(--brand-darker);
+            }
+        }
+        
+        &::placeholder {
+            color: var(--text-secondary);
+        }
+    }
+    
+    /* Checkboxes */
+    
+    &[type="checkbox"] {
+        position: relative;
+        -webkit-appearance: none;
+        appearance: none;
+        
+        width: 20px;
+        height: 20px;
+        
+        background: transparent;
+        border: 2px solid #ff4d4d;
+        border-radius: 4px;
+        
+        cursor: pointer;
+        transition: background var(--transition), border-color var(--transition);
+        margin: 0;
+        
+        &:checked {
+            border-color: #26a65b;
+            background: #26a65b;
+            
+            &:not(&:disabled):not(.nivix-toggle)::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 12px;
+                height: 12px;
+                background: #fff;
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        &:not(&:disabled):hover {
+            filter: brightness(1.2);
+        }
+        
+        &:disabled {
+            border-color: #ff4d4d;
+            background: #ff4d4d;
+            cursor: not-allowed;
+            
+            & ~ label {
+                color: var(--text-secondary);
+            }
+        }
+    }
+}
+
+.nivix-input[type="checkbox"].nivix-toggle {
+    box-sizing: border-box;
+    width: 44px;
+    height: 24px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: var(--background-secondary);
+    
+    &::before {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        background: var(--text-secondary);
+        border-radius: 50%;
+        transition: transform var(--transition), background var(--transition);
+    }
+    
+    &:checked {
+        border-color: var(--brand-primary);
+        background: var(--brand-primary);
+        
+        &::before {
+            background: var(--text-tertiary);
+            transform: translateX(22px);
+        }
+    }
+    
+    &:disabled {
+        border-color: transparent;
+        background: var(--background-secondary);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    &:checked:disabled {
+        background: var(--brand-primary);
+    }
+}
+
+/* Checkbox Wrappers */
+
+.nivix-checkbox-wrapper,
+.nivix-svg-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    
+    &.centered {
+        justify-content: center;
+    }
+    
+    & label {
+        color: var(--text-primary);
+        user-select: none;
+        cursor: pointer;
+    }
+    
+    & > input[type="checkbox"]:checked ~ .label-unchecked,
+    & > input[type="checkbox"]:not(:checked) ~ .label-checked {
+        display: none;
+    }
+}
+
+.nivix-svg-checkbox-wrapper {
+    position: relative;
+    display: inline-flex;
+    background: transparent;
+    border: none;
+    font-family: var(--font-primary);
+    font-size: 16px;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: var(--clickable-area-padding);
+    
+    &:hover {
+        font-weight: bold;
+    }
+    
+    &:active {
+        font-weight: bolder;
+    }
+    
+    & > input[type="checkbox"] {
+        position: absolute;
+        left: 1.1rem;
+        top: 50%;
+        z-index: 1;
+        width: 20px;
+        height: 20px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        opacity: 0;
+        transform: translateY(-50%);
+    }
+    
+    & > input[type="checkbox"]:checked::before {
+        content: none;
+    }
+    
+    & > input[type="checkbox"] ~ .svg-checked,
+    & > input[type="checkbox"] ~ .svg-unchecked {
+        display: block;
+        flex: 0 0 20px;
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+        fill: var(--text-primary);
+    }
+    
+    & > input[type="checkbox"]:not(:checked) ~ .svg-checked,
+    & > input[type="checkbox"]:checked ~ .svg-unchecked {
+        display: none;
+    }
+    
+    & > input[type="checkbox"]:focus-visible ~ .svg-checked,
+    & > input[type="checkbox"]:focus-visible ~ .svg-unchecked {
+        outline: 2px solid var(--outline);
+        outline-offset: 2px;
+        border-radius: 3px;
+    }
+}
+
+/* Select and Options Dropdowns */
+
+.nivix-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231c1c1c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") no-repeat right 0.8rem center / 1rem, var(--background-darker);
+    
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    
+    font-family: var(--font-primary);
+    font-size: 16px;
+    text-align: center;
+    color: var(--text-primary);
+    cursor: pointer;
+    
+    padding: var(--clickable-area-padding);
+    padding-right: 2.5rem;
+    transition: background var(--transition), box-shadow var(--transition), border-color var(--transition);
+    
+    &:hover:not(:disabled) {
+        box-shadow: var(--inset-shadow);
+    }
+    
+    &:disabled {
+        color: var(--text-secondary);
+        cursor: not-allowed;
+    }
+    
+    &.primary {
+        background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") no-repeat right 0.8rem center / 1rem, var(--brand-primary);
+        color: var(--text-tertiary);
+    }
+    
+    & option {
+        color: var(--text-primary);
+        background: var(--background-primary);
+        padding: var(--resting-area-padding);
+        
+        &:disabled {
+            color: var(--text-secondary);
+        }
+    }
+}
+
+.nivix-label {
+    color: var(--text-primary);
+    font-weight: bold;
+    text-align: left;
+    margin: 1.5rem 0 0.5rem 0;
+    
+    &.top {
+        margin: 0 0 0.5rem 0;
+    }
+}
+
+.nivix-disclaimer {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.8em;
+    text-align: left;
+}
+
+.nivix-dropdown-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    
+    background: var(--background-darker);
+    border-radius: var(--radius);
+    padding: var(--resting-area-padding);
+    margin: var(--resting-area-padding);
+    
+    .dropdown-label {
+        display: inline-flex;
+        align-items: center;
+        user-select: none;
+        gap: var(--gap);
+        
+        input[type="checkbox"] {
+            display: none;
+        }
+        
+        label {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--gap);
+            font-size: 1em;
+            color: var(--text-primary);
+            cursor: pointer;
+            
+            &::before {
+                content: "";
+                display: inline-block;
+                width: 0;
+                height: 0;
+                border-top: 0.35em solid transparent;
+                border-bottom: 0.35em solid transparent;
+                border-left: 0.6em solid var(--text-primary);
+                transition: transform var(--transition);
+                transform-origin: 35% 50%;
+            }
+        }
+        
+        input[type="checkbox"]:checked + label::before {
+            transform: rotate(90deg);
+        }
+    }
+    
+    &:has(input[type="checkbox"]:checked) .dropdown-content {
+        display: block;
+    }
+    
+    .dropdown-content {
+        display: none;
+    }
+    
+    &.primary {
+        background: color-mix(in srgb, var(--brand-primary), white 80%);
+    }
+}
+
+code {
+    background: var(--background-darker);
+    color: var(--text-primary);
+    border-radius: var(--radius);
+    padding: calc(var(--resting-area-padding) / 2);
+    
+    &.code-block {
+        display: block;
+    }
+}
+
+/* Navigation Elements */
+.nivix-horizontal-navigation {
+    display: flex;
+    gap: var(--gap);
+    align-items: center;
+    flex-wrap: wrap;
+    
+    box-sizing: border-box;
+    width: 100%;
+    
+    background: var(--background-primary);
+    border: none;
+    
+    padding: calc(var(--resting-area-padding) / 2);
+    
+    .filler {
+        flex: 1;
+    }
+    
+    &.transparent {
+        background: transparent;
+    }
+    
+    &.divider-bottom {
+        border-bottom: 2px solid var(--background-darker);
+    }
+    
+    &.divider-top {
+        border-top: 2px solid var(--background-darker);
+    }
+    
+    &.distribute-contents * {
+        flex: 1;
+    }
+}
+
+/* Animations */
+
+@keyframes load-spin {
+    100% {
+        transform: rotate(1turn);
+    }
+}
+
+@keyframes nivixFadeIn {
+    from { opacity: 0; transform: scale(0.95); filter: blur(2px); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+@keyframes nivixFadeOut {
+    from { opacity: 1; filter: blur(0); }
+    to { opacity: 0; filter: blur(10px); }
+}

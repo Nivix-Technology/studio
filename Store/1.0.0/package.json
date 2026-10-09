@@ -1,0 +1,24 @@
+{
+  "name": "nivix-store",
+  "version": "1.0.0",
+  "description": "Web-Based Easy Inventory Management App for Businesses and Home Users",
+  "license": "Apache-2.0",
+  "author": "Christian Bone <bone.christian.c@outlook.com>",
+  "scripts": {
+    "dev": "electrobun dev",
+    "build": "electrobun build --env=stable"
+  },
+  "dependencies": {
+    "electrobun": "^2.0.2",
+    "mysql2": "^3.24.5"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.6.4",
+    "typescript": "^7.0.2",
+    "rcedit": "^5.0.2"
+  },
+  "trustedDependencies": [
+    "register-scheme"
+  ]
+}
