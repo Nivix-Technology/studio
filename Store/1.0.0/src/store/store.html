@@ -35,6 +35,8 @@
 		<div class="nivix-horizontal-navigation transparent">
 			<button class="nivix-primary-button" id="load-exit">Exit</button>
 			<button class="nivix-primary-button" id="load-restart">Restart</button>
+			<div class="filler"></div>
+			<button class="nivix-primary-button hidden" id="load-skipDelay">Skip Load Delay</button>
 		</div>
 		<div class="nivix-footer">
 			<span>Store </span><span id="load-footer-version">vX.X.X</span><span> | &copy; 2026 Nivix Technology. All rights reserved.</span>
@@ -135,8 +137,8 @@
 				<hr>
 
 				<span class="nivix-checkbox-wrapper">
-					<label for="settings-menuDelay">Load Menu Delay: </label>
-					<input class="nivix-input" type="number" min="0" id="settings-menuDelay" placeholder="Menu Delay (ms)" data-preferences-key="menuDelay">
+					<label for="settings-loadMenuDelay">Load Menu Delay: </label>
+					<input class="nivix-input" type="number" min="0" id="settings-loadMenuDelay" placeholder="Menu Delay (ms)" data-preferences-key="loadMenuDelay">
 					<button class="tooltip-button tip-right">i<span class="tooltip">The menu delay is how long the load menu shows after the app has finished loading. This value is in milleseconds. Default is 750. (0.75 seconds)</span></button>
 				</span>
 

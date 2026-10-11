@@ -11,19 +11,18 @@ import { populateSVGs } from "./fileLoader";
 function getEBD<T extends HTMLElement = HTMLElement>(id: string): T {
     return document.getElementById(id) as T;
 }
-function wait(ms: number) {return new Promise((resolve) => { setTimeout(resolve, ms)})}
+
+let delayTimeout: any;
 
 const versionLabel = getEBD<HTMLSpanElement>('load-footer-version');
 const exitBtn = getEBD<HTMLButtonElement>('load-exit');
 const restartBtn = getEBD<HTMLButtonElement>('load-restart');
+const skipDelayBtn = getEBD<HTMLButtonElement>('load-skipDelay');
 
 let isFinishing = false;
 let initialization: Promise<void> | null = null;
 
 export function init(): Promise<void> {
-    exitBtn?.addEventListener('click', index.exit);
-    restartBtn.addEventListener('click', index.restart);
-
     if (!initialization) {
         initialization = initialize().catch(error => {
             initialization = null;
@@ -38,12 +37,14 @@ async function initialize() {
     
     initTooltips();
     
-    let menuDelay: number = 750;
+    let loadMenuDelay: number = 750;
+    console.log(loadMenuDelay);
     
     // Load User Preferences
     try {
         await settings.init();
-        menuDelay = settings.preferences['menuDelay'] ?? 750;
+        loadMenuDelay = settings.preferences['loadMenuDelay'] ?? 750;
+        console.log(loadMenuDelay);
     } catch (err) {
         const message = err as string;
         notifications.showNotification(`Non-Critical Error: Failed to load user preferences: ${message}`, 'warning');
@@ -102,8 +103,11 @@ async function initialize() {
         notifications?.showNotification(`Non-Critical Error: Failed to load space filler shapes: ${message}`, 'warning');
     }
     
-    await wait(menuDelay);
-    await finishLoading();
+    delayTimeout = setTimeout(finishLoading, loadMenuDelay);
+    skipDelayBtn.classList.remove('hidden');
+    skipDelayBtn.addEventListener('click', () => {
+        clearTimeout(delayTimeout);
+    });
 }
 
 async function finishLoading() {
@@ -120,3 +124,8 @@ export function checkLoadState() {
         window.addEventListener('load', () => void init(), { once: true });
     }
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+    exitBtn?.addEventListener('click', index.exit);
+    restartBtn.addEventListener('click', index.restart);
+});

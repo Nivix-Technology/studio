@@ -11,7 +11,7 @@ let isInitialized = false;
 const defaultPreferences: Record<string, any> = {
     spaceFillersEnabled: true,
     transitionAnimations: true,
-    menuDelay: 750,
+    loadMenuDelay: 750,
     spaceFillerAnimations: true,
     saveLastConnection: false
 };

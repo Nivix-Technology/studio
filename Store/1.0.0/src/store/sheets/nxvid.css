@@ -81,6 +81,10 @@ hr {
     border: 1px solid var(--background-darker);
 }
 
+.hidden {
+    display: none !important;
+}
+
 /* Heading Scaling Shorthand */
 
 h1 span { font-size: 1.5em; }

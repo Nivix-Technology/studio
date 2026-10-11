@@ -47,7 +47,7 @@ function focusFirstFocusable(element: HTMLElement): void {
     firstFocusable?.focus();
 }
 
-function getPrefix(id: string): string | null {
+function getPrefixes(id: string): string | null {
     const separatorIndex = id.lastIndexOf('_');
     return separatorIndex === -1 ? null : id.substring(0, separatorIndex);
 }
@@ -118,7 +118,7 @@ async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
         logPrevious = false;
     }
 
-    const targetPrefix = getPrefix(id);
+    const targetPrefixes = getPrefixes(id);
     let tabsHidden = 0;
     let lastHiddenTab: NavigationHistoryItem | undefined;
 
@@ -128,7 +128,7 @@ async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
     existingTabs.forEach((existingTab) => {
         const existingTabElement = getEBD(existingTab.id);
         if (!existingTabElement) return;
-        if (getPrefix(existingTab.id) !== targetPrefix) return;
+        if (getPrefixes(existingTab.id) !== targetPrefixes) return;
 
         const activeDisplay = existingTabElement.style.display || getComputedStyle(existingTabElement).display;
         if (activeDisplay === 'none') return;
@@ -188,6 +188,6 @@ export async function show(id: string, options: TabOptions = {}): Promise<void> 
     await waitForAnimation(thisElement, instant);
 
     thisElement.classList.remove('is-fading-in');
-    const focus = getPrefix(id) ? false : true;
+    const focus = getPrefixes(id) ? false : true;
     if (focus) focusFirstFocusable(thisElement);
 }
