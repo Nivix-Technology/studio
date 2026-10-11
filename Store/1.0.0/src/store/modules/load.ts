@@ -107,6 +107,7 @@ async function initialize() {
     skipDelayBtn.classList.remove('hidden');
     skipDelayBtn.addEventListener('click', () => {
         clearTimeout(delayTimeout);
+        finishLoading();
     });
 }
 
