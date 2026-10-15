@@ -48,8 +48,6 @@ export async function init() {
         if (!event.shiftKey) return;
         event.preventDefault();
         event.stopPropagation();
-        if (createBtn.disabled) return;
-        createBtn.disabled = true;
         try {
             const { name, id } = await createRandomSpace();
             showNotification(`Created random space '${name}' (ID: ${id})`);
@@ -57,8 +55,6 @@ export async function init() {
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             showNotification(`Failed to create random space: ${message}`, 'error');
-        } finally {
-            createBtn.disabled = false;
         }
     });
     

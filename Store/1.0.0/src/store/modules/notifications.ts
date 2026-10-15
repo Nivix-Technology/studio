@@ -114,8 +114,14 @@ function renderNotification(item: NotificationItem): Promise<void> {
         let dismissTimer: number | null = null;
         let isDismissed = false;
         
-        const dismiss = () => {
+        const dismiss = (event?: MouseEvent) => {
             if (isDismissed) return;
+            
+            // If shift key is held, clear out the entire notification queue
+            if (event && event.shiftKey) {
+                queue.length = 0;
+            }
+            
             isDismissed = true;
             
             if (dismissTimer !== null) {
@@ -136,10 +142,12 @@ function renderNotification(item: NotificationItem): Promise<void> {
             }, { once: true });
         };
         
-        closeBtn.addEventListener("click", dismiss);
+        closeBtn.addEventListener("click", (event) => {
+            dismiss(event);
+        });
         
         if (!item.sticky) {
-            dismissTimer = window.setTimeout(dismiss, item.duration);
+            dismissTimer = window.setTimeout(() => dismiss(), item.duration);
         }
     });
 }
@@ -271,7 +279,6 @@ export function showPopup<T = any>(
         
         let inputElement: HTMLInputElement | null = null;
         
-        // If type is not "options", generate the requested input field
         if (type !== "options") {
             inputElement = document.createElement("input");
             inputElement.type = type;
@@ -362,7 +369,6 @@ export function showPopup<T = any>(
         dismissThisPopup = () => closePopup(undefined, true);
         dismissActivePopup = dismissThisPopup;
         
-        // If it's an input type and default options weren't customized, default to Cancel & OK ("inputValue")
         const effectiveOptions = (type !== "options" && options.length === 2 && options[0].content === "No" && options[1].content === "Yes")
             ? [
                 { content: "Cancel", value: undefined, highlighted: false },
@@ -396,7 +402,6 @@ export function showPopup<T = any>(
             actionContainer.appendChild(btn);
         });
 
-        // Allow pressing "Enter" inside the input to submit
         if (inputElement) {
             inputElement.addEventListener("keydown", (e) => {
                 if (e.key === "Enter") {
@@ -406,7 +411,6 @@ export function showPopup<T = any>(
             });
         }
         
-        // Assemble strict layout elements
         popup.appendChild(titleBar);
         popup.appendChild(messageContainer);
         popup.appendChild(actionContainer);
