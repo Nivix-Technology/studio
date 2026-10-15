@@ -9,8 +9,7 @@
     "build": "electrobun build --env=stable"
   },
   "dependencies": {
-    "electrobun": "^2.0.2",
-    "mysql2": "^3.24.5"
+    "electrobun": "^2.0.2"
   },
   "devDependencies": {
     "@types/bun": "^1.4.2",

@@ -1,13 +1,13 @@
 #loadMenu {
     flex-direction: column;
-    gap: var(--gap);
+    gap: var(--gap, 5px);
     
     height: 100%;
     width: 100%;
     
-    padding: var(--resting-area-padding);
+    padding: var(--resting-area-padding, 5px);
     
-    animation: nivixFadeIn 0.8s var(--transition-easing-style) forwards;
+    animation: nivixFadeIn 0.8s var(--transition-easing-style, ease-out) forwards;
 
     .center {
         flex: 1;
@@ -19,7 +19,7 @@
     }
     
     h1 {
-        color: var(--brand-primary);
+        color: var(--brand-primary, #43a4eb);
         transform: scale(1.5);
         
         sup {

@@ -2,9 +2,10 @@ export type TabOptions = {
     instant?: boolean;
     logPrevious?: boolean;
     display?: string;
+    removePrevious?: boolean;
 }
 
-export type DatabaseType = 'sql' | 'sqlite';
+export type DatabaseType = 'sqlite' | 'remote';
 
 export interface Space {
     id: number | bigint;

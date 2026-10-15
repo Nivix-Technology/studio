@@ -15,8 +15,8 @@ function wait(ms: number): Promise<void> {
 
 let isInitialized: boolean = false;
 
-const fadeOutAnimation = "nivixFadeOut 0.1s var(--transition-easing-style) forwards";
-const fadeInAnimation = "nivixFadeIn 0.2s var(--transition-easing-style) forwards";
+const fadeOutAnimation = "nivixFadeOut 0.1s var(--transition-easing-style, ease-out) forwards";
+const fadeInAnimation = "nivixFadeIn 0.2s var(--transition-easing-style, ease-out) forwards";
 const programaticAnimationDuration = 200;
 const itemDelay = 25; // Adjust this (in ms) to make the staggered pops faster or slower
 

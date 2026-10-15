@@ -6,7 +6,6 @@ import fs from 'node:fs/promises';
 // @ts-expect-error @electrbun/bun doesn't supply data types.
 import { BrowserView, BrowserWindow, Screen, Utils } from "electrobun/bun";
 import Database from 'bun:sqlite';
-import mysql from 'mysql2/promise';
 
 import * as updater from "./updater";
 import * as utils from "./updater-utils";
@@ -40,6 +39,16 @@ const storeFileAccess: StoreFileAccess[] = [
 		create: true,
 		delete: false,
 		clear: false
+	},
+	{
+		path: 'ThemeProfiles',
+		type: 'directory',
+		read: true,
+		write: true,
+		list: true,
+		create: true,
+		delete: true,
+		clear: false
 	}
 ] as const;
 
@@ -51,7 +60,7 @@ const oldFormats = {
 const ctx = { studioPath: legacyStudioPath, oldFormats };
 
 let functions: Record<string, (...args: any[]) => any> = {};
-let db: Database | mysql.Pool | null = null;
+let db: Database | null = null;
 let initialization: Promise<void> | null = null;
 let databaseQueue: Promise<void> = Promise.resolve();
 let preferencesWrite: Promise<void> = Promise.resolve();
@@ -342,11 +351,7 @@ function withDatabase<T>(operation: (api: Record<string, (...args: any[]) => any
 
 async function closeDatabase(): Promise<void> {
 	if (!db) return;
-	if ('end' in db) {
-		await db.end();
-	} else {
-		db.close();
-	}
+	db.close();
 	db = null;
 	functions = {};
 	activeDB = null;
@@ -354,41 +359,14 @@ async function closeDatabase(): Promise<void> {
 }
 
 async function configureDatabase(database: DatabaseType, databasePath?: string): Promise<void> {
-	if (database === 'sql') {
-		if (!databasePath) throw new Error('A remote database URL is required.');
-		
-		const remoteDb = mysql.createPool(databasePath);
-		
-		try {
-			await remoteDb.query({
-				sql: 'SELECT 1',
-				timeout: 3000,
-			});
-			
-			const [{ default: createApi }, initModule] = await Promise.all([
-				import('./remote-sql-driver'),
-				import('./init-remote-sql-database')
-			]);
-			await initModule.initDatabase(remoteDb);
-			const remoteFunctions = createApi(remoteDb, ctx);
-			validateDatabaseApi(remoteFunctions);
-			await closeDatabase();
-			
-			db = remoteDb;
-			functions = remoteFunctions;
-			activeDB = 'sql';
-			activeDatabasePath = databasePath;
-		} catch (error) {
-			await remoteDb.end();
-			throw error;
-		}
-		return;
+	if (database === 'remote') {
+		throw new Error('Remote database support is intentionally disabled. Route future database calls here when the remote implementation is ready.');
 	}
-	
+
 	if (database === 'sqlite') {
 		const localDb = new Database(databasePath ?? path.join(storePath, 'store.sqlite'));
 		try {
-			const sqliteDriver = await import('./local-sqlite-driver');
+			const sqliteDriver = await import('./database-driver');
 			sqliteDriver.initDatabase(localDb);
 			const localFunctions = sqliteDriver.default(localDb, ctx);
 			validateDatabaseApi(localFunctions);
@@ -637,24 +615,7 @@ const storeRPC = BrowserView.defineRPC<StoreRPCType>({
 				return activeDB;
 			},
 			async pingServer(): Promise<boolean> {
-				if (activeDB === 'sql' && db) {
-					try {
-						await (db as mysql.Pool).query({
-							sql: 'SELECT 1',
-							timeout: 2000,
-						});
-						return true;
-					} catch (error) {
-						console.error('Database heartbeat ping failed:', error);
-						return false;
-					}
-				}
-				
-				if (activeDB === 'sqlite' && db) {
-					return true;
-				}
-				
-				return false;
+				return activeDB === 'sqlite' && !!db;
 			}
 		},
 		messages: {

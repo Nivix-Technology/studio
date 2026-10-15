@@ -4,21 +4,21 @@
     width: 100%;
     height: 100%;
 
-    background: var(--background-primary);
+    background: var(--background-base, #f6f6f6);
 
     .navigation {
         display: flex;
         flex-direction: column;
-        gap: var(--gap);
+        gap: var(--gap, 5px);
 
         box-sizing: border-box;
         height: 100%;
         width: max-content;
         overflow-y: auto;
 
-        background: var(--background-darker);
+        background: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
 
-        padding: var(--resting-area-padding);
+        padding: var(--resting-area-padding, 5px);
 
         button {
             display: flex;
@@ -30,23 +30,23 @@
 
             background: transparent;
             border: none;
-            border-radius: var(--radius);
+            border-radius: var(--radius, 4px);
 
-            color: var(--text-primary);
+            color: var(--text-primary, #313131);
             font-weight: bold;
 
             cursor: pointer;
-            transition: background var(--transition), box-shadow var(--outset-shadow);
+            transition: background var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out)), box-shadow var(--outset-shadow, 0 6px 10px rgba(0, 0, 0, 0.25));
 
             svg {
                 width: 2.5em;
                 aspect-ratio: 1;
-                fill: var(--text-primary);
+                fill: var(--text-primary, #313131);
             }
 
             &:hover {
-                background: var(--background-darker);
-                box-shadow: var(--outset-shadow);
+                background: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+                box-shadow: var(--outset-shadow, 0 6px 10px rgba(0, 0, 0, 0.25));
             }
         }
     }

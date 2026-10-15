@@ -47,9 +47,15 @@
 		<div class="action-container">
 			<h2 class="nivix-bookmark">General</h2>
 			
-			<button id="selectSpace-settings" class="nivix-secondary-button" data-tab-navigation="settings" data-tab-display="flex"><svgPlaceholder>assets/svg/settings.svg</svgPlaceholder>Settings</button>
+			<button class="nivix-secondary-button"
+			data-tab-navigation="settings"
+			data-tab-display="flex"><svgPlaceholder>assets/svg/settings.svg</svgPlaceholder>Settings</button>
+			
 			<div class="nivix-svg-checkbox-wrapper">
-				<input id="selectSpace-shapeAnimToggle" class="nivix-input" type="checkbox" data-preferences-key="spaceFillerAnimations">
+				<input id="selectSpace-shapeAnimToggle" class="nivix-input" type="checkbox"
+				data-preferences-key="spaceFillerAnimations"
+				data-depends="settings-spaceFillersEnabled:checked">
+				
 				<svgPlaceholder class="svg-checked">assets/svg/pauseShapeAnimation.svg</svgPlaceholder>
 				<svgPlaceholder class="svg-unchecked">assets/svg/playShapeAnimation.svg</svgPlaceholder>
 				<label for="selectSpace-shapeAnimToggle" class="label-checked">Disable Shape Motion</label>
@@ -60,21 +66,30 @@
 			
 			<h2 class="nivix-bookmark">Advanced</h2>
 			
-			<button class="nivix-secondary-button tooltip-support-button tip-right" data-tooltip-content="Connect to a remote SQL-based server." data-tab-navigation="connectDatabase" data-tab-display="flex"><svgPlaceholder>assets/svg/database.svg</svgPlaceholder>Connect to Remote Database</button>
+			<button class="nivix-secondary-button tooltip-support-button tip-right"
+			data-tooltip-content="This feature will be available soon."
+			data-tab-navigation="connectDatabase"
+			data-tab-display="flex" disabled><svgPlaceholder>assets/svg/database.svg</svgPlaceholder>Connect to Remote Database</button>
+			
 			<button id="selectSpace-issues" class="nivix-secondary-button"><svgPlaceholder>assets/svg/issue.svg</svgPlaceholder>Report a Problem</button>
 			
 			<h2 class="nivix-bookmark">Developers</h2>
 			
 			<button id="selectSpace-source" class="nivix-secondary-button"><svgPlaceholder>assets/svg/source.svg</svgPlaceholder>Source Code</button>
-			<button class="nivix-secondary-button" data-tab-navigation="credits"><svgPlaceholder>assets/svg/credits.svg</svgPlaceholder>Credits</button>
+			<button class="nivix-secondary-button"
+			data-tab-navigation="credits"><svgPlaceholder>assets/svg/credits.svg</svgPlaceholder>Credits</button>
 		</div>
 		<div class="main-container">
 			<div id="selectSpace-list"></div>
 			<div class="nivix-horizontal-navigation">
 				<input type="search" class="nivix-input filler" placeholder="Search Spaces">
-				<button class="nivix-primary-button tooltip-support-button tip-top" data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;.">What is a space?</button>
+				<button class="nivix-primary-button tooltip-support-button tip-top"
+				data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;.">What is a space?</button>
+				
 				<button id="selectSpace-refresh" class="nivix-primary-button">Refresh</button>
-				<button id="selectSpace-create" class="nivix-primary-button primary" data-tab-navigation="createSpace">Create New Space</button>
+				<button id="selectSpace-create" class="nivix-primary-button primary"
+				data-tab-navigation="createSpace">Create New Space</button>
+				
 			</div>
 		</div>
 	</div>
@@ -88,177 +103,190 @@
 					<button id="createSpace-continue" class="nivix-primary-button" type="submit">Create</button>
 					
 					<hr>
-					<button class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;." type="button">What is a space?</button>
+					<button class="nivix-primary-button tooltip-support-button tip-right" type="button"
+					data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;.">What is a space?</button>
 				</form>
 				
 				<hr>
-				<button id="createSpace-import" class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="This feature will be available soon." disabled>Import from file</button>
-				<button id="createSpace-convert" class="nivix-primary-button tooltip-support-button tip-right" data-tooltip-content="This feature will be available soon." disabled>Import from old inventory</button>
+				<button id="createSpace-import" class="nivix-primary-button tooltip-support-button tip-right" disabled
+				data-tooltip-content="This feature will be available soon.">Import from file</button>
+				
+				<button id="createSpace-convert" class="nivix-primary-button tooltip-support-button tip-right" disabled
+				data-tooltip-content="This feature will be available soon.">Import from old inventory</button>
 				
 				<hr>
-				<button id="createSpace-cancel" class="nivix-secondary-button" data-tab-navigation="previous, selectSpace">Cancel</button>
+				<button id="createSpace-cancel" class="nivix-secondary-button"
+				data-tab-navigation="previous, selectSpace">Cancel</button>
 			</div>
 			<p id="createSpace-output"></p>
 		</div>
 	</div>
 	
 	<div id="settings" class="tab">
-		<div class="nivix-horizontal-navigation divider-bottom distribute-contents">
-			<button class="nivix-primary-button" data-tab-navigation="settings_general" data-tab-display="flex" data-tab-log-previous="false" data-active-tab-highlight="true">General</button>
-			<button class="nivix-primary-button" data-tab-navigation="settings_theme" data-tab-display="flex" data-tab-log-previous="false" data-active-tab-highlight="true">Theme Editor</button>
-			<button class="nivix-primary-button" data-tab-navigation="settings_accessibility" data-tab-display="flex" data-tab-log-previous="false" data-active-tab-highlight="true">Accessibility</button>
+		<div class="nivix-horizontal-navigation small divider-bottom distribute-contents">
+			<button class="nivix-primary-button"
+			data-tab-navigation="settings_general"
+			data-tab-display="flex"
+			data-tab-log-previous="false"
+			data-active-tab-highlight="true">General</button>
+			
+			<button class="nivix-primary-button"
+			data-tab-navigation="settings_advanced"
+			data-tab-display="flex"
+			data-tab-log-previous="false"
+			data-active-tab-highlight="true">Advanced</button>
+
+			<button class="nivix-primary-button"
+			data-tab-navigation="settings_performance"
+			data-tab-display="flex"
+			data-tab-log-previous="false"
+			data-active-tab-highlight="true">Performance</button>
+			
+			<button class="nivix-primary-button"
+			data-tab-navigation="settings_theme"
+			data-tab-display="flex"
+			data-tab-log-previous="false"
+			data-active-tab-highlight="true">Theme Editor</button>
 		</div>
 		<div class="sub-tab-container">
-			<div id="settings_general" class="tab previsible-flex">
+			<div id="settings_general" class="tab">
 				<span class="nivix-label">Features</span>
 				<hr>
-
+				
 				<div class="nivix-checkbox-wrapper">
-					<input id="settings-spaceFillersEnabled" data-preferences-key="spaceFillersEnabled" class="nivix-input nivix-toggle" type="checkbox" checked>
+					<input type="checkbox" class="nivix-input nivix-toggle" id="settings-spaceFillersEnabled"
+					data-preferences-key="spaceFillersEnabled">
+					
 					<label for="settings-spaceFillersEnabled">Space Fillers</label>
-					<button class="tooltip-button tip-right">i<span class="tooltip">&quot;Space Fillers&quot; are the shapes in the background that make the app feel more lively and fill empty white space. Enabling this option can negatively impact performance on lower end devices.</span></button>
+					<button class="tooltip-button tip-right"
+					data-tooltip-content="&quot;Space Fillers&quot; are the shapes in the background that make the app feel more lively and fill empty white space. Enabling this option can negatively impact performance on lower end devices.">i</button>
 				</div>
-
+				
 				<span class="nivix-label">Animations</span>
 				<hr>
-
+				
 				<div class="nivix-checkbox-wrapper">
-					<input id="settings-toggleTransitionAnimations" data-preferences-key="transitionAnimations" class="nivix-input nivix-toggle" type="checkbox">
-					<label for="settings-toggleTransitionAnimations">Transition Animations</label>
-					<button class="tooltip-button tip-right">i<span class="tooltip">Transition animations are the small animations during transitions, like fading in popups, or hovering over buttons. Disabling this option will make all transitions instant. Enabling this option can negatively impact performance on lower end devices.</span></button>
-				</div>
-				<div class="nivix-checkbox-wrapper">
-					<input id="settings-toggleShapeAnimations" data-preferences-key="spaceFillerAnimations" class="nivix-input nivix-toggle" type="checkbox" data-depends="settings-spaceFillersEnabled:checked">
+					<input id="settings-toggleShapeAnimations" class="nivix-input nivix-toggle" type="checkbox"
+					data-preferences-key="spaceFillerAnimations"
+					data-depends="settings-spaceFillersEnabled:checked">
+					
 					<label for="settings-toggleShapeAnimations">Space Filler Floating Animation</label>
-					<button class="tooltip-button tip-right">i<span class="tooltip">If you look closely, some of the Space Filler shapes are lightly moving around. This can make some people motion sick, or negatively impact performance on lower end devices. This option toggles that effect.</span></button>
+					<button class="tooltip-button tip-right"
+					data-tooltip-content="If you look closely, some of the Space Filler shapes are lightly moving around. This can make some people motion sick, or negatively impact performance on lower end devices. This option toggles that effect.">i</button>
 				</div>
-
+				
 				<span class="nivix-label">Miscellaneous</span>
 				<hr>
-
+				
 				<span class="nivix-checkbox-wrapper">
 					<label for="settings-loadMenuDelay">Load Menu Delay: </label>
-					<input class="nivix-input" type="number" min="0" id="settings-loadMenuDelay" placeholder="Menu Delay (ms)" data-preferences-key="loadMenuDelay">
-					<button class="tooltip-button tip-right">i<span class="tooltip">The menu delay is how long the load menu shows after the app has finished loading. This value is in milleseconds. Default is 750. (0.75 seconds)</span></button>
+					<input class="nivix-input" type="number" min="0" id="settings-loadMenuDelay" placeholder="Menu Delay (ms)"
+					data-preferences-key="loadMenuDelay">
+					
+					<button class="tooltip-button tip-right"
+					data-tooltip-content="The menu delay is how long the load menu shows after the app has finished loading. This value is in milleseconds. Default is 750. (0.75 seconds)">i</button>
 				</span>
+			</div>
+			<div id="settings_advanced" class="tab">
+				<span class="nivix-label">Updates & Events</span>
+				<hr>
+				
+				<div class="nivix-checkbox-wrapper">
+					<input type="checkbox" class="nivix-input nivix-toggle" id="settings-updateSpaceFillersOnTabChange"
+					data-depends="settings-spaceFillersEnabled:checked"
+					data-preferences-key="updateSpaceFillersOnTabChange">
+					
+					<label for="settings-updateSpaceFillersOnTabChange">Update Space Fillers on Tab Change</label>
+					<button class="tooltip-button tip-right"
+					data-tooltip-content="Change the background shapes every time you change tabs.">i</button>
+				</div>
+			</div>
+			<div id="settings_performance" class="tab">
+				<span class="nivix-label">Animations</span>
+				<hr>
+				
+				<div class="nivix-checkbox-wrapper">
+					<input id="settings-transitionAnimations" class="nivix-input nivix-toggle" type="checkbox"
+					data-preferences-key="transitionAnimations">
+					
+					<label for="settings-transitionAnimations">Transition Animations</label>
+					<button class="tooltip-button tip-right"
+					data-tooltip-content="Animations like fading, etc. Disabling this option will make all transitions instant. Enabling this option can negatively impact performance on lower end devices.">i</button>
+				</div>
 
-				<span class="nivix-label">Danger Zone</span>
+				<span class="nivix-label">Visual Effects</span>
 				<hr>
 
-				<span class="nivix-checkbox-wrapper">
-					<button class="nivix-primary-button danger danger-primary" id="settings-reset-appData">Reset App Data</button>
-					<button class="nivix-primary-button danger" id="settings-reset-resetInventory">Reset Inventory</button>
-					<button class="nivix-primary-button danger" id="settings-reset-preferences">Reset Preferences</button>
-				</span>
+				<div class="nivix-checkbox-wrapper">
+					<input type="checkbox" id="settings-useSpaceFillerBlur" class="nivix-input nivix-toggle"
+					data-depends="settings-spaceFillersEnabled:checked"
+					data-preferences-key="useSpaceFillerBlur">
+
+					<label for="settings-useSpaceFillerBlur">Use Space Filler Blur</label>
+					<button class="tooltip-button tip-right"
+					data-tooltip-content="When enabled, background shapes will be blurred to blend in. When disabled, shapes will be faded to blend with the background. The faded design improves performance and blends into the background more.">i</button>
+				</div>
 			</div>
 			<div id="settings_theme" class="tab">
 				<span class="nivix-label">Theme Editor</span>
-				
 				<hr>
-				<div class="center">
-					<span>Coming Soon</span>
+				<div class="theme-profiles">
+					<label for="settings-theme-profile">Theme Profile</label>
+					<select id="settings-theme-profile" class="nivix-input">
+						<option value="">Current theme</option>
+					</select>
+					<div class="theme-profile-actions">
+						<input id="settings-theme-profile-name" class="nivix-input" type="text"
+						maxlength="64" placeholder="New profile name" aria-label="New profile name">
+						<button id="settings-theme-save-profile" class="nivix-primary-button">Save Profile</button>
+					</div>
+					<div class="theme-profile-actions">
+						<button id="settings-theme-import" class="nivix-primary-button">Import Theme</button>
+						<button id="settings-theme-export" class="nivix-primary-button">Export Theme</button>
+						<button id="settings-theme-delete" class="nivix-primary-button">Delete Profile</button>
+						<input id="settings-theme-import-file" type="file" accept=".storetheme,application/json" hidden>
+					</div>
 				</div>
-			</div>
-			<div id="settings_accessibility" class="tab">
-				<span class="nivix-label">Accessibility</span>
-				
+
 				<hr>
-				<div class="center">
-					<span>Coming Soon</span>
+				
+				<div class="nivix-checkbox-wrapper">
+					<input type="checkbox" class="nivix-input nivix-toggle" id="settings-enableDarkThemeSupport"
+					data-preferences-key="enableDarkThemeSupport">
+
+					<label for="settings-enableDarkThemeSupport">Dark Theme Support</label>
+					<button class="tooltip-button tip-right"
+					data-tooltip-content="If you are using a dark color as the Primary Background color, this option will make elements on top of others lighter instead of darker to maintain contrast (recommended).">i</button>
+				</div>
+
+				<hr>
+
+				<div id="settings-theme-variables" class="theme-variables"></div>
+				<div class="theme-reset-actions">
+					<div class="filler"></div>
+					<button id="settings-theme-reset" class="nivix-primary-button danger">Reset Theme</button>
 				</div>
 			</div>
 		</div>
 		<div class="nivix-horizontal-navigation divider-top">
-			<button class="nivix-primary-button" data-tab-navigation="previous, selectSpace">Back</button>
+			<button class="nivix-primary-button"
+			data-tab-navigation="previous, selectSpace">Back</button>
+			
 			<button id="settings-restart" class="nivix-primary-button">Restart</button>
-			<button class="tooltip-button tip-right" data-tooltip-content="Some of these settings may require an app restart to take affect.">i</button>
+			<button class="tooltip-button tip-right"
+			data-tooltip-content="Some of these settings may require an app restart to take affect.">i</button>
+			
+			<div class="filler"></div>
+			<button class="nivix-primary-button danger" id="settings-reset-preferences">Reset Preferences</button>
+			<button class="nivix-primary-button danger" id="settings-reset-resetInventory">Reset Inventory</button>
+			<button class="nivix-primary-button danger danger-primary" id="settings-reset-appData">Reset App Data</button>
 		</div>
 	</div>
 	
 	<div id="connectDatabase" class="tab">
-		<div class="nivix-horizontal-navigation divider-bottom distribute-contents">
-			<button class="nivix-primary-button" data-tab-navigation="connectDatabase_profiles" data-tab-display="flex" data-tab-log-previous="false" data-active-tab-highlight="true">Connection Profiles</button>
-			<button class="nivix-primary-button" data-tab-navigation="connectDatabase_quickConnect" data-tab-display="flex" data-tab-log-previous="false" data-active-tab-highlight="true">Quick Connect</button>
-			<button class="nivix-primary-button" data-tab-navigation="connectDatabase_urlConnect" data-tab-display="flex" data-tab-log-previous="false" data-active-tab-highlight="true">Custom URL Connection</button>
-		</div>
-		
-		<div class="sub-tab-container">
-			<div class="tab previsible-flex" id="connectDatabase_profiles">
-				<span class="nivix-label">Load Saved Profile</span>
-				<hr>
-				<div class="horizontal-container">
-					<select id="connectDatabase-profiles" class="nivix-select flex-primary"></select>
-					<button id="connectDatabase-profile-load" class="nivix-primary-button" type="button">Load</button>
-					<button id="connectDatabase-profile-delete" class="nivix-primary-button" type="button" disabled>Delete</button>
-				</div>
-				
-				<span class="nivix-label">Save Current Connection as Profile</span>
-				<hr>
-				<div class="horizontal-container">
-					<input id="connectDatabase-profile-name" class="nivix-input flex-primary" type="text" maxlength="64" placeholder="Profile Name">
-					<button id="connectDatabase-profile-save" class="nivix-primary-button" type="button">Save as Profile</button>
-				</div>
-				
-				<span class="nivix-label">Options</span>
-				<hr>
-				<div class="nivix-checkbox-wrapper">
-					<input id="connectDatabase-saveLastProfile" data-preferences-key="saveLastConnection" class="nivix-input" type="checkbox">
-					<label for="connectDatabase-saveLastProfile">Automatically save my last connection as a profile</label>
-				</div>
-			</div>
-			<div class="tab" id="connectDatabase_quickConnect">
-				<form id="connectDatabase-form">
-					<div class="connection-fields">
-						<label class="connection-field">
-							<span>Protocol</span>
-							<input id="connectDatabase-prefix" class="nivix-input" type="text" placeholder="mysql://" value="mysql://" required>
-						</label>
-						<label class="connection-field">
-							<span>Hostname or IP address</span>
-							<input id="connectDatabase-hostname" class="nivix-input" type="text" placeholder="db.example.com" autocomplete="url" required>
-						</label>
-						<label class="connection-field">
-							<span>Port <span class="field-hint">(optional)</span></span>
-							<input id="connectDatabase-port" class="nivix-input" type="number" min="1" max="65535" placeholder="3306">
-						</label>
-						<label class="connection-field connection-field-wide">
-							<span>Database name</span>
-							<input id="connectDatabase-database" class="nivix-input" type="text" placeholder="Database name" required>
-						</label>
-						<label class="connection-field">
-							<span>Username <span class="field-hint">(optional)</span></span>
-							<input id="connectDatabase-username" class="nivix-input" type="text" placeholder="Username" autocomplete="username">
-						</label>
-						<label class="connection-field">
-							<span>Password <span class="field-hint">(optional)</span></span>
-							<span class="password-field">
-								<input id="connectDatabase-password" class="nivix-input" type="password" placeholder="Password" autocomplete="current-password">
-								<button id="connectDatabase-password-toggle" class="nivix-secondary-button" type="button" aria-pressed="false">Show</button>
-							</span>
-						</label>
-					</div>
-					<div class="connection-actions">
-						<button id="connectDatabase-connect" class="nivix-primary-button primary" type="submit">Connect</button>
-						<button id="connectDatabase-clear" class="nivix-secondary-button primary" type="button">Clear fields</button>
-					</div>
-				</form>
-			</div>
-			<div class="tab" id="connectDatabase_urlConnect">
-				<label class="connection-field">
-					<span>Custom connection URL</span>
-					<input id="connectDatabase-url" class="nivix-input" type="url" placeholder="mysql://user:password@host:3306/database" autocomplete="url">
-				</label>
-				<button id="connectDatabase-url-submit" class="nivix-primary-button" type="button">Connect with Custom URL</button>
-				<p class="nivix-disclaimer">Use this if Quick Connect doesn't support your connection format. Passwords and URL secrets are not saved in profiles.</p>
-			</div>
-		</div>
-		
 		<div class="nivix-horizontal-navigation divider-top distribute-contents">
-			<span id="connectDatabase-status">Not Connected</span>
-			<button id="connectDatabase-disconnect" class="nivix-primary-button" disabled>Disconnect</button>
-		</div>
-		<div class="nivix-horizontal-navigation divider-top distribute-contents">
-			<button class="nivix-primary-button" data-tab-navigation="previous, selectSpace">Back</button>
+			<button class="nivix-primary-button"
+			data-tab-navigation="previous, selectSpace">Back</button>
 		</div>
 	</div>
 	
@@ -268,13 +296,14 @@
 			<button id="workspace-navigation-query"><svgPlaceholder>assets/svg/query.svg</svgPlaceholder>Query</button>
 		</div>
 	</div>
-
+	
 	<div id="credits" class="tab">
 		<div class="nivix-horizontal-navigation divider-top distribute-contents">
-			<button class="nivix-primary-button" data-tab-navigation="previous, selectSpace">Back</button>
+			<button class="nivix-primary-button"
+			data-tab-navigation="previous, selectSpace">Back</button>
 		</div>
 	</div>
-
+	
 	<script src="./index.js" type="module"></script>
 </body>
 </html>

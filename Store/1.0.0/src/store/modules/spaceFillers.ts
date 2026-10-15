@@ -47,6 +47,11 @@ const floatAnimations = ['float', 'float-slow', 'float-fast', 'float-subtle'];
 export async function fillSpaceContainer() {
     const callId = ++currentCallId;
     const container = getEBD('space-filler-container') as HTMLDivElement;
+    if (preferences['useSpaceFillerBlur']) {
+        container.classList.add('use-blur');
+    } else {
+        container.classList.remove('use-blur');
+    }
     if (!container) return;
     if (!preferences['spaceFillersEnabled']) {
         container.classList.remove('is-fading-out');
@@ -106,11 +111,11 @@ export async function fillSpaceContainer() {
             if (spaceFillerAnimations) {
                 shapeElement.addEventListener('animationend', (event: AnimationEvent) => {
                     if (event.animationName !== 'fadeInShape') return;
-                    shapeElement.classList.remove('is-appearing');
+                    shapeElement.classList.remove('is-fading-in');
                     shapeElement.classList.add(randomFloatClass, 'is-floating');
                 }, { once: true });
             }
-            shapeElement.classList.add('is-appearing');
+            shapeElement.classList.add('is-fading-in');
         } else if (spaceFillerAnimations) {
             shapeElement.classList.add(randomFloatClass, 'is-floating');
         }
@@ -123,11 +128,18 @@ export async function fillSpaceContainer() {
     }
 }
 
-window.addEventListener('tabChange', fillSpaceContainer);
+window.addEventListener('tabChange', () => {
+    if (preferences['updateSpaceFillersOnTabChange']) {
+        fillSpaceContainer();
+    }
+});
+
 window.addEventListener('preferencesUpdate', (event) => {
     const triggerPreferenceKeys = new Set([
         'spaceFillersEnabled',
-        'spaceFillerAnimations'
+        'spaceFillerAnimations',
+        'updateSpaceFillersOnTabChange',
+        'useSpaceFillerBlur'
     ]);
     const eventDetails = event as CustomEvent<preferenceUpdateEventDetail>;
     const { preference } = eventDetails.detail;

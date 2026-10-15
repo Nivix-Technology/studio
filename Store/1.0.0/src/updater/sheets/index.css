@@ -8,8 +8,8 @@ body {
 .center {
     min-height: 100%;
 
-    background: var(--background-primary);
-    border-radius: var(--radius);
+    background: var(--background-base, #f6f6f6);
+    border-radius: var(--radius, 4px);
     
     animation: window-open 0.25s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
     transform-origin: center center;
@@ -26,10 +26,10 @@ h1 {
 }
 
 #debug-output {
-    background: var(--background-darker);
-    border-radius: var(--radius);
+    background: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    border-radius: var(--radius, 4px);
     
-    color: var(--text-primary);
+    color: var(--text-primary, #313131);
     
     padding: 0.3rem 0.7rem;
     
@@ -45,13 +45,13 @@ h1 {
 .footer {
     display: flex;
     flex-direction: row;
-    gap: var(--gap);
+    gap: var(--gap, 5px);
     
     position: fixed;
     bottom: 0;
     
     width: calc(100% - 10px);
-    padding: var(--resting-area-padding);
+    padding: var(--resting-area-padding, 5px);
     
     button, a {
         padding: 0.4rem 0.8rem;

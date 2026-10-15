@@ -12,10 +12,10 @@
     width: 30%;
     min-height: 2.5em;
     
-    background: color-mix(in srgb, var(--background-primary), black calc(var(--background-color-step-amount) * 2));
-    border: none;
-    border-radius: var(--radius);
-    box-shadow: var(--outset-shadow);
+    background: var(--background-base, #f6f6f6);
+    border: 1px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    border-radius: var(--radius, 4px);
+    box-shadow: var(--outset-shadow, 0 6px 10px rgba(0, 0, 0, 0.25));
     
     padding: 8px 12px 10px 16px;
     z-index: 9999;
@@ -25,12 +25,12 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        border-bottom: 1px solid color-mix(in srgb, var(--text-primary), transparent 75%);
+        border-bottom: 1px solid color-mix(in srgb, var(--text-primary, #313131), transparent 75%);
         padding-bottom: 5px;
     }
     
     .notification-title {
-        color: var(--text-primary);
+        color: var(--text-primary, #313131);
         font-size: 0.9rem;
         font-weight: 600;
         text-transform: capitalize;
@@ -45,7 +45,7 @@
     }
     
     .notification-message {
-        color: var(--text-primary);
+        color: var(--text-primary, #313131);
         margin: 0;
         font-size: 0.95rem;
         text-align: left;
@@ -56,14 +56,14 @@
     .notification-close {
         background: transparent;
         border: none;
-        color: var(--text-primary);
+        color: var(--text-primary, #313131);
         font-size: 1.25rem;
         line-height: 1;
         cursor: pointer;
         padding: 2px 6px;
         border-radius: 4px;
         opacity: 0.7;
-        transition: opacity 0.15s var(--transition-easing-style), background-color 0.15s var(--transition-easing-style);
+        transition: opacity 0.15s var(--transition-easing-style, ease-out), background-color 0.15s var(--transition-easing-style, ease-out);
         
         &:hover {
             opacity: 1;
@@ -90,41 +90,41 @@
     }
     
     &.popup-container-shaded {
-        background: var(--shade);
+        background: var(--shade, rgba(0, 0, 0, 0.3));
         pointer-events: auto;
     }
     
     .popup {
         display: flex;
         flex-direction: column;
-        gap: var(--gap);
+        gap: var(--gap, 5px);
         
         box-sizing: border-box;
         width: max-content;
         max-width: 35%;
         
-        background: var(--background-primary);
-        border-radius: var(--radius);
+        background: var(--background-base, #f6f6f6);
+        border-radius: var(--radius, 4px);
         
-        box-shadow: var(--outset-shadow);
+        box-shadow: var(--outset-shadow, 0 6px 10px rgba(0, 0, 0, 0.25));
         
-        padding: var(--resting-area-padding);
+        padding: var(--resting-area-padding, 5px);
         pointer-events: auto;
         
         .popup-title-bar {
             padding: 0.5rem 1.1rem;
-            border-bottom: 1px solid var(--background-darker);
+            border-bottom: 1px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
         }
         
         .popup-title {
-            color: var(--text-primary);
+            color: var(--text-primary, #313131);
             font-weight: bolder;
         }
         
         .message-container {
             display: flex;
             flex-direction: column;
-            gap: var(--gap);
+            gap: var(--gap, 5px);
             
             box-sizing: border-box;
             
@@ -132,7 +132,7 @@
             overflow: hidden;
             
             span {
-                color: var(--text-primary);
+                color: var(--text-primary, #313131);
                 white-space: normal;
                 word-break: break-word;
             }
@@ -146,7 +146,7 @@
         .action-container {
             display: flex;
             flex-direction: row;
-            gap: var(--gap);
+            gap: var(--gap, 5px);
             
             button {
                 flex: 1;

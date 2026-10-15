@@ -49,19 +49,11 @@ function handlePointerOver(event: PointerEvent): void {
     const trigger = findTrigger(event.target);
     if (!trigger || (event.relatedTarget instanceof Node && trigger.contains(event.relatedTarget))) return;
 
-    clearTimeout(showTimer);
-    if (trigger.classList.contains('tooltip-delayed-button') ||
-        trigger.classList.contains('tooltip-delayed-support-button') ||
-        trigger.classList.contains('tooltip-support-delayed-button')) {
-        hideTooltip();
-        activeTrigger = trigger;
-        showTimer = setTimeout(() => showTooltip(trigger), delayedTooltipWait);
-    } else {
-        showTooltip(trigger);
-    }
+    activateTooltip(trigger);
 }
 
 function handlePointerOut(event: PointerEvent): void {
+    if (event.pointerType === 'touch') return;
     const trigger = findTrigger(event.target);
     if (!trigger || (event.relatedTarget instanceof Node && trigger.contains(event.relatedTarget))) return;
     if (trigger === activeTrigger && !trigger.matches(':focus-within')) hideTooltip();
@@ -69,8 +61,10 @@ function handlePointerOut(event: PointerEvent): void {
 
 function handlePointerDown(event: PointerEvent): void {
     if (event.pointerType === 'touch') {
-        touchFocusedTrigger = findTrigger(event.target);
-        hideTooltip();
+        const trigger = findTrigger(event.target);
+        touchFocusedTrigger = trigger;
+        if (trigger) activateTooltip(trigger);
+        else hideTooltip();
         return;
     }
     touchFocusedTrigger = null;
@@ -84,8 +78,22 @@ function handleFocusIn(event: FocusEvent): void {
 function handleFocusOut(event: FocusEvent): void {
     const trigger = findTrigger(event.target);
     if (!trigger || (event.relatedTarget instanceof Node && trigger.contains(event.relatedTarget))) return;
-    if (trigger === touchFocusedTrigger) touchFocusedTrigger = null;
-    if (trigger === activeTrigger && !trigger.matches(':hover')) hideTooltip();
+    const wasTouchFocused = trigger === touchFocusedTrigger;
+    if (wasTouchFocused) touchFocusedTrigger = null;
+    if (trigger === activeTrigger && (wasTouchFocused || !trigger.matches(':hover'))) hideTooltip();
+}
+
+function activateTooltip(trigger: HTMLElement): void {
+    clearTimeout(showTimer);
+    if (trigger.classList.contains('tooltip-delayed-button') ||
+        trigger.classList.contains('tooltip-delayed-support-button') ||
+        trigger.classList.contains('tooltip-support-delayed-button')) {
+        hideTooltip();
+        activeTrigger = trigger;
+        showTimer = setTimeout(() => showTooltip(trigger), delayedTooltipWait);
+    } else {
+        showTooltip(trigger);
+    }
 }
 
 function showTooltip(trigger: HTMLElement): void {

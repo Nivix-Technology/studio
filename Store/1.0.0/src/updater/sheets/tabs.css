@@ -10,14 +10,6 @@
     height: 100%;
     overflow: auto;
     
-    &.is-fading-out {
-        animation: nivixFadeOut var(--transition) forwards;
-    }
-    
-    &.is-fading-in {
-        animation: nivixFadeIn var(--transition) forwards;
-    }
-    
     &.previsible-flex {
         display: flex;
     }
@@ -25,4 +17,8 @@
 
 .sub-tab-container .tab {
     position: unset;
+}
+
+.sub-tab-container {
+    overflow-y: auto;
 }

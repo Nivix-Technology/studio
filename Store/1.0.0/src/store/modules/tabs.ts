@@ -29,8 +29,38 @@ document.addEventListener('click', (event: MouseEvent) => {
     });
 });
 
+// Highlight active navigation buttons based on tabChange events
+window.addEventListener('tabChange', ((event: CustomEvent<{ tabId: string }>) => {
+    const activeTabId = event.detail.tabId;
+    const highlightButtons = document.querySelectorAll<HTMLButtonElement>('button[data-active-tab-highlight="true"]');
+
+    highlightButtons.forEach((button) => {
+        const navAttr = button.dataset['tabNavigation'] ?? '';
+        const navIds = navAttr.split(',').map((id) => id.trim());
+        
+        if (navIds.includes(activeTabId)) {
+            button.classList.add('primary');
+        } else {
+            button.classList.remove('primary');
+        }
+    });
+}) as EventListener);
+
 function getEBD(id: string): HTMLElement | null {
     return document.getElementById(id);
+}
+
+function getTree(id: string): Array<string> {
+    const parts = id.split('_');
+    const tree: string[] = [];
+    for (let i = 0; i < parts.length; i++) {
+        tree.push(parts.slice(0, i + 1).join('_'));
+    }
+    return tree;
+}
+
+function isSubTab(id: string): boolean {
+    return getTree(id).length > 1;
 }
 
 function focusFirstFocusable(element: HTMLElement): void {
@@ -45,11 +75,6 @@ function focusFirstFocusable(element: HTMLElement): void {
     );
 
     firstFocusable?.focus();
-}
-
-function getPrefixes(id: string): string | null {
-    const separatorIndex = id.lastIndexOf('_');
-    return separatorIndex === -1 ? null : id.substring(0, separatorIndex);
 }
 
 function waitForAnimation(element: HTMLElement, instant: boolean, fallbackMs: number = 350): Promise<void> {
@@ -118,7 +143,7 @@ async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
         logPrevious = false;
     }
 
-    const targetPrefixes = getPrefixes(id);
+    const targetTree = getTree(id);
     let tabsHidden = 0;
     let lastHiddenTab: NavigationHistoryItem | undefined;
 
@@ -128,7 +153,23 @@ async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
     existingTabs.forEach((existingTab) => {
         const existingTabElement = getEBD(existingTab.id);
         if (!existingTabElement) return;
-        if (getPrefixes(existingTab.id) !== targetPrefixes) return;
+
+        const existingTree = getTree(existingTab.id);
+        
+        // Keep ancestors visible
+        if (targetTree.includes(existingTab.id)) return;
+
+        const existingRoot = existingTree[0];
+        const targetRoot = targetTree[0];
+        const existingParent = existingTree.slice(0, -1).join('_');
+        const targetParent = targetTree.slice(0, -1).join('_');
+
+        // Hide if it belongs to a completely different root tree
+        const isDifferentRoot = existingRoot !== targetRoot;
+        // Hide if it's a direct sibling under the same parent level
+        const isSibling = existingTree.length === targetTree.length && existingParent === targetParent;
+
+        if (!isDifferentRoot && !isSibling) return;
 
         const activeDisplay = existingTabElement.style.display || getComputedStyle(existingTabElement).display;
         if (activeDisplay === 'none') return;
@@ -143,9 +184,14 @@ async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
         navigationHistory.push(lastHiddenTab);
     }
 
+    window.dispatchEvent(
+        new CustomEvent('tabChange', {
+            detail: { tabId: id },
+        })
+    );
+
     // Wait for all active tabs to finish hiding before showing the new one
     await Promise.all(hidePromises);
-
     await show(id, { instant, display });
 }
 
@@ -173,11 +219,17 @@ export async function show(id: string, options: TabOptions = {}): Promise<void> 
     const instant = options.instant !== undefined ? options.instant : !preferences['transitionAnimations'];
     const thisDisplay = options.display ? options.display : "block";
 
-    window.dispatchEvent(
-        new CustomEvent('tabChange', {
-            detail: { tabId: id },
-        })
-    );
+    // Ensure parent tree is shown first
+    const parentTree = getTree(id);
+    parentTree.pop();
+
+    for (const parentId of parentTree) {
+        const parentElement = getEBD(parentId);
+        if (!parentElement || !parentElement.classList.contains('tab')) continue;
+
+        const parentDisplay = parentElement.style.display || getComputedStyle(parentElement).display;
+        if (parentDisplay === 'none') await show(parentId, { instant });
+    }
 
     thisElement.style.display = thisDisplay;
     thisElement.style.animationDuration = instant ? '0s' : '';
@@ -188,6 +240,5 @@ export async function show(id: string, options: TabOptions = {}): Promise<void> 
     await waitForAnimation(thisElement, instant);
 
     thisElement.classList.remove('is-fading-in');
-    const focus = getPrefixes(id) ? false : true;
-    if (focus) focusFirstFocusable(thisElement);
+    if (isSubTab(id)) focusFirstFocusable(thisElement);
 }

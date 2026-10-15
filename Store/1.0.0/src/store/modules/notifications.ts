@@ -105,7 +105,7 @@ function renderNotification(item: NotificationItem): Promise<void> {
         header.appendChild(closeBtn);
         container.appendChild(header);
         container.appendChild(messageOutput);
-        if (preferences['transitionAnimations']) container.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style) forwards";
+        if (preferences['transitionAnimations']) container.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style, ease-out) forwards";
         document.body.appendChild(container);
         
         let dismissTimer: number | null = null;
@@ -125,7 +125,7 @@ function renderNotification(item: NotificationItem): Promise<void> {
                 return;
             }
             
-            container.style.animation = "nivixFadeOut 0.25s var(--transition-easing-style) forwards";
+            container.style.animation = "nivixFadeOut 0.25s var(--transition-easing-style, ease-out) forwards";
             
             container.addEventListener("animationend", () => {
                 container.remove();
@@ -345,7 +345,7 @@ export function showPopup<T = any>(
             popup.addEventListener("animationend", () => {
                 animationEnded();
             }, { once: true });
-            popup.style.animation = "nivixFadeOut 0.3s var(--transition-easing-style) forwards";
+            popup.style.animation = "nivixFadeOut 0.3s var(--transition-easing-style, ease-out) forwards";
 
             if (isShaded) {
                 const onContainerAnimationEnd = (event: AnimationEvent) => {
@@ -354,7 +354,7 @@ export function showPopup<T = any>(
                     animationEnded();
                 };
                 popupContainer.addEventListener("animationend", onContainerAnimationEnd);
-                popupContainer.style.animation = "popupContainerFadeOut 0.3s var(--transition-easing-style) forwards";
+                popupContainer.style.animation = "popupContainerFadeOut 0.3s var(--transition-easing-style, ease-out) forwards";
             }
         };
         dismissThisPopup = () => closePopup(undefined, true);
@@ -457,9 +457,9 @@ export function showPopup<T = any>(
         document.addEventListener("keydown", trapTabNavigation);
 
         if (transitionAnimations) {
-            popup.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style) forwards";
+            popup.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style, ease-out) forwards";
             if (popupContainer.classList.contains("popup-container-shaded")) {
-                popupContainer.style.animation = "popupContainerFadeIn 0.3s var(--transition-easing-style) forwards";
+                popupContainer.style.animation = "popupContainerFadeIn 0.3s var(--transition-easing-style, ease-out) forwards";
             }
         }
         

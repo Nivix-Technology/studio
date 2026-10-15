@@ -38,13 +38,11 @@ async function initialize() {
     initTooltips();
     
     let loadMenuDelay: number = 750;
-    console.log(loadMenuDelay);
     
     // Load User Preferences
     try {
         await settings.init();
         loadMenuDelay = settings.preferences['loadMenuDelay'] ?? 750;
-        console.log(loadMenuDelay);
     } catch (err) {
         const message = err as string;
         notifications.showNotification(`Non-Critical Error: Failed to load user preferences: ${message}`, 'warning');
@@ -115,7 +113,7 @@ async function finishLoading() {
     if (isFinishing) return;
     isFinishing = true;
     
-    tabs.goto('selectSpace', { display: 'flex' });
+    tabs.goto('selectSpace', { display: 'flex', logPrevious: false, removePrevious: true });
 }
 
 export function checkLoadState() {

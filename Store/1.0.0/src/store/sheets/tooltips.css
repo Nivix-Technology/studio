@@ -20,32 +20,32 @@
     width: 24px;
     aspect-ratio: 1;
 
-    background: var(--background-darker);
+    background: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
     border: none;
     border-radius: 50%;
 
-    color: var(--text-primary);
+    color: var(--text-primary, #313131);
     font-size: 14px;
     font-weight: bold;
     font-family: monospace;
 
     cursor: pointer;
     margin-left: 6px;
-    transition: background var(--transition), color var(--transition);
+    transition: background var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out)), color var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out));
 
     &:hover,
     &:focus {
-        background: color-mix(in srgb, var(--background-darker), black var(--background-color-step-amount));
+        background: color-mix(in srgb, var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%))), black var(--background-color-step-amount, 12%));
     }
 
     /* Accent Modifier Class */
     &.primary {
-        background: var(--brand-primary);
-        color: var(--text-tertiary);
+        background: var(--brand-primary, #43a4eb);
+        color: var(--text-tertiary, #ffffff);
 
         &:hover,
         &:focus {
-            background: var(--brand-darker);
+            background: var(--brand-darker, color-mix(in srgb, var(--brand-primary, #43a4eb), black var(--brand-color-step-amount, 20%)));
         }
     }
 }
@@ -64,19 +64,19 @@
     min-width: 80px;
     max-width: min(220px, calc(100vw - 20px));
     
-    background: var(--text-primary);
-    color: var(--background-primary);
-    border-radius: var(--radius);
+    background: var(--text-primary, #313131);
+    color: var(--background-base, #f6f6f6);
+    border-radius: var(--radius, 4px);
     padding: 6px 10px;
     
     font-size: 13px;
     font-weight: normal;
     text-align: center;
     line-height: 1.3;
-    box-shadow: var(--outset-shadow);
+    box-shadow: var(--outset-shadow, 0 6px 10px rgba(0, 0, 0, 0.25));
     
     z-index: 2147483647;
-    transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+    transition: opacity var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out)), transform var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out)), visibility var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out));
     transform: translateY(2px);
 
     &.is-visible {
@@ -87,14 +87,14 @@
 
     /* Primary Accent Variant for Tooltip Box */
     &.primary {
-        background: var(--brand-primary);
-        color: var(--text-tertiary);
+        background: var(--brand-primary, #43a4eb);
+        color: var(--text-tertiary, #ffffff);
     }
 }
 
 .tooltip-popup.primary {
-    background: var(--brand-primary);
-    color: var(--text-tertiary);
+    background: var(--brand-primary, #43a4eb);
+    color: var(--text-tertiary, #ffffff);
 }
 
 .tooltip:not(.tooltip-popup) {
