@@ -1,7 +1,6 @@
 export type TabOptions = {
     instant?: boolean;
     logPrevious?: boolean;
-    display?: string;
     removePrevious?: boolean;
 }
 

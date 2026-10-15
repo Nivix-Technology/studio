@@ -43,24 +43,16 @@
 		</div>
 	</div>
 	
-	<div id="selectSpace" class="tab">
+	<div id="selectSpace" class="tab" data-tab-display="flex">
 		<div class="action-container">
 			<h2 class="nivix-bookmark">General</h2>
 			
 			<button class="nivix-secondary-button"
-			data-tab-navigation="settings"
-			data-tab-display="flex"><svgPlaceholder>assets/svg/settings.svg</svgPlaceholder>Settings</button>
+			data-tab-navigation="settings"><svgPlaceholder>assets/svg/settings.svg</svgPlaceholder>Settings</button>
 			
-			<div class="nivix-svg-checkbox-wrapper">
-				<input id="selectSpace-shapeAnimToggle" class="nivix-input" type="checkbox"
-				data-preferences-key="spaceFillerAnimations"
-				data-depends="settings-spaceFillersEnabled:checked">
-				
-				<svgPlaceholder class="svg-checked">assets/svg/pauseShapeAnimation.svg</svgPlaceholder>
-				<svgPlaceholder class="svg-unchecked">assets/svg/playShapeAnimation.svg</svgPlaceholder>
-				<label for="selectSpace-shapeAnimToggle" class="label-checked">Disable Shape Motion</label>
-				<label for="selectSpace-shapeAnimToggle" class="label-unchecked">Enable Shape Motion</label>
-			</div>
+			<button class="nivix-secondary-button"
+			data-tab-navigation="settings_general"><svgPlaceholder>assets/svg/toggleShapeAnimations.svg</svgPlaceholder>Toggle Shape Animation</button>
+
 			<button id="selectSpace-restart" class="nivix-secondary-button"><svgPlaceholder>assets/svg/refresh.svg</svgPlaceholder>Restart Store</button>
 			<button id="selectSpace-exit" class="nivix-secondary-button"><svgPlaceholder>assets/svg/exit.svg</svgPlaceholder>Exit Store</button>
 			
@@ -69,7 +61,7 @@
 			<button class="nivix-secondary-button tooltip-support-button tip-right"
 			data-tooltip-content="This feature will be available soon."
 			data-tab-navigation="connectDatabase"
-			data-tab-display="flex" disabled><svgPlaceholder>assets/svg/database.svg</svgPlaceholder>Connect to Remote Database</button>
+			disabled><svgPlaceholder>assets/svg/database.svg</svgPlaceholder>Connect to Remote Database</button>
 			
 			<button id="selectSpace-issues" class="nivix-secondary-button"><svgPlaceholder>assets/svg/issue.svg</svgPlaceholder>Report a Problem</button>
 			
@@ -82,7 +74,7 @@
 		<div class="main-container">
 			<div id="selectSpace-list"></div>
 			<div class="nivix-horizontal-navigation">
-				<input type="search" class="nivix-input filler" placeholder="Search Spaces">
+				<input id="selectSpace-search" type="search" class="nivix-input filler" placeholder="Search Spaces" aria-label="Search spaces">
 				<button class="nivix-primary-button tooltip-support-button tip-top"
 				data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;.">What is a space?</button>
 				
@@ -94,62 +86,58 @@
 		</div>
 	</div>
 	
-	<div id="createSpace" class="tab">
+	<div id="createSpace" class="tab" data-tab-display="flex">
 		<div class="center">
-			<h1 class="nivix-accent">Create a Space</h1>
-			<div class="button-container">
+			<section class="create-space-options">
+				<h1 class="nivix-accent">Create a Space</h1>
 				<form id="createSpace-form">
+					<label for="createSpace-name">Space name</label>
 					<input id="createSpace-name" class="nivix-input" type="text" maxlength="128" placeholder="Space Name">
-					<button id="createSpace-continue" class="nivix-primary-button" type="submit">Create</button>
-					
-					<hr>
+					<div class="create-space-icon-actions">
+						<button id="createSpace-icon" class="nivix-secondary-button" type="button">Choose Icon</button>
+						<button id="createSpace-icon-reset" class="nivix-secondary-button" type="button">Use Default</button>
+						<input id="createSpace-icon-input" type="file" accept="image/png, image/jpeg, image/gif, image/webp, image/svg+xml, image/avif, image/bmp, image/x-icon" hidden>
+					</div>
+					<button id="createSpace-continue" class="nivix-primary-button" type="submit">Create Space</button>
 					<button class="nivix-primary-button tooltip-support-button tip-right" type="button"
 					data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;.">What is a space?</button>
+					<hr>
+					<button id="createSpace-import" class="nivix-primary-button tooltip-support-button tip-right" disabled
+					data-tooltip-content="This feature will be available soon.">Import from file</button>
+					<button id="createSpace-convert" class="nivix-primary-button tooltip-support-button tip-right" disabled
+					data-tooltip-content="This feature will be available soon.">Import from old inventory</button>
+					<button id="createSpace-cancel" class="nivix-secondary-button"
+					data-tab-navigation="previous, selectSpace">Cancel</button>
 				</form>
-				
-				<hr>
-				<button id="createSpace-import" class="nivix-primary-button tooltip-support-button tip-right" disabled
-				data-tooltip-content="This feature will be available soon.">Import from file</button>
-				
-				<button id="createSpace-convert" class="nivix-primary-button tooltip-support-button tip-right" disabled
-				data-tooltip-content="This feature will be available soon.">Import from old inventory</button>
-				
-				<hr>
-				<button id="createSpace-cancel" class="nivix-secondary-button"
-				data-tab-navigation="previous, selectSpace">Cancel</button>
-			</div>
-			<p id="createSpace-output"></p>
+				<p id="createSpace-output" role="status"></p>
+			</section>
 		</div>
 	</div>
 	
-	<div id="settings" class="tab">
+	<div id="settings" class="tab" data-tab-display="flex">
 		<div class="nivix-horizontal-navigation small divider-bottom distribute-contents">
 			<button class="nivix-primary-button"
 			data-tab-navigation="settings_general"
-			data-tab-display="flex"
 			data-tab-log-previous="false"
 			data-active-tab-highlight="true">General</button>
 			
 			<button class="nivix-primary-button"
 			data-tab-navigation="settings_advanced"
-			data-tab-display="flex"
 			data-tab-log-previous="false"
 			data-active-tab-highlight="true">Advanced</button>
 
 			<button class="nivix-primary-button"
 			data-tab-navigation="settings_performance"
-			data-tab-display="flex"
 			data-tab-log-previous="false"
 			data-active-tab-highlight="true">Performance</button>
 			
 			<button class="nivix-primary-button"
 			data-tab-navigation="settings_theme"
-			data-tab-display="flex"
 			data-tab-log-previous="false"
 			data-active-tab-highlight="true">Theme Editor</button>
 		</div>
 		<div class="sub-tab-container">
-			<div id="settings_general" class="tab">
+			<div id="settings_general" class="tab" data-tab-display="flex">
 				<span class="nivix-label">Features</span>
 				<hr>
 				
@@ -187,7 +175,7 @@
 					data-tooltip-content="The menu delay is how long the load menu shows after the app has finished loading. This value is in milleseconds. Default is 750. (0.75 seconds)">i</button>
 				</span>
 			</div>
-			<div id="settings_advanced" class="tab">
+			<div id="settings_advanced" class="tab" data-tab-display="flex">
 				<span class="nivix-label">Updates & Events</span>
 				<hr>
 				
@@ -201,7 +189,7 @@
 					data-tooltip-content="Change the background shapes every time you change tabs.">i</button>
 				</div>
 			</div>
-			<div id="settings_performance" class="tab">
+			<div id="settings_performance" class="tab" data-tab-display="flex">
 				<span class="nivix-label">Animations</span>
 				<hr>
 				
@@ -227,7 +215,7 @@
 					data-tooltip-content="When enabled, background shapes will be blurred to blend in. When disabled, shapes will be faded to blend with the background. The faded design improves performance and blends into the background more.">i</button>
 				</div>
 			</div>
-			<div id="settings_theme" class="tab">
+			<div id="settings_theme" class="tab" data-tab-display="flex">
 				<span class="nivix-label">Theme Editor</span>
 				<hr>
 				<div class="theme-profiles">
@@ -272,10 +260,6 @@
 			<button class="nivix-primary-button"
 			data-tab-navigation="previous, selectSpace">Back</button>
 			
-			<button id="settings-restart" class="nivix-primary-button">Restart</button>
-			<button class="tooltip-button tip-right"
-			data-tooltip-content="Some of these settings may require an app restart to take affect.">i</button>
-			
 			<div class="filler"></div>
 			<button class="nivix-primary-button danger" id="settings-reset-preferences">Reset Preferences</button>
 			<button class="nivix-primary-button danger" id="settings-reset-resetInventory">Reset Inventory</button>
@@ -283,14 +267,14 @@
 		</div>
 	</div>
 	
-	<div id="connectDatabase" class="tab">
+	<div id="connectDatabase" class="tab" data-tab-display="flex">
 		<div class="nivix-horizontal-navigation divider-top distribute-contents">
 			<button class="nivix-primary-button"
 			data-tab-navigation="previous, selectSpace">Back</button>
 		</div>
 	</div>
 	
-	<div id="workspace" class="tab">
+	<div id="workspace" class="tab" data-tab-display="flex">
 		<div class="navigation">
 			<button id="workspace-navigation-dashboard"><svgPlaceholder>assets/svg/home.svg</svgPlaceholder>Home</button>
 			<button id="workspace-navigation-query"><svgPlaceholder>assets/svg/query.svg</svgPlaceholder>Query</button>

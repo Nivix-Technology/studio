@@ -52,14 +52,9 @@ const storeFileAccess: StoreFileAccess[] = [
 	}
 ] as const;
 
-const oldFormats = {
-	"0.1.0-hub": path.join('appdata', 'store', 'inventory.ndjson'),
-	"0.1.0": path.join('store', 'inventory.ndjson')
-};
+type SqliteDatabaseApi = ReturnType<typeof import('./database-driver').createSqliteDatabaseApi>;
 
-const ctx = { studioPath: legacyStudioPath, oldFormats };
-
-let functions: Record<string, (...args: any[]) => any> = {};
+let functions: SqliteDatabaseApi | null = null;
 let db: Database | null = null;
 let initialization: Promise<void> | null = null;
 let databaseQueue: Promise<void> = Promise.resolve();
@@ -69,33 +64,6 @@ let resettingAppData = false;
 
 let activeDB: DatabaseType | null = null;
 let activeDatabasePath: string | undefined;
-const databaseApiMethods = [
-	'createSpace',
-	'renameSpace',
-	'listSpaces',
-	'deleteSpace',
-	'createCategory',
-	'renameCategory',
-	'listCategories',
-	'deleteCategory',
-	'createItem',
-	'deleteItem',
-	'resetDatabase',
-	'listAllItemsInCategoryRecursive',
-	'updateItem',
-	'listItemsByCategory',
-	'getItemById',
-	'queryItemsUnified',
-	'rebuildSearchIndex',
-	'convert'
-];
-
-function validateDatabaseApi(api: Record<string, (...args: any[]) => any>): void {
-	const missingMethods = databaseApiMethods.filter(method => typeof api[method] !== 'function');
-	if (missingMethods.length) {
-		throw new Error(`The database driver is missing required methods: ${missingMethods.join(', ')}.`);
-	}
-}
 
 function validateStoreFilePath(relativePath: string): string[] {
 	if (typeof relativePath !== 'string' || relativePath.length === 0) {
@@ -340,9 +308,9 @@ function enqueueDatabaseTask<T>(task: () => Promise<T> | T): Promise<T> {
 	return result;
 }
 
-function withDatabase<T>(operation: (api: Record<string, (...args: any[]) => any>) => Promise<T> | T): Promise<T> {
+function withDatabase<T>(operation: (api: SqliteDatabaseApi) => Promise<T> | T): Promise<T> {
 	return enqueueDatabaseTask(() => {
-		if (!db || Object.keys(functions).length === 0) {
+		if (!db || !functions) {
 			throw new Error('The database is not ready.');
 		}
 		return operation(functions);
@@ -353,7 +321,7 @@ async function closeDatabase(): Promise<void> {
 	if (!db) return;
 	db.close();
 	db = null;
-	functions = {};
+	functions = null;
 	activeDB = null;
 	activeDatabasePath = undefined;
 }
@@ -368,8 +336,7 @@ async function configureDatabase(database: DatabaseType, databasePath?: string):
 		try {
 			const sqliteDriver = await import('./database-driver');
 			sqliteDriver.initDatabase(localDb);
-			const localFunctions = sqliteDriver.default(localDb, ctx);
-			validateDatabaseApi(localFunctions);
+			const localFunctions = sqliteDriver.createSqliteDatabaseApi(localDb);
 			await closeDatabase();
 
 			db = localDb;
@@ -502,7 +469,7 @@ const storeRPC = BrowserView.defineRPC<StoreRPCType>({
 				return true;
 			},
 			async resetInventory() {
-				return withDatabase(api => api['resetDatabase']());
+				return withDatabase(api => api.resetDatabase());
 			},
 			async resetAppData() {
 				await performAppDataReset();
@@ -514,94 +481,63 @@ const storeRPC = BrowserView.defineRPC<StoreRPCType>({
 			}) {
 				return manageStoreFile(request);
 			},
-			async createSpace(name: string) {
-				return withDatabase(api => api['createSpace'](name));
+			async createSpace({ name, imageBase64 = null }: { name: string; imageBase64?: string | null }) {
+				return withDatabase(api => api.createSpace(name, imageBase64));
 			},
-			async renameSpace({ id, name }: { id: number; name: string }) {
-				return withDatabase(api => api['renameSpace'](id, name));
+			async updateSpace({ id, updates }: {
+				id: number | bigint;
+				updates: { name?: string; imageBase64?: string | null };
+			}) {
+				return withDatabase(api => api.updateSpace(id, updates));
 			},
 			async listSpaces() {
-				return withDatabase(api => api['listSpaces']());
+				return withDatabase(api => api.listSpaces());
 			},
-			async deleteSpace(id: number) {
-				return withDatabase(api => api['deleteSpace'](id));
+			async deleteSpace(id: number | bigint) {
+				return withDatabase(api => api.deleteSpace(id));
 			},
 			async createCategory({
 				name,
-				space,
-				id = null,
-				fields = []
+				spaceId,
+				parentCategoryId = null,
+				attributes = []
 			}: {
 				name: string;
-				space: number;
-				id?: number | null;
-				fields?: string[]
+				spaceId: number | bigint;
+				parentCategoryId?: number | bigint | null;
+				attributes?: import('./database-driver').CategoryAttributeInput[];
 			}) {
-				return withDatabase(api => api['createCategory'](name, space, id, fields));
+				return withDatabase(api => api.createCategory(spaceId, name, parentCategoryId, attributes));
 			},
-			async renameCategory({ id, name }: { id: number; name: string }) {
-				return withDatabase(api => api['renameCategory'](id, name));
-			},
-			async listCategories(space: number) {
-				return withDatabase(api => api['listCategories'](space));
-			},
-			async deleteCategory(id: number) {
-				return withDatabase(api => api['deleteCategory'](id));
-			},
-			async createItem({
-				name,
-				quantity = 0,
-				category,
-				attributes = {}
-			}: {
-				name: string;
-				quantity?: number;
-				category: number;
-				attributes?: object;
+			async updateCategory({ id, updates }: {
+				id: number | bigint;
+				updates: { name?: string; spaceId?: number | bigint; parentCategoryId?: number | bigint | null };
 			}) {
-				return withDatabase(api => api['createItem'](name, quantity, category, attributes));
+				return withDatabase(api => api.updateCategory(id, updates));
 			},
-			async deleteItem(id: number) {
-				return withDatabase(api => api['deleteItem'](id));
+			async listCategories(spaceId: number | bigint) {
+				return withDatabase(api => api.listCategories(spaceId));
 			},
-			async listAllItemsInCategoryRecursive(id: number) {
-				return withDatabase(api => api['listAllItemsInCategoryRecursive'](id));
+			async deleteCategory(id: number | bigint) {
+				return withDatabase(api => api.deleteCategory(id));
 			},
-			async updateItem({ id, updates = {} }: { id: number; updates?: object }) {
-				return withDatabase(api => api['updateItem'](id, updates));
+			async createItem(input: import('./database-driver').ItemInput) {
+				return withDatabase(api => api.createItem(input));
 			},
-			async listItemsByCategory(id: number) {
-				return withDatabase(api => api['listItemsByCategory'](id));
+			async deleteItem(id: number | bigint) {
+				return withDatabase(api => api.deleteItem(id));
 			},
-			async getItemById(id: number) {
-				return withDatabase(api => api['getItemById'](id));
+			async getItemById(id: number | bigint) {
+				return withDatabase(api => api.getItemById(id));
 			},
-			async queryItems({
-				category = null,
-				rules = [],
-				logicalOp = 'AND'
-			}: {
-				category?: number | null;
-				rules?: any[];
-				logicalOp?: string;
-			} | void = {}) {
-				return withDatabase(api => api['queryItemsUnified']({
-					categoryId: category,
-					rules,
-					logicalOp
-				}));
+			async detectFileVersion(source: string) {
+				return withDatabase(api => api.detectFileVersion(source));
 			},
-			async rebuildSearchIndex() {
-				return withDatabase(api => api['rebuildSearchIndex']());
-			},
-			async convert({
-				version,
-				space
-			}: {
-				version: string;
-				space: number;
+			async convert({ source, options }: {
+				source: string;
+				options: import('./database-driver').ConvertOptions;
 			}) {
-				return withDatabase(api => api['convert'](version, space));
+				return withDatabase(api => api.convert(source, options));
 			},
 			async readFile({ path: relativePath }: { path: string }) {
 				const absolutePath = path.resolve(import.meta.dir, '../views/store/', relativePath);

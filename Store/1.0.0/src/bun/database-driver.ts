@@ -1,477 +1,620 @@
-import type { Database, SQLQueryBindings } from 'bun:sqlite';
+import type { Database } from 'bun:sqlite';
 import * as fsSync from 'node:fs';
-import * as path from 'node:path';
 import * as readline from 'node:readline';
-import type {
-	Category,
-	ChunkCap,
-	Item,
-	ItemInput,
-	QueryUnifiedOptions,
-	Space
-} from '../rpc/store-types';
 
-export interface AppContext {
-	studioPath: string;
-	oldFormats: Record<string, string>;
+export type SupportedVersion = '0.1.0' | '0.2.0' | '1.0.0';
+export type ChunkCap = 'auto' | 'max' | number;
+
+export interface Space {
+  id: number | bigint;
+  name: string;
+  imageBase64?: string | null;
+  created_at?: string;
 }
 
-function createCurrentSchema(db: Database): void {
-	db.run(`
-		CREATE TABLE IF NOT EXISTS spaces (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL
-		);
-
-		CREATE TABLE IF NOT EXISTS categories (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			parent_space INTEGER NOT NULL,
-			parent_category INTEGER,
-			fields_template TEXT NOT NULL DEFAULT '[]',
-			FOREIGN KEY (parent_space) REFERENCES spaces(id) ON DELETE CASCADE,
-			FOREIGN KEY (parent_category) REFERENCES categories(id) ON DELETE CASCADE
-		);
-
-		CREATE TABLE IF NOT EXISTS items (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			category_id INTEGER NOT NULL,
-			name TEXT NOT NULL,
-			quantity REAL NOT NULL DEFAULT 0,
-			quantity_commited REAL NOT NULL DEFAULT 0,
-			restock_point REAL NOT NULL DEFAULT 0,
-			attributes TEXT NOT NULL DEFAULT '{}',
-			FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
-		);
-
-		CREATE TABLE IF NOT EXISTS item_attributes_index (
-			item_id INTEGER NOT NULL,
-			attr_key TEXT NOT NULL,
-			attr_value TEXT,
-			PRIMARY KEY (item_id, attr_key),
-			FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
-		);
-
-		CREATE INDEX IF NOT EXISTS idx_attributes_search
-			ON item_attributes_index (attr_key, attr_value COLLATE NOCASE);
-		CREATE INDEX IF NOT EXISTS idx_items_name ON items (name);
-		CREATE INDEX IF NOT EXISTS idx_items_quantity ON items (quantity);
-	`);
+export interface Category {
+  id: number | bigint;
+  space_id: number | bigint;
+  parent_category_id?: number | bigint | null;
+  name: string;
+  created_at?: string;
 }
 
-function migrateNormalizedSchema(db: Database): void {
-	const spaces = db.prepare('SELECT id, name FROM spaces').all() as Record<string, any>[];
-	const categories = db.prepare('SELECT * FROM categories').all() as Record<string, any>[];
-	const items = db.prepare('SELECT * FROM items').all() as Record<string, any>[];
-	const attributeDefinitions = db.prepare('SELECT id, category_id, name FROM category_attributes')
-		.all() as Record<string, any>[];
-	const attributeValues = db.prepare('SELECT * FROM item_attribute_values').all() as Record<string, any>[];
-	const attributeNames = new Map(attributeDefinitions.map(definition => [
-		definition['id'],
-		definition['name']
-	]));
-	const itemAttributes = new Map<number | bigint, Record<string, any>>();
+export interface CategoryAttributeInput {
+  name: string;
+  dataType: 'string' | 'number' | 'boolean' | 'date';
+  isRequired?: boolean;
+}
 
-	for (const entry of attributeValues) {
-		const name = attributeNames.get(entry['attribute_id']);
-		if (typeof name !== 'string') continue;
-		let value: unknown;
-		if (entry['value_number'] !== null) value = entry['value_number'];
-		else if (entry['value_boolean'] !== null) value = Boolean(entry['value_boolean']);
-		else if (entry['value_date'] !== null) value = entry['value_date'];
-		else value = entry['value_string'];
-		const attributes = itemAttributes.get(entry['item_id']) ?? {};
-		attributes[name] = value;
-		itemAttributes.set(entry['item_id'], attributes);
-	}
+export interface ItemInput {
+  name: string;
+  categoryId: number | bigint;
+  quantity?: number;
+  reorderPoint?: number;
+  attributes?: Record<string, string | number | boolean>;
+}
 
-	const fieldsByCategory = new Map<number | bigint, string[]>();
-	for (const definition of attributeDefinitions) {
-		const names = fieldsByCategory.get(definition['category_id']) ?? [];
-		names.push(definition['name']);
-		fieldsByCategory.set(definition['category_id'], names);
-	}
+export interface Item {
+  id: number | bigint;
+  category_id: number | bigint;
+  name: string;
+  quantity: number;
+  reorder_point: number;
+  created_at?: string;
+  attributes?: Record<string, any>;
+}
 
-	db.run('BEGIN IMMEDIATE');
-	try {
-		db.run('DROP TABLE item_attribute_values');
-		db.run('DROP TABLE category_attributes');
-		db.run('DROP TABLE items');
-		db.run('DROP TABLE categories');
-		db.run('DROP TABLE spaces');
-		createCurrentSchema(db);
+export interface ConvertOptions {
+  sourceVersion?: SupportedVersion | 'auto';
+  targetSpaceId: number | bigint;
+  chunkCap?: ChunkCap;
+}
 
-		const insertSpace = db.prepare('INSERT INTO spaces (id, name) VALUES (?, ?)');
-		for (const space of spaces) insertSpace.run(space['id'], space['name']);
+export interface InspectionResult {
+  detectedVersion: SupportedVersion | 'unknown';
+  isValidSchema: boolean;
+}
 
-		const insertCategory = db.prepare(`
-			INSERT INTO categories (id, name, parent_space, parent_category, fields_template)
-			VALUES (?, ?, ?, NULL, ?)
-		`);
-		for (const category of categories) {
-			insertCategory.run(
-				category['id'],
-				category['name'],
-				category['space_id'],
-				JSON.stringify(fieldsByCategory.get(category['id']) ?? [])
-			);
-		}
-		const setParentCategory = db.prepare(
-			'UPDATE categories SET parent_category = ? WHERE id = ?'
-		);
-		for (const category of categories) {
-			if (category['parent_category_id'] !== null) {
-				setParentCategory.run(category['parent_category_id'], category['id']);
-			}
-		}
+function createSchema(db: Database): void {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS spaces (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        image_base64 TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
 
-		const insertItem = db.prepare(`
-			INSERT INTO items (id, category_id, name, quantity, quantity_commited, restock_point, attributes)
-			VALUES (?, ?, ?, ?, 0, ?, ?)
-		`);
-		const insertAttribute = db.prepare(`
-			INSERT INTO item_attributes_index (item_id, attr_key, attr_value) VALUES (?, ?, ?)
-		`);
-		for (const item of items) {
-			const attributes = itemAttributes.get(item['id']) ?? {};
-			insertItem.run(
-				item['id'],
-				item['category_id'],
-				item['name'],
-				item['quantity'],
-				item['reorder_point'] ?? 0,
-				JSON.stringify(attributes)
-			);
-			for (const [key, value] of Object.entries(attributes)) {
-				if (value !== null && value !== undefined) {
-					insertAttribute.run(item['id'], key, String(value));
-				}
-			}
-		}
-		db.run('COMMIT');
-	} catch (error) {
-		db.run('ROLLBACK');
-		throw error;
-	}
+    CREATE TABLE IF NOT EXISTS categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        space_id INTEGER NOT NULL,
+        parent_category_id INTEGER NULL,
+        name TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (space_id) REFERENCES spaces(id) ON DELETE CASCADE,
+        FOREIGN KEY (parent_category_id) REFERENCES categories(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        quantity REAL NOT NULL DEFAULT 0,
+        reorder_point REAL NOT NULL DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS category_attributes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        data_type TEXT NOT NULL CHECK (data_type IN ('string', 'number', 'boolean', 'date')),
+        is_required BOOLEAN DEFAULT 0,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+        UNIQUE(category_id, name)
+    );
+
+    CREATE TABLE IF NOT EXISTS item_attribute_values (
+        item_id INTEGER NOT NULL,
+        attribute_id INTEGER NOT NULL,
+        value_string TEXT,
+        value_number REAL,
+        value_date DATETIME,
+        value_boolean BOOLEAN,
+        PRIMARY KEY (item_id, attribute_id),
+        FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
+        FOREIGN KEY (attribute_id) REFERENCES category_attributes(id) ON DELETE CASCADE
+    );
+  `);
+}
+
+function getTableColumns(db: Database, table: string): Set<string> {
+  return new Set(
+    (db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[])
+      .map(column => column.name)
+  );
+}
+
+function migrateLegacySchema(db: Database): void {
+  const spaces = db.prepare('SELECT * FROM spaces').all() as Record<string, any>[];
+  const categories = db.prepare('SELECT * FROM categories').all() as Record<string, any>[];
+  const items = db.prepare('SELECT * FROM items').all() as Record<string, any>[];
+  const spaceColumns = getTableColumns(db, 'spaces');
+  const categoryColumns = getTableColumns(db, 'categories');
+  const itemColumns = getTableColumns(db, 'items');
+  const categoryAttributes = new Map<number | bigint, Set<string>>();
+  const itemAttributes = new Map<number | bigint, Record<string, unknown>>();
+
+  for (const category of categories) {
+    const names = new Set<string>();
+    if (categoryColumns.has('fields_template')) {
+      const template = category['fields_template'];
+      if (typeof template === 'string') {
+        const parsed: unknown = JSON.parse(template || '[]');
+        if (!Array.isArray(parsed) || parsed.some(name => typeof name !== 'string')) {
+          throw new Error(`Category ${category['id']} has an invalid fields template.`);
+        }
+        parsed.forEach(name => names.add(name));
+      }
+    }
+    categoryAttributes.set(category['id'], names);
+  }
+
+  for (const item of items) {
+    const attributesValue = itemColumns.has('attributes') ? item['attributes'] : null;
+    const attributes: Record<string, unknown> = typeof attributesValue === 'string'
+      ? JSON.parse(attributesValue || '{}')
+      : {};
+    if (typeof attributes !== 'object' || attributes === null || Array.isArray(attributes)) {
+      throw new Error(`Item ${item['id']} has invalid stored attributes.`);
+    }
+    itemAttributes.set(item['id'], attributes);
+    const names = categoryAttributes.get(item['category_id']);
+    if (names) {
+      Object.keys(attributes).forEach(name => names.add(name));
+    }
+  }
+
+  const attributeTypes = new Map<number | bigint, Map<string, CategoryAttributeInput['dataType']>>();
+  for (const [categoryId, names] of categoryAttributes) {
+    const types = new Map<string, CategoryAttributeInput['dataType']>();
+    for (const name of names) {
+      const values = items
+        .filter(item => item['category_id'] === categoryId)
+        .map(item => itemAttributes.get(item['id'])?.[name])
+        .filter(value => value !== null && value !== undefined);
+      const type = values.length > 0 && values.every(value => typeof value === 'number')
+        ? 'number'
+        : values.length > 0 && values.every(value => typeof value === 'boolean')
+          ? 'boolean'
+          : 'string';
+      types.set(name, type);
+    }
+    attributeTypes.set(categoryId, types);
+  }
+
+  db.run('PRAGMA foreign_keys = OFF');
+  db.run('BEGIN IMMEDIATE');
+  try {
+    db.run(`
+      DROP TABLE IF EXISTS item_attributes_index;
+      DROP TABLE IF EXISTS item_attribute_values;
+      DROP TABLE IF EXISTS category_attributes;
+      DROP TABLE items;
+      DROP TABLE categories;
+      DROP TABLE spaces;
+    `);
+    createSchema(db);
+
+    const insertSpace = db.prepare(`
+      INSERT INTO spaces (id, name, image_base64) VALUES (?, ?, ?)
+    `);
+    for (const space of spaces) {
+      insertSpace.run(
+        space['id'],
+        space['name'],
+        spaceColumns.has('image_base64') ? space['image_base64'] ?? null : null
+      );
+    }
+
+    const insertCategory = db.prepare(`
+      INSERT INTO categories (id, space_id, parent_category_id, name)
+      VALUES (?, ?, NULL, ?)
+    `);
+    const setParentCategory = db.prepare(
+      'UPDATE categories SET parent_category_id = ? WHERE id = ?'
+    );
+    for (const category of categories) {
+      insertCategory.run(category['id'], category['parent_space'], category['name']);
+      if (categoryColumns.has('parent_category') && category['parent_category'] !== null) {
+        setParentCategory.run(category['parent_category'], category['id']);
+      }
+    }
+
+    const insertAttribute = db.prepare(`
+      INSERT INTO category_attributes (category_id, name, data_type, is_required)
+      VALUES (?, ?, ?, 0)
+    `);
+    const insertItemAttribute = db.prepare(`
+      INSERT INTO item_attribute_values
+        (item_id, attribute_id, value_string, value_number, value_date, value_boolean)
+      VALUES (?, ?, ?, ?, NULL, ?)
+    `);
+    const attributeIds = new Map<number | bigint, Map<string, number | bigint>>();
+    for (const [categoryId, types] of attributeTypes) {
+      const ids = new Map<string, number | bigint>();
+      for (const [name, dataType] of types) {
+        ids.set(name, insertAttribute.run(categoryId, name, dataType).lastInsertRowid);
+      }
+      attributeIds.set(categoryId, ids);
+    }
+
+    const insertItem = db.prepare(`
+      INSERT INTO items (id, category_id, name, quantity, reorder_point)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    for (const item of items) {
+      const restockPoint = itemColumns.has('restock_point')
+        ? item['restock_point'] ?? 0
+        : item['reorder_point'] ?? 0;
+      insertItem.run(
+        item['id'],
+        item['category_id'],
+        item['name'],
+        item['quantity'] ?? 0,
+        restockPoint
+      );
+      const ids = attributeIds.get(item['category_id']);
+      for (const [name, value] of Object.entries(itemAttributes.get(item['id']) ?? {})) {
+        const attributeId = ids?.get(name);
+        if (attributeId === undefined || value === null || value === undefined) continue;
+        const dataType = attributeTypes.get(item['category_id'])?.get(name);
+        insertItemAttribute.run(
+          item['id'],
+          attributeId,
+          dataType === 'string' ? String(value) : null,
+          dataType === 'number' ? Number(value) : null,
+          dataType === 'boolean' ? (value ? 1 : 0) : null
+        );
+      }
+    }
+
+    db.run('COMMIT');
+  } catch (error) {
+    db.run('ROLLBACK');
+    throw error;
+  } finally {
+    db.run('PRAGMA foreign_keys = ON');
+  }
 }
 
 export function initDatabase(db: Database): void {
-	db.run('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
-	const categoryColumns = db.prepare('PRAGMA table_info(categories)')
-		.all() as Record<string, any>[];
-	const columnNames = new Set(categoryColumns.map(column => column['name']));
+  db.run('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
+  const categoryColumns = getTableColumns(db, 'categories');
+  if (categoryColumns.has('parent_space')) {
+    migrateLegacySchema(db);
+  }
 
-	if (columnNames.has('space_id') && !columnNames.has('parent_space')) {
-		migrateNormalizedSchema(db);
-	} else {
-		createCurrentSchema(db);
-	}
+  createSchema(db);
+  const itemColumns = getTableColumns(db, 'items');
+  if (!itemColumns.has('reorder_point')) {
+    db.run('ALTER TABLE items ADD COLUMN reorder_point REAL NOT NULL DEFAULT 0');
+    if (itemColumns.has('restock_point')) {
+      db.run('UPDATE items SET reorder_point = restock_point');
+    }
+  }
+  db.run(`
+    CREATE INDEX IF NOT EXISTS idx_items_category ON items(category_id);
+    CREATE INDEX IF NOT EXISTS idx_items_low_stock ON items(quantity, reorder_point) WHERE reorder_point > 0;
+    CREATE INDEX IF NOT EXISTS idx_attr_val_num ON item_attribute_values(attribute_id, value_number);
+    CREATE INDEX IF NOT EXISTS idx_attr_val_str ON item_attribute_values(attribute_id, value_string);
+  `);
 }
 
-function parseJsonObject(value: unknown): Record<string, any> {
-	if (typeof value === 'string') {
-		const parsed: unknown = JSON.parse(value || '{}');
-		if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-			throw new Error('Stored item attributes must be a JSON object.');
-		}
-		return parsed as Record<string, any>;
-	}
-	if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-		return value as Record<string, any>;
-	}
-	return {};
-}
+export function createSqliteDatabaseApi(db: Database) {
+  const runTransaction = <T>(callback: () => T): T => {
+    db.run('BEGIN IMMEDIATE');
+    try {
+      const result = callback();
+      db.run('COMMIT');
+      return result;
+    } catch (err) {
+      db.run('ROLLBACK');
+      throw err;
+    }
+  };
 
-function parseItem(row: Record<string, any>): Item {
-	return { ...row, attributes: parseJsonObject(row['attributes']) } as Item;
-}
+  // --- Spaces ---
+  const createSpace = (name: string, imageBase64: string | null = null): number | bigint => {
+    const stmt = db.prepare('INSERT INTO spaces (name, image_base64) VALUES (?, ?)');
+    const info = stmt.run(name, imageBase64);
+    return info.lastInsertRowid;
+  };
 
-export default function createSqliteDatabaseApi(db: Database, ctx: AppContext) {
-	const runTransaction = <T>(callback: () => T): T => {
-		db.run('BEGIN IMMEDIATE');
-		try {
-			const result = callback();
-			db.run('COMMIT');
-			return result;
-		} catch (error) {
-			db.run('ROLLBACK');
-			throw error;
-		}
-	};
+  const updateSpace = (id: number | bigint, updates: { name?: string; imageBase64?: string | null }): boolean => {
+    const fields: string[] = [];
+    const values: any[] = [];
 
-	const createSpace = (name: string): number | bigint => {
-		return db.prepare('INSERT INTO spaces (name) VALUES (?)').run(name).lastInsertRowid;
-	};
+    if (updates.name !== undefined) {
+      fields.push('name = ?');
+      values.push(updates.name);
+    }
+    if (updates.imageBase64 !== undefined) {
+      fields.push('image_base64 = ?');
+      values.push(updates.imageBase64);
+    }
 
-	const renameSpace = (id: number | bigint, name: string): boolean => {
-		return db.prepare('UPDATE spaces SET name = ? WHERE id = ?').run(name, id).changes > 0;
-	};
+    if (fields.length === 0) return false;
+    values.push(id);
 
-	const listSpaces = (): Space[] => {
-		return db.prepare('SELECT id, name FROM spaces').all() as Space[];
-	};
+    const stmt = db.prepare(`UPDATE spaces SET ${fields.join(', ')} WHERE id = ?`);
+    const info = stmt.run(...values);
+    return info.changes > 0;
+  };
 
-	const deleteSpace = (id: number | bigint): boolean => {
-		return db.prepare('DELETE FROM spaces WHERE id = ?').run(id).changes > 0;
-	};
+  const listSpaces = (): Space[] => {
+    return db
+      .prepare('SELECT id, name, image_base64 AS imageBase64, created_at FROM spaces')
+      .all() as Space[];
+  };
 
-	const resetDatabase = (): void => {
-		runTransaction(() => {
-			db.prepare('DELETE FROM item_attributes_index').run();
-			db.prepare('DELETE FROM items').run();
-			db.prepare('DELETE FROM categories').run();
-			db.prepare('DELETE FROM spaces').run();
-		});
-	};
+  const deleteSpace = (id: number | bigint): boolean => {
+    const info = db.prepare('DELETE FROM spaces WHERE id = ?').run(id);
+    return info.changes > 0;
+  };
 
-	const createCategory = (
-		name: string,
-		space: number | bigint,
-		category: number | bigint | null = null,
-		fields: string[] = []
-	): number | bigint => {
-		return db.prepare(
-			'INSERT INTO categories (name, parent_space, parent_category, fields_template) VALUES (?, ?, ?, ?)'
-		).run(name, space, category, JSON.stringify(fields)).lastInsertRowid;
-	};
+  const resetDatabase = (): void => {
+    runTransaction(() => {
+      db.prepare('DELETE FROM spaces').run();
+    });
+  };
 
-	const renameCategory = (id: number | bigint, name: string): boolean => {
-		return db.prepare('UPDATE categories SET name = ? WHERE id = ?').run(name, id).changes > 0;
-	};
+  // --- Categories ---
+  const createCategory = (
+    spaceId: number | bigint,
+    name: string,
+    parentCategoryId: number | bigint | null = null,
+    attributes: CategoryAttributeInput[] = []
+  ): number | bigint => {
+    return runTransaction(() => {
+      const catStmt = db.prepare(
+        'INSERT INTO categories (space_id, name, parent_category_id) VALUES (?, ?, ?)'
+      );
+      const info = catStmt.run(spaceId, name, parentCategoryId);
+      const categoryId = info.lastInsertRowid;
 
-	const listCategories = (space: number | bigint): Category[] => {
-		const rows = db.prepare(
-			'SELECT id, name, parent_space, parent_category, fields_template FROM categories WHERE parent_space = ?'
-		).all(space) as Record<string, any>[];
-		return rows.map(row => ({
-			...row,
-			fields_template: typeof row['fields_template'] === 'string'
-				? JSON.parse(row['fields_template'] || '[]')
-				: row['fields_template']
-		})) as Category[];
-	};
+      const attrStmt = db.prepare(
+        'INSERT INTO category_attributes (category_id, name, data_type, is_required) VALUES (?, ?, ?, ?)'
+      );
 
-	const deleteCategory = (id: number | bigint): boolean => {
-		return db.prepare('DELETE FROM categories WHERE id = ?').run(id).changes > 0;
-	};
+      for (const attr of attributes) {
+        attrStmt.run(categoryId, attr.name, attr.dataType, attr.isRequired ? 1 : 0);
+      }
 
-	const replaceAttributeIndex = (itemId: number | bigint, attributes: Record<string, any>): void => {
-		db.prepare('DELETE FROM item_attributes_index WHERE item_id = ?').run(itemId);
-		const insert = db.prepare(
-			'INSERT INTO item_attributes_index (item_id, attr_key, attr_value) VALUES (?, ?, ?)'
-		);
-		for (const [key, value] of Object.entries(attributes)) {
-			if (value !== null && value !== undefined) insert.run(itemId, key, String(value));
-		}
-	};
+      return categoryId;
+    });
+  };
 
-	const createItem = (
-		name: string,
-		quantity = 0,
-		category: number | bigint,
-		attributes: Record<string, any> = {}
-	): number | bigint => {
-		return runTransaction(() => {
-			const result = db.prepare(
-				'INSERT INTO items (name, quantity, category_id, attributes) VALUES (?, ?, ?, ?)'
-			).run(name, quantity, category, JSON.stringify(attributes));
-			replaceAttributeIndex(result.lastInsertRowid, attributes);
-			return result.lastInsertRowid;
-		});
-	};
+  const updateCategory = (
+    id: number | bigint,
+    updates: { name?: string; spaceId?: number | bigint; parentCategoryId?: number | bigint | null }
+  ): boolean => {
+    const fields: string[] = [];
+    const values: any[] = [];
 
-	const createItemBulk = (items: ItemInput[], categoryId: number | bigint): void => {
-		runTransaction(() => {
-			const insert = db.prepare(
-				'INSERT INTO items (name, quantity, category_id, attributes) VALUES (?, ?, ?, ?)'
-			);
-			for (const item of items) {
-				const attributes = item.attributes ?? {};
-				const result = insert.run(item.name, item.quantity ?? 0, categoryId, JSON.stringify(attributes));
-				replaceAttributeIndex(result.lastInsertRowid, attributes);
-			}
-		});
-	};
+    if (updates.name !== undefined) {
+      fields.push('name = ?');
+      values.push(updates.name);
+    }
+    if (updates.spaceId !== undefined) {
+      fields.push('space_id = ?');
+      values.push(updates.spaceId);
+    }
+    if (updates.parentCategoryId !== undefined) {
+      fields.push('parent_category_id = ?');
+      values.push(updates.parentCategoryId);
+    }
 
-	const listItemsByCategory = (categoryId: number | bigint): Item[] => {
-		const rows = db.prepare(
-			'SELECT id, name, quantity, quantity_commited, restock_point, category_id, attributes FROM items WHERE category_id = ?'
-		).all(categoryId) as Record<string, any>[];
-		return rows.map(parseItem);
-	};
+    if (fields.length === 0) return false;
+    values.push(id);
 
-	const getItemById = (itemId: number | bigint): Item | null => {
-		const row = db.prepare('SELECT * FROM items WHERE id = ?').get(itemId) as Record<string, any> | null;
-		return row ? parseItem(row) : null;
-	};
+    const stmt = db.prepare(`UPDATE categories SET ${fields.join(', ')} WHERE id = ?`);
+    const info = stmt.run(...values);
+    return info.changes > 0;
+  };
 
-	const deleteItem = (id: number | bigint): boolean => {
-		return db.prepare('DELETE FROM items WHERE id = ?').run(id).changes > 0;
-	};
+  const listCategories = (spaceId: number | bigint): Category[] => {
+    return db
+      .prepare('SELECT id, space_id, parent_category_id, name FROM categories WHERE space_id = ?')
+      .all(spaceId) as Category[];
+  };
 
-	const listAllItemsInCategoryRecursive = (categoryId: number | bigint): Item[] => {
-		const rows = db.prepare(`
-			WITH RECURSIVE subcategories(id) AS (
-				SELECT id FROM categories WHERE id = ?
-				UNION ALL
-				SELECT categories.id FROM categories
-				JOIN subcategories ON categories.parent_category = subcategories.id
-			)
-			SELECT items.* FROM items
-			WHERE items.category_id IN (SELECT id FROM subcategories)
-		`).all(categoryId) as Record<string, any>[];
-		return rows.map(parseItem);
-	};
+  const deleteCategory = (id: number | bigint): boolean => {
+    const info = db.prepare('DELETE FROM categories WHERE id = ?').run(id);
+    return info.changes > 0;
+  };
 
-	const updateItem = (
-		id: number | bigint,
-		updates: Partial<ItemInput> & Record<string, any> = {}
-	): boolean => {
-		return runTransaction(() => {
-			const current = getItemById(id);
-			if (!current) throw new Error(`Item with ID ${id} not found.`);
+  // --- Items ---
+  const createItem = (input: ItemInput): number | bigint => {
+    return runTransaction(() => {
+      const stmt = db.prepare(
+        'INSERT INTO items (name, category_id, quantity, reorder_point) VALUES (?, ?, ?, ?)'
+      );
+      const info = stmt.run(input.name, input.categoryId, input.quantity ?? 0, input.reorderPoint ?? 0);
+      const itemId = info.lastInsertRowid;
 
-			const attributes = updates['attributes']
-				? { ...current.attributes, ...updates['attributes'] }
-				: current.attributes;
-			const result = db.prepare(`
-				UPDATE items
-				SET name = ?, category_id = ?, quantity = ?, quantity_commited = ?, restock_point = ?, attributes = ?
-				WHERE id = ?
-			`).run(
-				updates['name'] ?? current.name,
-				updates['category_id'] ?? current.category_id,
-				updates['quantity'] ?? current.quantity,
-				updates['quantity_commited'] ?? current.quantity_commited ?? 0,
-				updates['restock_point'] ?? current.restock_point ?? 0,
-				JSON.stringify(attributes),
-				id
-			);
-			if (result.changes > 0 && updates['attributes']) replaceAttributeIndex(id, attributes);
-			return result.changes > 0;
-		});
-	};
+      if (input.attributes) {
+        saveItemAttributes(itemId, input.categoryId, input.attributes);
+      }
 
-	const queryItemsUnified = ({
-		categoryId = null,
-		rules = [],
-		logicalOp = 'AND'
-	}: QueryUnifiedOptions = {}): Item[] => {
-		const operatorWhitelist = new Set(['=', '>=', '<=', '>', '<', 'LIKE', '!=']);
-		const nativeFields = new Set(['name', 'quantity', 'quantity_commited', 'restock_point', 'category_id']);
-		const normalizedLogicalOp = logicalOp.toUpperCase();
-		if (normalizedLogicalOp !== 'AND' && normalizedLogicalOp !== 'OR') {
-			throw new Error(`Unsupported logical operator: ${logicalOp}`);
-		}
+      return itemId;
+    });
+  };
 
-		const whereClauses: string[] = [];
-		const params: SQLQueryBindings[] = [];
-		if (categoryId !== null) {
-			whereClauses.push('i.category_id = ?');
-			params.push(categoryId);
-		}
+  const createItemBulk = (items: ItemInput[]): void => {
+    runTransaction(() => {
+      const itemStmt = db.prepare(
+        'INSERT INTO items (name, category_id, quantity, reorder_point) VALUES (?, ?, ?, ?)'
+      );
 
-		const ruleClauses = rules.map(rule => {
-			if (!operatorWhitelist.has(rule.operator)) {
-				throw new Error(`Unsupported query operator: ${rule.operator}`);
-			}
-			const value = rule.operator === 'LIKE' ? `%${String(rule.value)}%` : rule.value;
-			if (rule.type === 'native') {
-				if (!nativeFields.has(rule.field)) throw new Error(`Invalid native column lookup: ${rule.field}`);
-				params.push(value);
-				return `i.${rule.field} ${rule.operator} ?`;
-			}
-			if (rule.type !== 'attribute') throw new Error(`Unsupported query rule type: ${rule.type}`);
-			params.push(rule.field, String(value));
-			return `EXISTS (
-				SELECT 1 FROM item_attributes_index attr
-				WHERE attr.item_id = i.id AND attr.attr_key = ? AND attr.attr_value ${rule.operator} ?
-			)`;
-		});
-		if (ruleClauses.length) whereClauses.push(`(${ruleClauses.join(` ${normalizedLogicalOp} `)})`);
-		const where = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
-		const rows = db.prepare(`SELECT i.* FROM items i ${where}`).all(...params) as Record<string, any>[];
-		return rows.map(parseItem);
-	};
+      for (const item of items) {
+        const info = itemStmt.run(item.name, item.categoryId, item.quantity ?? 0, item.reorderPoint ?? 0);
+        if (item.attributes) {
+          saveItemAttributes(info.lastInsertRowid, item.categoryId, item.attributes);
+        }
+      }
+    });
+  };
 
-	const rebuildSearchIndex = (): number => {
-		return runTransaction(() => {
-			db.prepare('DELETE FROM item_attributes_index').run();
-			const items = db.prepare('SELECT id, attributes FROM items').all() as Record<string, any>[];
-			for (const item of items) {
-				replaceAttributeIndex(item['id'], parseJsonObject(item['attributes']));
-			}
-			return items.length;
-		});
-	};
+  const getItemById = (id: number | bigint): Item | null => {
+    return (db.prepare('SELECT * FROM items WHERE id = ?').get(id) as Item) || null;
+  };
 
-	const convert = async (
-		version: string,
-		spaceId: number | bigint,
-		chunkCap: ChunkCap = 5000
-	): Promise<void> => {
-		const relativePath = ctx.oldFormats[version];
-		if (!relativePath) return;
-		const spaces = listSpaces();
-		if (!spaces.some(space => space.id === spaceId)) throw new Error('Space match error.');
+  const deleteItem = (id: number | bigint): boolean => {
+    const info = db.prepare('DELETE FROM items WHERE id = ?').run(id);
+    return info.changes > 0;
+  };
 
-		const oldPath = path.join(ctx.studioPath, relativePath);
-		const inventory = fsSync.createReadStream(oldPath);
-		const lineReader = readline.createInterface({ input: inventory, crlfDelay: Infinity });
-		const categoryId = createCategory(`${version} Inventory`, spaceId, null, ['location', 'keywords']);
-		const threshold = chunkCap === 'auto'
-			? 50000
-			: chunkCap === 'max'
-				? 200000
-				: chunkCap;
-		if (!Number.isInteger(threshold) || threshold <= 0) {
-			throw new Error('The conversion chunk size must be a positive integer.');
-		}
+  function saveItemAttributes(
+    itemId: number | bigint,
+    categoryId: number | bigint,
+    attributes: Record<string, any>
+  ): void {
+    const catAttrs = db
+      .prepare('SELECT id, name, data_type FROM category_attributes WHERE category_id = ?')
+      .all(categoryId) as { id: number; name: string; data_type: string }[];
 
-		let chunk: ItemInput[] = [];
-		for await (const line of lineReader) {
-			if (!line.trim()) continue;
-			let legacyItem: Record<string, any>;
-			try {
-				legacyItem = JSON.parse(line);
-			} catch (error) {
-				throw new Error(`Failed to parse legacy inventory line: ${error}`);
-			}
-			chunk.push({
-				name: legacyItem['name'],
-				quantity: legacyItem['quantity'] ?? 0,
-				attributes: {
-					location: legacyItem['location'],
-					keywords: legacyItem['keywords']
-				}
-			});
-			if (chunk.length >= threshold) {
-				createItemBulk(chunk, categoryId);
-				chunk = [];
-			}
-		}
-		if (chunk.length) createItemBulk(chunk, categoryId);
-	};
+    const attrMap = new Map(catAttrs.map((a) => [a.name, a]));
 
-	return {
-		createSpace,
-		renameSpace,
-		listSpaces,
-		deleteSpace,
-		createCategory,
-		renameCategory,
-		listCategories,
-		deleteCategory,
-		createItem,
-		createItemBulk,
-		resetDatabase,
-		listItemsByCategory,
-		getItemById,
-		deleteItem,
-		listAllItemsInCategoryRecursive,
-		updateItem,
-		queryItemsUnified,
-		rebuildSearchIndex,
-		convert
-	};
+    const valStmt = db.prepare(`
+      INSERT INTO item_attribute_values (item_id, attribute_id, value_string, value_number, value_boolean, value_date)
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(item_id, attribute_id) DO UPDATE SET
+        value_string=excluded.value_string,
+        value_number=excluded.value_number,
+        value_boolean=excluded.value_boolean,
+        value_date=excluded.value_date
+    `);
+
+    for (const [key, val] of Object.entries(attributes)) {
+      if (val === null || val === undefined) continue;
+      const attrDef = attrMap.get(key);
+      if (!attrDef) continue;
+
+      let vStr = null,
+        vNum = null,
+        vBool = null,
+        vDate = null;
+      if (attrDef.data_type === 'number') vNum = Number(val);
+      else if (attrDef.data_type === 'boolean') vBool = val ? 1 : 0;
+      else if (attrDef.data_type === 'date') vDate = String(val);
+      else vStr = String(val);
+
+      valStmt.run(itemId, attrDef.id, vStr, vNum, vBool, vDate);
+    }
+  }
+
+  // --- Conversion ---
+  const detectFileVersion = async (source: string | Buffer): Promise<InspectionResult> => {
+    try {
+      let contentString = '';
+      if (typeof source === 'string' && fsSync.existsSync(source)) {
+        contentString = fsSync.readFileSync(source, 'utf-8').slice(0, 2048);
+      } else if (Buffer.isBuffer(source)) {
+        contentString = source.toString('utf-8', 0, 2048);
+      }
+
+      if (contentString.includes('"version": "1.0.0"') || contentString.includes('"version":"1.0.0"')) {
+        return { detectedVersion: '1.0.0', isValidSchema: true };
+      }
+      if (contentString.includes('"version": "0.2.0"') || contentString.includes('"version":"0.2.0"')) {
+        return { detectedVersion: '0.2.0', isValidSchema: true };
+      }
+      if (contentString.includes('keywords') || contentString.includes('location')) {
+        return { detectedVersion: '0.1.0', isValidSchema: true };
+      }
+
+      return { detectedVersion: 'unknown', isValidSchema: false };
+    } catch {
+      return { detectedVersion: 'unknown', isValidSchema: false };
+    }
+  };
+
+  const convert = async (
+    source: string | Buffer,
+    options: ConvertOptions
+  ): Promise<{ importedItems: number; importedCategories: number }> => {
+    let sourceVersion = options.sourceVersion;
+
+    if (!sourceVersion || sourceVersion === 'auto') {
+      const inspect = await detectFileVersion(source);
+      if (inspect.detectedVersion === 'unknown') {
+        throw new Error('Unable to auto-detect file version schema.');
+      }
+      sourceVersion = inspect.detectedVersion;
+    }
+
+    const spaces = listSpaces();
+    if (!spaces.some((s) => s.id === options.targetSpaceId)) {
+      throw new Error(`Target space ID ${options.targetSpaceId} does not exist.`);
+    }
+
+    if (sourceVersion === '0.1.0') {
+      return await convertLegacy_0_1_0(source, options.targetSpaceId, options.chunkCap || 5000);
+    }
+
+    return { importedItems: 0, importedCategories: 0 };
+  };
+
+  async function convertLegacy_0_1_0(
+    source: string | Buffer,
+    spaceId: number | bigint,
+    chunkCap: ChunkCap
+  ): Promise<{ importedItems: number; importedCategories: number }> {
+    const categoryId = createCategory(spaceId, 'Imported 0.1.0 Inventory', null, [
+      { name: 'location', dataType: 'string' },
+      { name: 'keywords', dataType: 'string' },
+    ]);
+
+    let threshold = typeof chunkCap === 'number' ? chunkCap : 5000;
+    if (chunkCap === 'auto') threshold = 20000;
+    if (chunkCap === 'max') threshold = 100000;
+
+    let itemsChunk: ItemInput[] = [];
+    let totalImported = 0;
+
+    if (typeof source === 'string' && fsSync.existsSync(source)) {
+      const fileStream = fsSync.createReadStream(source);
+      const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
+
+      for await (const line of rl) {
+        if (!line.trim()) continue;
+        try {
+          const raw = JSON.parse(line);
+          itemsChunk.push({
+            name: raw.name,
+            categoryId,
+            quantity: raw.quantity || 0,
+            attributes: {
+              location: raw.location,
+              keywords: raw.keywords,
+            },
+          });
+
+          if (itemsChunk.length >= threshold) {
+            createItemBulk(itemsChunk);
+            totalImported += itemsChunk.length;
+            itemsChunk = [];
+          }
+        } catch (e) {
+          throw new Error(`Failed to parse legacy JSON line: ${e}`);
+        }
+      }
+
+      if (itemsChunk.length > 0) {
+        createItemBulk(itemsChunk);
+        totalImported += itemsChunk.length;
+      }
+    }
+
+    return { importedItems: totalImported, importedCategories: 1 };
+  }
+
+  return {
+    createSpace,
+    updateSpace,
+    listSpaces,
+    deleteSpace,
+    resetDatabase,
+    createCategory,
+    updateCategory,
+    listCategories,
+    deleteCategory,
+    createItem,
+    createItemBulk,
+    getItemById,
+    deleteItem,
+    detectFileVersion,
+    convert,
+  };
 }

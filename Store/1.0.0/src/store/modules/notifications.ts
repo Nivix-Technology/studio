@@ -28,7 +28,8 @@ export type ValidInputType =
 | "search" 
 | "date" 
 | "time" 
-| "datetime-local";
+| "datetime-local"
+| "file";
 
 export type PopupType = "options" | ValidInputType;
 
@@ -45,7 +46,9 @@ export interface PopupInputAttributes {
     readonly?: boolean;
     disabled?: boolean;
     autocomplete?: string;
-    [key: string]: any; // Allow any additional standard HTML input attributes
+    accept?: string;
+    multiple?: boolean;
+    [key: string]: any;
 }
 
 const queue: NotificationItem[] = [];
@@ -274,7 +277,6 @@ export function showPopup<T = any>(
             inputElement.type = type;
             inputElement.className = "nivix-input";
             
-            // Apply all passed attributes dynamically
             Object.entries(inputProps).forEach(([key, val]) => {
                 if (val !== undefined && val !== null) {
                     inputElement!.setAttribute(key, String(val));
@@ -360,47 +362,47 @@ export function showPopup<T = any>(
         dismissThisPopup = () => closePopup(undefined, true);
         dismissActivePopup = dismissThisPopup;
         
-        // Render input "OK" button OR custom option buttons
-        if (type !== "options") {
-            const okBtn = document.createElement('button');
-            okBtn.textContent = 'OK';
-            okBtn.className = 'nivix-primary-button primary';
+        // If it's an input type and default options weren't customized, default to Cancel & OK ("inputValue")
+        const effectiveOptions = (type !== "options" && options.length === 2 && options[0].content === "No" && options[1].content === "Yes")
+            ? [
+                { content: "Cancel", value: undefined, highlighted: false },
+                { content: "Set", value: "inputValue", highlighted: true }
+              ]
+            : options;
+
+        const submitInput = () => {
+            const targetOpt = effectiveOptions.find(o => o.highlighted && o.value === "inputValue") || 
+                              effectiveOptions.find(o => o.value === "inputValue") ||
+                              effectiveOptions[effectiveOptions.length - 1];
             
-            const cancelbtn = document.createElement('button');
-            cancelbtn.textContent = 'Cancel';
-            cancelbtn.className = 'nivix-secondary-button';
-            highlightedButton = okBtn;
+            const val = targetOpt?.value === "inputValue"
+                ? (type === "file" ? inputElement?.files : inputElement?.value)
+                : (targetOpt ? targetOpt.value : (type === "file" ? inputElement?.files : inputElement?.value));
+            closePopup(val);
+        };
+
+        effectiveOptions.forEach((opt) => {
+            const btn = document.createElement("button");
+            btn.textContent = opt.content;
+            btn.className = opt.highlighted ? "nivix-primary-button primary" : "nivix-secondary-button";
+            if (opt.highlighted) highlightedButton = btn;
             
-            const submitInput = () => {
-                closePopup(inputElement ? inputElement.value : "");
-            };
-            
-            okBtn.addEventListener("click", submitInput);
-            cancelbtn.addEventListener('click', () => {
-                closePopup(undefined);
+            btn.addEventListener("click", () => {
+                const val = opt.value === "inputValue"
+                    ? (type === "file" ? inputElement?.files : inputElement?.value)
+                    : opt.value;
+                closePopup(val);
             });
-            
-            // Allow pressing "Enter" inside the input to submit
-            if (inputElement) {
-                inputElement.addEventListener("keydown", (e) => {
-                    if (e.key === "Enter") {
-                        e.preventDefault();
-                        submitInput();
-                    }
-                });
-            }
-            
-            actionContainer.appendChild(cancelbtn);
-            actionContainer.appendChild(okBtn);
-        } else {
-            options.forEach((opt) => {
-                const btn = document.createElement("button");
-                btn.textContent = opt.content;
-                btn.className = opt.highlighted ? "nivix-primary-button primary" : "nivix-secondary-button";
-                if (opt.highlighted) highlightedButton = btn;
-                
-                btn.addEventListener("click", () => closePopup(opt.value));
-                actionContainer.appendChild(btn);
+            actionContainer.appendChild(btn);
+        });
+
+        // Allow pressing "Enter" inside the input to submit
+        if (inputElement) {
+            inputElement.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    submitInput();
+                }
             });
         }
         

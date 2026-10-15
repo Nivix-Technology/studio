@@ -113,7 +113,7 @@ async function finishLoading() {
     if (isFinishing) return;
     isFinishing = true;
     
-    tabs.goto('selectSpace', { display: 'flex', logPrevious: false, removePrevious: true });
+    tabs.goto('selectSpace', { logPrevious: false, removePrevious: true });
 }
 
 export function checkLoadState() {

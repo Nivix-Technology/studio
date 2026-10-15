@@ -86,11 +86,20 @@
                 grid-template-columns: minmax(170px, 0.8fr) 28px minmax(220px, 2fr);
                 align-items: center;
                 gap: var(--gap, 5px);
+
                 min-height: 42px;
+                
+                border-radius: var(--radius);
                 border-top: 1px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+
+                padding: calc(var(--resting-area-padding) / 2);
 
                 &:first-of-type {
                     border-top: none;
+                }
+
+                &:nth-of-type(even) {
+                    background: var(--background-stack);
                 }
 
                 input[type="color"] {

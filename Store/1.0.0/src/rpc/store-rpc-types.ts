@@ -1,6 +1,16 @@
 // @ts-expect-error Electrobun's RPC types are provided by the build toolchain.
 import type { RPCSchema } from "electrobun";
 import type { DatabaseType } from "./store-types";
+import type { 
+    Space, 
+    Category, 
+    Item, 
+    CategoryAttributeInput, 
+    ItemInput, 
+    SupportedVersion, 
+    ChunkCap, 
+    InspectionResult 
+} from "../bun/database-driver";
 
 export type StoreRPCType = {
     bun: RPCSchema<{
@@ -21,100 +31,99 @@ export type StoreRPCType = {
                 params: void;
                 response: void;
             };
+
+            // --- SPACES ---
             createSpace: {
-                params: string;
-                response: any;
+                params: {
+                    name: string;
+                    imageBase64?: string | null;
+                };
+                response: number | bigint;
+            };
+            updateSpace: {
+                params: {
+                    id: number | bigint;
+                    updates: {
+                        name?: string;
+                        imageBase64?: string | null;
+                    };
+                };
+                response: boolean;
             };
             listSpaces: {
                 params: void;
-                response: any;
-            };
-            renameSpace: {
-                params: {
-                    id: number;
-                    name: string;
-                };
-                response: any;
+                response: Space[];
             };
             deleteSpace: {
-                params: number;
-                response: any;
+                params: number | bigint;
+                response: boolean;
             };
+
+            // --- CATEGORIES ---
             createCategory: {
                 params: {
+                    spaceId: number | bigint;
                     name: string;
-                    space: number;
-                    id?: number | null;
-                    fields?: string[];
+                    parentCategoryId?: number | bigint | null;
+                    attributes?: CategoryAttributeInput[];
                 };
-                response: any;
+                response: number | bigint;
+            };
+            updateCategory: {
+                params: {
+                    id: number | bigint;
+                    updates: {
+                        name?: string;
+                        spaceId?: number | bigint;
+                        parentCategoryId?: number | bigint | null;
+                    };
+                };
+                response: boolean;
             };
             listCategories: {
-                params: number;
-                response: any;
-            };
-            renameCategory: {
-                params: {
-                    id: number;
-                    name: string;
-                };
-                response: any;
+                params: number | bigint; // spaceId
+                response: Category[];
             };
             deleteCategory: {
-                params: number;
-                response: any;
+                params: number | bigint;
+                response: boolean;
             };
+
+            // --- ITEMS ---
             createItem: {
-                params: {
-                    name: string;
-                    category: number;
-                    quantity?: number;
-                    attributes?: object;
-                };
-                response: any;
-            };
-            deleteItem: {
-                params: number;
-                response: any;
-            };
-            listAllItemsInCategoryRecursive: {
-                params: number;
-                response: any;
-            };
-            updateItem: {
-                params: {
-                    id: number;
-                    updates?: object;
-                };
-                response: any;
-            };
-            listItemsByCategory: {
-                params: number;
-                response: any;
+                params: ItemInput;
+                response: number | bigint;
             };
             getItemById: {
-                params: number;
-                response: any;
+                params: number | bigint;
+                response: Item | null;
             };
-            queryItems: {
-                params: {
-                    category?: number | null;
-                    rules?: import("./store-types").QueryRule[];
-                    logicalOp?: 'AND' | 'OR';
-                } | void;
-                response: any;
+            deleteItem: {
+                params: number | bigint;
+                response: boolean;
             };
-            rebuildSearchIndex: {
-                params: void;
-                response: any;
+
+            // --- CONVERSION & INSPECTION ---
+            detectFileVersion: {
+                params: string; // filePath or content string
+                response: InspectionResult;
             };
             convert: {
                 params: {
-                    version: string;
-                    space: number;
+                    source: string; // file path or string content
+                    options: {
+                        sourceVersion?: SupportedVersion | 'auto';
+                        targetSpaceId: number | bigint;
+                        chunkCap?: ChunkCap;
+                    };
                 };
-                response: any;
+                response: {
+                    importedItems: number;
+                    importedCategories: number;
+                };
             };
+
+            // --- FILE SYSTEM & CONFIG ---
             readFile: {
                 params: {
                     path: string;

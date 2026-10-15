@@ -131,6 +131,32 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                     width: 95%;
+                    
+                    &:hover {
+                        overflow: visible;
+                        text-overflow: clip;
+                        white-space: normal;
+                        overflow-wrap: break-word;
+                        word-break: break-word;
+                        width: auto;
+                    }
+                }
+                
+                &:hover {
+                    .name-column {
+                        overflow: visible;
+                        text-overflow: clip;
+                        white-space: normal;
+                        overflow-wrap: break-word;
+                        word-break: break-word;
+                        width: auto;
+                    }
+                }
+                
+                .id-column {
+                    flex-shrink: 0;
+                    color: var(--text-secondary);
+                    margin-left: auto;
                 }
                 
                 .tile-divider {

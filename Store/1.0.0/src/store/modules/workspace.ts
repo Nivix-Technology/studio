@@ -11,7 +11,7 @@ export function init(): void {
 }
 
 export function gotoWorkspace(_space: number) {
-    tabs.goto('workspace', { display: 'flex' });
+    tabs.goto('workspace');
 }
 
 window.addEventListener('tabChange', (event) => {

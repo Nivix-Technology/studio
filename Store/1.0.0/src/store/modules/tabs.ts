@@ -3,7 +3,6 @@ import { type TabOptions } from '../../rpc/store-types';
 
 interface NavigationHistoryItem {
     id: string;
-    display?: string;
 }
 
 let navigationHistory: NavigationHistoryItem[] = [];
@@ -24,7 +23,6 @@ document.addEventListener('click', (event: MouseEvent) => {
 
     event.preventDefault();
     void goto(targetId, {
-        display: button.dataset['tabDisplay'],
         logPrevious: button.dataset['tabLogPrevious'] !== 'false',
     });
 });
@@ -129,7 +127,6 @@ export function goto(id: string, options: TabOptions = {}): Promise<void> {
 async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
     const instant = options.instant !== undefined ? options.instant : !preferences['transitionAnimations'];
     let logPrevious = options.logPrevious !== undefined ? options.logPrevious : true;
-    let display = options.display;
 
     if (id === 'previous') {
         const lastTab = navigationHistory.pop();
@@ -139,7 +136,6 @@ async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
         }
 
         id = lastTab.id;
-        if (display === undefined) display = lastTab.display;
         logPrevious = false;
     }
 
@@ -177,7 +173,7 @@ async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
         hidePromises.push(hide(existingTab.id, { instant }));
         tabsHidden++;
 
-        lastHiddenTab = { id: existingTab.id, display: activeDisplay };
+        lastHiddenTab = { id: existingTab.id };
     });
 
     if (logPrevious && tabsHidden > 0 && lastHiddenTab) {
@@ -192,7 +188,7 @@ async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
 
     // Wait for all active tabs to finish hiding before showing the new one
     await Promise.all(hidePromises);
-    await show(id, { instant, display });
+    await show(id, { instant });
 }
 
 export async function hide(id: string, options: TabOptions = {}): Promise<void> {
@@ -217,7 +213,7 @@ export async function show(id: string, options: TabOptions = {}): Promise<void> 
     if (!thisElement) return;
 
     const instant = options.instant !== undefined ? options.instant : !preferences['transitionAnimations'];
-    const thisDisplay = options.display ? options.display : "block";
+    const thisDisplay = thisElement.dataset['tabDisplay'] || 'block';
 
     // Ensure parent tree is shown first
     const parentTree = getTree(id);
