@@ -1,0 +1,166 @@
+.notification-box {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    
+    box-sizing: border-box;
+    width: 30%;
+    min-height: 2.5em;
+    
+    background: var(--background-base, #f6f6f6);
+    border: 1px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    border-radius: var(--radius, 4px);
+    box-shadow: var(--outset-shadow, 0 6px 10px rgba(0, 0, 0, 0.25));
+    
+    padding: 8px 12px 10px 16px;
+    z-index: 9999;
+    
+    .notification-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid color-mix(in srgb, var(--text-primary, #313131), transparent 75%);
+        padding-bottom: 5px;
+    }
+    
+    .notification-title {
+        color: var(--text-primary, #313131);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+    
+    &.error {
+        background: #ff9b9b;
+    }
+    
+    &.warning {
+        background: #ffffb2;
+    }
+    
+    .notification-message {
+        color: var(--text-primary, #313131);
+        margin: 0;
+        font-size: 0.95rem;
+        text-align: left;
+        word-break: break-word;
+        flex-grow: 1;
+    }
+    
+    .notification-close {
+        background: transparent;
+        border: none;
+        color: var(--text-primary, #313131);
+        font-size: 1.25rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        opacity: 0.7;
+        transition: opacity 0.15s var(--transition-easing-style, ease-out), background-color 0.15s var(--transition-easing-style, ease-out);
+        
+        &:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.08);
+        }
+    }
+}
+
+.popup-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    
+    width: 100%;
+    height: 100%;
+    
+    background: transparent;
+    pointer-events: none;
+    
+    z-index: 9998;
+    
+    &.center {
+        position: fixed;
+    }
+    
+    &.popup-container-shaded {
+        background: var(--shade, rgba(0, 0, 0, 0.3));
+        pointer-events: auto;
+    }
+    
+    .popup {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap, 5px);
+        
+        box-sizing: border-box;
+        width: max-content;
+        max-width: 35%;
+        
+        background: var(--background-base, #f6f6f6);
+        border-radius: var(--radius, 4px);
+        
+        box-shadow: var(--outset-shadow, 0 6px 10px rgba(0, 0, 0, 0.25));
+        
+        padding: var(--resting-area-padding, 5px);
+        pointer-events: auto;
+        
+        .popup-title-bar {
+            padding: 0.5rem 1.1rem;
+            border-bottom: 1px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+        }
+        
+        .popup-title {
+            color: var(--text-primary, #313131);
+            font-weight: bolder;
+        }
+        
+        .message-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap, 5px);
+            
+            box-sizing: border-box;
+            
+            padding: 0.5rem 1.1rem;
+            overflow: hidden;
+            
+            span {
+                color: var(--text-primary, #313131);
+                white-space: normal;
+                word-break: break-word;
+            }
+            
+            input {
+                box-sizing: border-box;
+                width: 100%;
+            }
+        }
+        
+        .action-container {
+            display: flex;
+            flex-direction: row;
+            gap: var(--gap, 5px);
+            
+            button {
+                flex: 1;
+            }
+        }
+    }
+}
+
+@keyframes popupContainerFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popupContainerFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}

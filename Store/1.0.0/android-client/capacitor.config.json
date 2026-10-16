@@ -1,0 +1,10 @@
+{
+  "appId": "store.nivixtech.com",
+  "appName": "Nivix Store",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    }
+  }
+}

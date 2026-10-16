@@ -1,0 +1,102 @@
+/* Tooltip Trigger Base */
+
+.tooltip-button,
+.tooltip-support-button,
+.tooltip-delayed-button,
+.tooltip-delayed-support-button,
+.tooltip-support-delayed-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+/* Styled Tooltip Trigger Button */
+
+.tooltip-button,
+.tooltip-delayed-button {
+    height: 24px;
+    width: 24px;
+    aspect-ratio: 1;
+
+    background: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    border: none;
+    border-radius: 50%;
+
+    color: var(--text-primary, #313131);
+    font-size: 14px;
+    font-weight: bold;
+    font-family: monospace;
+
+    cursor: pointer;
+    margin-left: 6px;
+    transition: background var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out)), color var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out));
+
+    &:hover,
+    &:focus {
+        background: color-mix(in srgb, var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%))), black var(--background-color-step-amount, 12%));
+    }
+
+    /* Accent Modifier Class */
+    &.primary {
+        background: var(--brand-primary, #43a4eb);
+        color: var(--text-tertiary, #ffffff);
+
+        &:hover,
+        &:focus {
+            background: var(--brand-darker, color-mix(in srgb, var(--brand-primary, #43a4eb), black var(--brand-color-step-amount, 20%)));
+        }
+    }
+}
+
+/* Shared tooltip popup, mounted directly under body */
+
+.tooltip-popup {
+    position: fixed;
+    user-select: none;
+    pointer-events: none;
+    
+    visibility: hidden;
+    opacity: 0;
+    
+    width: max-content;
+    min-width: 80px;
+    max-width: min(220px, calc(100vw - 20px));
+    
+    background: var(--text-primary, #313131);
+    color: var(--background-base, #f6f6f6);
+    border-radius: var(--radius, 4px);
+    padding: 6px 10px;
+    
+    font-size: 13px;
+    font-weight: normal;
+    text-align: center;
+    line-height: 1.3;
+    box-shadow: var(--outset-shadow, 0 6px 10px rgba(0, 0, 0, 0.25));
+    
+    z-index: 2147483647;
+    transition: opacity var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out)), transform var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out)), visibility var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out));
+    transform: translateY(2px);
+
+    &.is-visible {
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Primary Accent Variant for Tooltip Box */
+    &.primary {
+        background: var(--brand-primary, #43a4eb);
+        color: var(--text-tertiary, #ffffff);
+    }
+}
+
+.tooltip-popup.primary {
+    background: var(--brand-primary, #43a4eb);
+    color: var(--text-tertiary, #ffffff);
+}
+
+.tooltip:not(.tooltip-popup) {
+    display: none;
+}

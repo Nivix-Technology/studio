@@ -1,0 +1,304 @@
+/* Container */
+#space-filler-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.2;
+    z-index: 0;
+    overflow: hidden;
+    
+    &.is-fading-in {
+        animation: spaceFillerFadeIn var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out)) forwards;
+    }
+    
+    &.is-fading-out {
+        animation: spaceFillerFadeOut var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out)) forwards;
+    }
+    
+    &.use-blur {
+        opacity: 0.4;
+        
+        &.is-fading-in {
+            animation: blurSpaceFillerFadeIn var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out)) forwards;
+        }
+        
+        &.is-fading-out {
+            animation: blurSpaceFillerFadeOut var(--transition, var(--transition-speed, 0.2s) var(--transition-easing-style, ease-out)) forwards;
+        }
+    }
+}
+
+@keyframes spaceFillerFadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 0.2; transform: scale(1); }
+}
+
+@keyframes spaceFillerFadeOut {
+    from { opacity: 0.2; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.98); }
+}
+
+@keyframes blurSpaceFillerFadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 0.4; transform: scale(1); }
+}
+
+@keyframes blurSpaceFillerFadeOut {
+    from { opacity: 0.4; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.98); }
+}
+
+/* Base Shape Styling */
+.space-filler-shape {
+    position: absolute;
+}
+
+.space-filler-shape.is-floating.float {
+    animation: float 12s ease-in-out infinite;
+}
+
+.space-filler-shape.is-floating.float-slow {
+    animation: float-slow 20s ease-in-out infinite;
+}
+
+.space-filler-shape.is-floating.float-fast {
+    animation: float-fast 8s ease-in-out infinite;
+}
+
+.space-filler-shape.is-floating.float-subtle {
+    animation: float-subtle 15s ease-in-out infinite;
+}
+
+/* ==========================================================================
+CIRCLES (7 Total)
+========================================================================== */
+.space-filler-shape.circle1 {
+    width: 300px;
+    height: 300px;
+    top: 15%;
+    left: 10%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    border-radius: 50%;
+}
+
+.space-filler-shape.circle2 {
+    width: 450px;
+    height: 450px;
+    top: 60%;
+    left: 75%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    border-radius: 50%;
+}
+
+.space-filler-shape.circle3 {
+    width: 200px;
+    height: 200px;
+    top: 10%;
+    left: 80%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    border-radius: 50%;
+}
+
+.space-filler-shape.circle4 {
+    width: 350px;
+    height: 350px;
+    top: 80%;
+    left: 5%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    border-radius: 50%;
+}
+
+.space-filler-shape.circle5 {
+    width: 150px;
+    height: 150px;
+    top: 40%;
+    left: 60%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    border-radius: 50%;
+}
+
+.space-filler-shape.circle6 {
+    width: 250px;
+    height: 250px;
+    top: 5%;
+    left: 50%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    border-radius: 50%;
+}
+
+.space-filler-shape.circle7 {
+    width: 180px;
+    height: 180px;
+    top: 85%;
+    left: 60%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    border-radius: 50%;
+}
+
+/* ==========================================================================
+TRIANGLES (7 Total)
+========================================================================== */
+.space-filler-shape.triangle1 {
+    width: 0;
+    height: 0;
+    top: 30%;
+    left: 50%;
+    border-left: 80px solid transparent;
+    border-right: 80px solid transparent;
+    border-bottom: 140px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    transform: rotate(25deg);
+}
+
+.space-filler-shape.triangle2 {
+    width: 0;
+    height: 0;
+    top: 70%;
+    left: 20%;
+    border-left: 60px solid transparent;
+    border-right: 60px solid transparent;
+    border-bottom: 120px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    transform: rotate(-15deg);
+}
+
+.space-filler-shape.triangle3 {
+    width: 0;
+    height: 0;
+    top: 25%;
+    left: 80%;
+    border-left: 70px solid transparent;
+    border-right: 70px solid transparent;
+    border-bottom: 130px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    transform: rotate(40deg);
+}
+
+.space-filler-shape.triangle4 {
+    width: 0;
+    height: 0;
+    top: 55%;
+    left: 10%;
+    border-left: 50px solid transparent;
+    border-right: 50px solid transparent;
+    border-bottom: 100px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    transform: rotate(-25deg);
+}
+
+.space-filler-shape.triangle5 {
+    width: 0;
+    height: 0;
+    top: 75%;
+    left: 50%;
+    border-left: 90px solid transparent;
+    border-right: 90px solid transparent;
+    border-bottom: 160px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    transform: rotate(60deg);
+}
+
+.space-filler-shape.triangle6 {
+    width: 0;
+    height: 0;
+    top: 15%;
+    left: 60%;
+    border-left: 60px solid transparent;
+    border-right: 60px solid transparent;
+    border-bottom: 120px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    transform: rotate(-35deg);
+}
+
+.space-filler-shape.triangle7 {
+    width: 0;
+    height: 0;
+    top: 40%;
+    left: 90%;
+    border-left: 50px solid transparent;
+    border-right: 50px solid transparent;
+    border-bottom: 100px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    transform: rotate(20deg);
+}
+
+/* ==========================================================================
+POLYGONS (6 Total)
+========================================================================== */
+.space-filler-shape.polygon1 {
+    width: 120px;
+    height: 120px;
+    top: 50%;
+    left: 30%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+
+.space-filler-shape.polygon2 {
+    width: 100px;
+    height: 100px;
+    top: 20%;
+    left: 40%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.space-filler-shape.polygon3 {
+    width: 140px;
+    height: 140px;
+    top: 65%;
+    left: 70%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
+.space-filler-shape.polygon4 {
+    width: 120px;
+    height: 120px;
+    top: 35%;
+    left: 20%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    clip-path: polygon(50% 0%, 100% 25%, 75% 100%, 25% 100%, 0% 25%);
+}
+
+.space-filler-shape.polygon5 {
+    width: 160px;
+    height: 160px;
+    top: 50%;
+    left: 80%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    clip-path: polygon(50% 0%, 85% 25%, 100% 50%, 85% 75%, 50% 100%, 15% 75%, 0% 50%, 15% 25%);
+}
+
+.space-filler-shape.polygon6 {
+    width: 110px;
+    height: 110px;
+    top: 75%;
+    left: 30%;
+    background-color: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
+    clip-path: polygon(50% 0%, 100% 25%, 85% 100%, 15% 100%, 0% 25%);
+}
+
+/* ==========================================================================
+ANIMATIONS
+========================================================================== */
+@keyframes float {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    50%  { transform: translate(5px, -10px) rotate(15deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes float-slow {
+    0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
+    50%  { transform: translate(-15px, 20px) rotate(-8deg) scale(1.03); }
+    100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+}
+
+@keyframes float-fast {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    33%  { transform: translate(12px, -8px) rotate(10deg); }
+    66%  { transform: translate(-5px, -15px) rotate(-5deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes float-subtle {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    50%  { transform: translate(4px, 6px) rotate(4deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Nivix Store</string>
+    <string name="title_activity_main">Nivix Store</string>
+    <string name="package_name">store.nivixtech.com</string>
+    <string name="custom_url_scheme">store.nivixtech.com</string>
+</resources>
