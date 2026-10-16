@@ -57,7 +57,7 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferen
     
     const spaces = await listSpaces();
     if (!spaces.length) {
-        spacesList.innerHTML = `<div class="center"${animate ? ` style="animation: ${fadeInAnimation}"` : ''}>You have no spaces. Click 'Create New Space' at the bottom right of this menu to get started!</div>`;
+        spacesList.innerHTML = `<div class="center"${animate ? ` style="animation: ${fadeInAnimation}"` : ''}>You have no spaces. Click 'Create Space' at the bottom right of this menu to get started!</div>`;
         createBtn.focus();
     }
     

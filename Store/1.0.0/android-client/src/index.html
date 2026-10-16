@@ -40,30 +40,25 @@
 	</div>
 	
 	<div id="selectSpace" class="tab" data-tab-display="flex">
-		<div class="action-container">
-			<h2 class="nivix-bookmark">General</h2>
-			
-			<button class="nivix-secondary-button"
-			data-tab-navigation="settings"><svgPlaceholder>assets/svg/settings.svg</svgPlaceholder>Settings</button>
-			
-			<button class="nivix-secondary-button"
-			data-tab-navigation="settings_general"><svgPlaceholder>assets/svg/toggleShapeAnimations.svg</svgPlaceholder>Toggle Shape Animation</button>
-
-			<h2 class="nivix-bookmark">About</h2>
-			<button class="nivix-secondary-button"
-			data-tab-navigation="credits"><svgPlaceholder>assets/svg/credits.svg</svgPlaceholder>Credits</button>
+		<div class="nivix-horizontal-navigation">
+			<div class="filler"></div>
+			<button class="nivix-secondary-button icon-button"
+			data-tab-navigation="credits"><svgPlaceholder>assets/svg/credits.svg</svgPlaceholder></button>
+			<button class="nivix-secondary-button icon-button"
+			data-tab-navigation="settings"><svgPlaceholder>assets/svg/settings.svg</svgPlaceholder></button>
 		</div>
-		<div class="main-container">
-			<div id="selectSpace-list"></div>
-			<div class="nivix-horizontal-navigation">
-				<input id="selectSpace-search" type="search" class="nivix-input filler" placeholder="Search Spaces" aria-label="Search spaces">
-				<button class="nivix-primary-button tooltip-support-button tip-top"
-				data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;.">What is a space?</button>
-				
-				<button id="selectSpace-refresh" class="nivix-primary-button">Refresh</button>
-				<button id="selectSpace-create" class="nivix-primary-button primary"
-				data-tab-navigation="createSpace">Create New Space</button>
-			</div>
+		<div id="selectSpace-list"></div>
+		<div class="nivix-horizontal-navigation">
+			<input id="selectSpace-search" type="search" class="nivix-input filler" placeholder="Search Spaces" aria-label="Search spaces">
+		</div>
+		<div class="nivix-horizontal-navigation">
+			<div class="filler"></div>
+			<button class="nivix-primary-button icon-button tooltip-support-button tip-top"
+			data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;."><svgPlaceholder>assets/svg/details.svg</svgPlaceholder></button>
+			
+			<button id="selectSpace-refresh" class="nivix-primary-button icon-button"><svgPlaceholder>assets/svg/refresh.svg</svgPlaceholder></button>
+			<button id="selectSpace-create" class="nivix-primary-button primary"
+			data-tab-navigation="createSpace"><svgPlaceholder>assets/svg/create.svg</svgPlaceholder>Create Space</button>
 		</div>
 	</div>
 	
@@ -101,7 +96,7 @@
 			data-tab-navigation="settings_advanced"
 			data-tab-log-previous="false"
 			data-active-tab-highlight="true">Advanced</button>
-
+			
 			<button class="nivix-primary-button"
 			data-tab-navigation="settings_performance"
 			data-tab-log-previous="false"
@@ -177,15 +172,15 @@
 					<button class="tooltip-button tip-right"
 					data-tooltip-content="Animations like fading, etc. Disabling this option will make all transitions instant. Enabling this option can negatively impact performance on lower end devices.">i</button>
 				</div>
-
+				
 				<span class="nivix-label">Visual Effects</span>
 				<hr>
-
+				
 				<div class="nivix-checkbox-wrapper">
 					<input type="checkbox" id="settings-useSpaceFillerBlur" class="nivix-input nivix-toggle"
 					data-depends="settings-spaceFillersEnabled:checked"
 					data-preferences-key="useSpaceFillerBlur">
-
+					
 					<label for="settings-useSpaceFillerBlur">Use Space Filler Blur</label>
 					<button class="tooltip-button tip-right"
 					data-tooltip-content="When enabled, background shapes will be blurred to blend in. When disabled, shapes will be faded to blend with the background. The faded design improves performance and blends into the background more.">i</button>
@@ -211,20 +206,20 @@
 						<input id="settings-theme-import-file" type="file" accept=".storetheme,application/json" hidden>
 					</div>
 				</div>
-
+				
 				<hr>
 				
 				<div class="nivix-checkbox-wrapper">
 					<input type="checkbox" class="nivix-input nivix-toggle" id="settings-enableDarkThemeSupport"
 					data-preferences-key="enableDarkThemeSupport">
-
+					
 					<label for="settings-enableDarkThemeSupport">Dark Theme Support</label>
 					<button class="tooltip-button tip-right"
 					data-tooltip-content="If you are using a dark color as the Primary Background color, this option will make elements on top of others lighter instead of darker to maintain contrast (recommended).">i</button>
 				</div>
-
+				
 				<hr>
-
+				
 				<div id="settings-theme-variables" class="theme-variables"></div>
 				<div class="theme-reset-actions">
 					<div class="filler"></div>

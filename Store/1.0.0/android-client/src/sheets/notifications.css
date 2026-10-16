@@ -101,7 +101,7 @@
         
         box-sizing: border-box;
         width: max-content;
-        max-width: 35%;
+        max-width: 100%;
         
         background: var(--background-base, #f6f6f6);
         border-radius: var(--radius, 4px);
