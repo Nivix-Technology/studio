@@ -139,7 +139,3 @@ export function deleteSpace(id: number | bigint): Promise<boolean> {
         return true;
     });
 }
-
-export function resetMockDatabase(): Promise<void> {
-    return enqueue(async () => writeDatabase(emptyDatabase()));
-}

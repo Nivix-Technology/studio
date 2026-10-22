@@ -52,12 +52,11 @@
 			<input id="selectSpace-search" type="search" class="nivix-input filler" placeholder="Search Spaces" aria-label="Search spaces">
 		</div>
 		<div class="nivix-horizontal-navigation">
-			<div class="filler"></div>
 			<button class="nivix-primary-button icon-button tooltip-support-button tip-top"
 			data-tooltip-content="A &quot;Space&quot; is like a location. Each Space contains its own categories and items. Examples include &quot;Office&quot; and &quot;Warehouse&quot;."><svgPlaceholder>assets/svg/details.svg</svgPlaceholder></button>
 			
 			<button id="selectSpace-refresh" class="nivix-primary-button icon-button"><svgPlaceholder>assets/svg/refresh.svg</svgPlaceholder></button>
-			<button id="selectSpace-create" class="nivix-primary-button primary"
+			<button id="selectSpace-create" class="nivix-primary-button filler primary"
 			data-tab-navigation="createSpace"><svgPlaceholder>assets/svg/create.svg</svgPlaceholder>Create Space</button>
 		</div>
 	</div>
@@ -221,20 +220,13 @@
 				<hr>
 				
 				<div id="settings-theme-variables" class="theme-variables"></div>
-				<div class="theme-reset-actions">
-					<div class="filler"></div>
-					<button id="settings-theme-reset" class="nivix-primary-button danger">Reset Theme</button>
-				</div>
 			</div>
 		</div>
-		<div class="nivix-horizontal-navigation divider-top">
+		<div class="nivix-horizontal-navigation divider-top distribute-contents vertical">
+			<button class="nivix-primary-button danger" id="settings-reset-preferences">Reset Preferences</button>
+			<button id="settings-theme-reset" class="nivix-primary-button danger">Reset Theme</button>
 			<button class="nivix-primary-button"
 			data-tab-navigation="previous, selectSpace">Back</button>
-			
-			<div class="filler"></div>
-			<button class="nivix-primary-button danger" id="settings-reset-preferences">Reset Preferences</button>
-			<button class="nivix-primary-button danger" id="settings-reset-mockDatabase">Reset Mock Database</button>
-			<button class="nivix-primary-button danger danger-primary" id="settings-reset-appData">Reset App Data</button>
 		</div>
 	</div>
 	

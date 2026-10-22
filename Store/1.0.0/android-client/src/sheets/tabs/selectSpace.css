@@ -15,9 +15,15 @@
         flex-direction: column;
         flex: 1;
         gap: var(--gap, 5px);
-
+        
         box-sizing: border-box;
         overflow-y: auto;
+        
+        .center:not(.item) {
+            position: absolute;
+            width: 100%;
+            min-height: 100%;
+        }
         
         .item {
             display: flex;

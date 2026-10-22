@@ -1,7 +1,7 @@
 import { init as initNxLib } from './nxlib';
 import { showNotification, showPopup } from './notifications';
 import { Preferences } from '@capacitor/preferences';
-import { resetMockDatabase } from './mockDatabase';
+import { populateSVGs } from './fileLoader';
 
 type PreferenceValues = Record<string, any>;
 type ThemeValue = string | number;
@@ -50,8 +50,8 @@ const themeVariables: ThemeVariable[] = [
     { name: 'Accent Color Contrast', property: '--brand-color-step-amount', section: 'Colors', description: 'How much darker accent colored elements are than the ones they are stacked on top of.', type: 'range', defaultValue: 12, min: 0, max: 50, unit: '%' },
     { name: 'Corner Radius', property: '--radius', section: 'Shape & spacing', description: 'How round corners are on things like buttons and menus.', type: 'range', defaultValue: 4, min: 0, max: 24, unit: 'px' },
     { name: 'Resting Area Padding', property: '--resting-area-padding', section: 'Shape & spacing', description: 'How much space there is around the inside of panels and other menus.', type: 'range', defaultValue: 5, min: 0, max: 24, unit: 'px' },
-    { name: 'Clickable Area Vertical Padding', property: '--clickable-area-padding-y', section: 'Shape & spacing', description: 'Vertical space inside buttons.', type: 'range', defaultValue: 0.4, min: 0, max: 2, step: 0.04, unit: 'rem' },
-    { name: 'Clickable Area Horizontal Padding', property: '--clickable-area-padding-x', section: 'Shape & spacing', description: 'Horizontal space inside buttons.', type: 'range', defaultValue: 1, min: 0, max: 3, step: 0.05, unit: 'rem' },
+    { name: 'Button Vertical Padding', property: '--clickable-area-padding-y', section: 'Shape & spacing', description: 'Vertical space inside buttons.', type: 'range', defaultValue: 0.4, min: 0, max: 2, step: 0.04, unit: 'rem' },
+    { name: 'Button Horizontal Padding', property: '--clickable-area-padding-x', section: 'Shape & spacing', description: 'Horizontal space inside buttons.', type: 'range', defaultValue: 1, min: 0, max: 3, step: 0.05, unit: 'rem' },
     { name: 'Element Gap', property: '--gap', section: 'Shape & spacing', description: 'The space between elements in lists.', type: 'range', defaultValue: 5, min: 0, max: 24, unit: 'px' },
     { name: 'Transition Speed', property: '--transition-speed', section: 'Effects & motion', description: 'How long transition animations take.', type: 'range', defaultValue: 0.2, min: 0.2, max: 10, step: 0.05, unit: 's' },
     { name: 'Transition Easing', property: '--transition-easing-style', section: 'Effects & motion', description: 'Animation easing style.', type: 'select', defaultValue: 'ease-out', options: ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'] }
@@ -303,60 +303,54 @@ function buildThemeInputs(overrides: Record<string, ThemeValue>) {
         }
 
         const value = overrides[variable.property] ?? variable.defaultValue;
-        const id = `theme-variable-${variable.property.slice(2)}`;
-        let input: HTMLInputElement | HTMLSelectElement;
-        if (variable.type === 'select') {
-            const select = document.createElement('select');
-            select.className = 'nivix-select';
-            variable.options!.forEach(option => select.add(new Option(option, option)));
-            input = select;
-        } else {
-            const field = document.createElement('input');
-            field.className = 'nivix-input';
-            field.type = variable.type;
-            if (variable.type === 'range') {
-                field.min = String(variable.min);
-                field.max = String(variable.max);
-                field.step = String(variable.step ?? 1);
-            }
-            input = field;
-        }
-        input.id = id;
-        input.value = String(value);
-
         const label = document.createElement('label');
-        label.htmlFor = id;
         label.textContent = variable.name;
-        const help = document.createElement('button');
-        help.type = 'button';
-        help.className = 'tooltip-button tip-right';
-        help.textContent = 'i';
-        help.setAttribute('aria-label', `About ${variable.name}`);
-        help.dataset['tooltipContent'] = variable.description;
         const valueLabel = document.createElement('span');
         valueLabel.className = 'theme-variable-value';
 
         const displayValue = (nextValue: ThemeValue) =>
             variable.type === 'range' ? `${nextValue}${variable.unit}` : String(nextValue);
-        const updateValue = () => {
-            const nextValue = variable.type === 'range' ? (input as HTMLInputElement).valueAsNumber : input.value;
-            valueLabel.textContent = displayValue(nextValue);
-            document.documentElement.style.setProperty(variable.property, themeCssValue(variable, nextValue));
-        };
         valueLabel.textContent = displayValue(value);
-        const control = document.createElement('div');
-        control.className = 'theme-variable-control';
-        control.append(input, valueLabel);
+        const changeButton = document.createElement('button');
+        changeButton.type = 'button';
+        changeButton.className = 'nivix-primary-button';
+        changeButton.setAttribute('aria-label', `Change ${variable.name}`);
+        const icon = document.createElement('svgPlaceholder');
+        icon.textContent = 'assets/svg/changeSetting.svg';
+        changeButton.append(icon);
+        changeButton.addEventListener('click', () => {
+            void (async () => {
+                const inputProps = variable.type === 'range'
+                    ? { min: variable.min, max: variable.max, step: variable.step ?? 1, value }
+                    : variable.type === 'select'
+                        ? { selectOptions: variable.options, value: String(value) }
+                        : { value: String(value) };
+                const result = await showPopup<ThemeValue | false | 'reset'>(
+                    `Changing '${variable.name}'`,
+                    variable.description,
+                    variable.type,
+                    [
+                        { content: 'Cancel', value: false },
+                        { content: 'Reset', value: 'reset' },
+                        { content: 'Set', value: 'inputValue', highlighted: true }
+                    ],
+                    inputProps
+                );
+                if (result === undefined || result === false) return;
+
+                const nextValue = result === 'reset'
+                    ? variable.defaultValue
+                    : variable.type === 'range' ? Number(result) : result;
+                await updateThemeVariable(variable, nextValue);
+                valueLabel.textContent = displayValue(nextValue);
+            })().catch(showThemeError);
+        });
         const row = document.createElement('div');
         row.className = 'theme-variable';
-        row.append(label, help, control);
-        input.addEventListener('input', updateValue);
-        input.addEventListener('change', () => {
-            const nextValue = variable.type === 'range' ? (input as HTMLInputElement).valueAsNumber : input.value;
-            void updateThemeVariable(variable, nextValue).catch(showThemeError);
-        });
+        row.append(label, valueLabel, changeButton);
         sectionContainer!.append(row);
     }
+    void populateSVGs();
 }
 
 function showThemeError(error: unknown) {
@@ -521,40 +515,8 @@ async function resetPreferences() {
     initNxLib();
 }
 
-async function resetMockDatabaseData() {
-    if (!await confirmReset(
-        'Reset Mock Database',
-        "This permanently deletes all spaces from this device's mock database. This cannot be undone."
-    )) return;
-
-    try {
-        await resetMockDatabase();
-        showNotification('The mock database has been reset.');
-    } catch (error) {
-        console.error('Failed to reset mock database:', error);
-        showNotification('Failed to reset the mock database.', 'error');
-    }
-}
-
-async function resetAllAppData() {
-    if (!await confirmReset(
-        'Reset App Data',
-        'This permanently deletes all data stored by this app on this device, including preferences and theme profiles.'
-    )) return;
-
-    try {
-        await Preferences.clear();
-        window.location.reload();
-    } catch (error) {
-        console.error('Failed to reset application data:', error);
-        showNotification('Failed to reset application data.', 'error');
-    }
-}
-
 function initTab() {
     if (tabInitialized) return;
-    getElement<HTMLButtonElement>('settings-reset-appData').addEventListener('click', () => void resetAllAppData());
-    getElement<HTMLButtonElement>('settings-reset-mockDatabase').addEventListener('click', () => void resetMockDatabaseData());
     getElement<HTMLButtonElement>('settings-reset-preferences').addEventListener('click', () => {
         void (async () => {
             try {

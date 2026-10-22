@@ -16,7 +16,6 @@
             gap: var(--gap, 5px);
             
             box-sizing: border-box;
-            width: 85%;
             
             padding: calc(var(--resting-area-padding, 5px) * 2);
 
@@ -82,8 +81,8 @@
             }
 
             .theme-variable {
-                display: grid;
-                grid-template-columns: minmax(170px, 0.8fr) 28px minmax(220px, 2fr);
+                display: flex;
+                flex-direction: row;
                 align-items: center;
                 gap: var(--gap, 5px);
 
@@ -92,37 +91,21 @@
                 border-radius: var(--radius);
                 border-top: 1px solid var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
 
-                padding: calc(var(--resting-area-padding) / 2);
+                padding: var(--resting-area-padding);
 
                 &:first-of-type {
                     border-top: none;
                 }
 
                 &:nth-of-type(even) {
+                    border-color: transparent;
                     background: var(--background-stack);
                 }
 
-                input[type="color"] {
-                    width: 72px;
-                    height: 30px;
-                    box-sizing: border-box;
-                    background: var(--background-stack, color-mix(in srgb, transparent, black var(--background-color-step-amount, 12%)));
-                    border: 2px solid var(--background-secondary, color-mix(in srgb, var(--background-base, #f6f6f6), black var(--background-color-step-amount, 12%)));
-                    border-radius: var(--radius, 4px);
-                    padding: 2px;
-                }
-
-                input[type="range"],
-                select {
-                    width: 100%;
-                    accent-color: var(--brand-primary, #43a4eb);
-                }
-
-                .theme-variable-control {
-                    display: grid;
-                    grid-template-columns: minmax(0, 1fr) 80px;
-                    align-items: center;
-                    gap: calc(var(--gap, 5px) * 2);
+                label {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                     min-width: 0;
                 }
 
@@ -131,39 +114,18 @@
                     font-size: 0.9em;
                     text-align: right;
                     white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
 
                 .tooltip-button {
                     justify-self: center;
                 }
-            }
 
-            .theme-reset-actions {
-                display: flex;
-                gap: var(--gap, 5px);
-            }
-
-            @media (max-width: 560px) {
-                .theme-variable {
-                    grid-template-columns: minmax(0, 1fr) 28px;
-                    padding: var(--resting-area-padding, 5px) 0;
-
-                    .theme-variable-control {
-                        grid-column: 1 / -1;
-                        grid-row: 2;
-                    }
-                }
-
-                .theme-profile-actions > button {
-                    flex: 1;
+                .nivix-primary-button {
+                    margin-left: auto;
                 }
             }
-        }
-    }
-    
-    @media (max-width: 560px) {
-        .sub-tab-container .tab {
-            width: 100%;
         }
     }
 }
