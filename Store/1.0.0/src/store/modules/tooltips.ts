@@ -109,7 +109,7 @@ function showTooltip(trigger: HTMLElement): void {
         return;
     }
 
-    tooltip.textContent = content;
+    tooltip.innerHTML = content;
     tooltip.classList.toggle('primary', trigger.querySelector('.tooltip.primary') !== null);
     addDescription(trigger);
     repositionTooltip();

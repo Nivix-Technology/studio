@@ -2,7 +2,19 @@ import { electroview } from './index';
 import { init as initNxLib } from './nxlib';
 import { showNotification, showPopup } from './notifications';
 
-type PreferenceValues = Record<string, any>;
+type PreferenceValues = {
+    spaceFillersEnabled: boolean;
+    updateSpaceFillersOnTabChange: boolean;
+    useSpaceFillerBlur: boolean;
+    transitionAnimations: boolean;
+    loadMenuDelay: number;
+    spaceFillerAnimations: boolean;
+    enableDarkThemeSupport: boolean;
+    themeVariables: Record<string, any>;
+    themeProfileId: string;
+    [key: string]: unknown;
+};
+
 type ThemeValue = string | number;
 
 type ThemeVariable = {
@@ -46,18 +58,34 @@ const defaultPreferences: PreferenceValues = {
 
 const themeVariables: ThemeVariable[] = [
     { name: 'Accent Color', property: '--brand-primary', section: 'Colors', description: 'The main accent color used for primary buttons and highlights.', type: 'color', defaultValue: '#43a4eb' },
-    { name: 'Primary Text', property: '--text-primary', section: 'Colors', description: 'The main text color used throughout the app.', type: 'color', defaultValue: '#313131' },
-    { name: 'Light Text', property: '--text-tertiary', section: 'Colors', description: 'Text shown on colored or dark backgrounds.', type: 'color', defaultValue: '#ffffff' },
+
+    { name: 'Accent Color Contrast', property: '--brand-color-step-amount', section: 'Colors', description: 'How much darker accent colored elements are than the ones they are stacked on top of. Increase this setting to increase contrast.', type: 'range', defaultValue: 12, min: 0, max: 20, unit: '%' },
+
     { name: 'Primary Background', property: '--background-base', section: 'Colors', description: 'The main app background color.', type: 'color', defaultValue: '#f6f6f6' },
-    { name: 'Background Color Contrast', property: '--background-color-step-amount', section: 'Colors', description: 'How much darker backgrounds are than the ones they are stacked on top of. Increase this setting to increase contrast.', type: 'range', defaultValue: 12, min: 0, max: 50, unit: '%' },
-    { name: 'Accent Color Contrast', property: '--brand-color-step-amount', section: 'Colors', description: 'How much darker accent colored elements are than the ones they are stacked on top of. Increase this setting to increase contrast.', type: 'range', defaultValue: 12, min: 0, max: 50, unit: '%' },
+
+    { name: 'Background Color Contrast', property: '--background-color-step-amount', section: 'Colors', description: 'How much darker backgrounds are than the ones they are stacked on top of. Increase this setting to increase contrast.', type: 'range', defaultValue: 12, min: 0, max: 20, unit: '%' },
+
+    { name: 'Primary Text', property: '--text-primary', section: 'Colors', description: 'The main text color used throughout the app.', type: 'color', defaultValue: '#313131' },
+
+    { name: 'Light Text', property: '--text-tertiary', section: 'Colors', description: 'Text shown on colored or dark backgrounds.', type: 'color', defaultValue: '#ffffff' },
+
     { name: 'Corner Radius', property: '--radius', section: 'Shape & spacing', description: 'How round corners are on things like buttons and menus.', type: 'range', defaultValue: 4, min: 0, max: 24, unit: 'px' },
+    
     { name: 'Resting Area Padding', property: '--resting-area-padding', section: 'Shape & spacing', description: 'How much space there is around the inside of panels and other menus.', type: 'range', defaultValue: 5, min: 0, max: 24, unit: 'px' },
-    { name: 'Clickable Area Vertical Padding', property: '--clickable-area-padding-y', section: 'Shape & spacing', description: 'How much space there is between the text and the top and bottom of buttons and other clickable elements.', type: 'range', defaultValue: 0.4, min: 0, max: 2, step: 0.04, unit: 'rem' },
-    { name: 'Clickable Area Horizontal Padding', property: '--clickable-area-padding-x', section: 'Shape & spacing', description: 'How much space there is between the text and the left and right of buttons and other clickable elements.', type: 'range', defaultValue: 1, min: 0, max: 3, step: 0.05, unit: 'rem' },
+
     { name: 'Element Gap', property: '--gap', section: 'Shape & spacing', description: 'The space between elements in lists, both left-right and top-bottom.', type: 'range', defaultValue: 5, min: 0, max: 24, unit: 'px' },
+    
+    { name: 'Clickable Area Vertical Padding', property: '--clickable-area-padding-y', section: 'Shape & spacing', description: 'How much space there is between the text and the top and bottom of buttons and other clickable elements.', type: 'range', defaultValue: 0.4, min: 0, max: 2, step: 0.04, unit: 'rem' },
+    
+    { name: 'Clickable Area Horizontal Padding', property: '--clickable-area-padding-x', section: 'Shape & spacing', description: 'How much space there is between the text and the left and right of buttons and other clickable elements.', type: 'range', defaultValue: 1, min: 0, max: 3, step: 0.05, unit: 'rem' },
+    
+    { name: 'Outline Thickness', property: '--outline-width', section: 'Accessibility', description: 'How thick the line around an item is when said item is clicked or focused on with the TAB key.', type: 'range', min: 2, defaultValue: 1.5, max: 10, step: 0.5, unit: 'px' },
+    
+    { name: 'Outline Color', property: '--outline-color', section: 'Accessibility', description: 'The color of the line around an item is when said item is clicked or focused on with the TAB key.', type: 'color', defaultValue: '#ff6b00' },
+    
     { name: 'Transition Speed', property: '--transition-speed', section: 'Effects & motion', description: 'How long transition animations like fading and switching tabs take.', type: 'range', defaultValue: 0.2, min: 0.2, max: 10, step: 0.05, unit: 's' },
-    { name: 'Transition Easing', property: '--transition-easing-style', section: 'Effects & motion', description: 'Linear: Animation is the same speed until the end. Ease In: Animation starts slow and ends fast. Ease Out: Animation starts fast and ends slow. Ease In Out: Starts slow, middle is fast, ends slow.', type: 'select', defaultValue: 'ease-out', options: ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'] }
+    
+    { name: 'Transition Easing Style', property: '--transition-easing-style', section: 'Effects & motion', description: '<strong>Linear:</strong> Animation is the same speed until the end.<br><strong>Ease In:</strong> Animation starts slow and ends fast.<br><strong>Ease Out:</strong> Animation starts fast and ends slow.<br><strong>Ease In Out:</strong> Starts slow, middle is fast, ends slow.', type: 'select', defaultValue: 'ease-out', options: ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'] }
 ];
 
 const themeDirectory = 'ThemeProfiles';
@@ -71,7 +99,7 @@ let settingsInputsInitialized = false;
 let tabInitialized = false;
 let savedThemeProfiles: SavedThemeProfile[] = [];
 
-function getElement<T extends HTMLElement>(id: string): T {
+function getEBD<T extends HTMLElement>(id: string): T {
     const element = document.getElementById(id);
     if (!element) throw new Error(`Settings element "${id}" was not found.`);
     return element as T;
@@ -102,8 +130,8 @@ function initSettingsInputs() {
         input.addEventListener('change', () => {
             let value: unknown = input.type === 'checkbox' ? input.checked :
                 input.type === 'number' ? input.valueAsNumber : input.value;
-            if (typeof value === 'number' && Number.isNaN(value)) value = currentPreferences[key];
-            void setPreferences({ [key]: value }).catch(error => {
+            if (typeof value === 'number' && Number.isNaN(value)) value = currentPreferences[key as keyof PreferenceValues];
+            void setPreferences({ [key]: value } as Partial<PreferenceValues>).catch(error => {
                 console.error(`Failed to save preference ${key}:`, error);
             });
         });
@@ -118,11 +146,11 @@ function syncPreferenceInput(input: HTMLInputElement, key: string) {
     else input.value = String(value);
 }
 
-async function setPreferences(updates: PreferenceValues) {
+async function setPreferences(updates: Partial<PreferenceValues>) {
     for (const [key, value] of Object.entries(updates)) {
         if (!(key in currentPreferences)) throw new Error(`Unknown preference: ${key}`);
-        if (typeof value !== typeof currentPreferences[key]) {
-            throw new Error(`Preference "${key}" must be a ${typeof currentPreferences[key]}.`);
+        if (value !== undefined && typeof value !== typeof currentPreferences[key as keyof PreferenceValues]) {
+            throw new Error(`Preference "${key}" must be a ${typeof currentPreferences[key as keyof PreferenceValues]}.`);
         }
     }
 
@@ -232,30 +260,24 @@ function parseThemeProfile(content: string): ThemeProfile {
 }
 
 async function initThemeEditor() {
-    buildThemeInputs(readThemeVariables(preferences['themeVariables']));
-    getElement<HTMLSelectElement>('settings-theme-profile').addEventListener('change', () => {
+    buildThemeInputs();
+    getEBD<HTMLSelectElement>('settings-theme-profile').addEventListener('change', () => {
         void selectThemeProfile().catch(showThemeError);
     });
-    getElement<HTMLButtonElement>('settings-theme-save-profile').addEventListener('click', () => {
+    getEBD<HTMLButtonElement>('settings-theme-save-profile').addEventListener('click', () => {
         void saveThemeProfile().catch(showThemeError);
     });
-    getElement<HTMLButtonElement>('settings-theme-import').addEventListener('click', () => {
-        getElement<HTMLInputElement>('settings-theme-import-file').click();
-    });
-    getElement<HTMLInputElement>('settings-theme-import-file').addEventListener('change', event => {
+    getEBD<HTMLInputElement>('settings-theme-import-file').addEventListener('change', event => {
         const input = event.currentTarget as HTMLInputElement;
         const file = input.files?.[0];
         input.value = '';
         if (file) void importThemeProfile(file).catch(showThemeError);
     });
-    getElement<HTMLButtonElement>('settings-theme-export').addEventListener('click', () => {
+    getEBD<HTMLButtonElement>('settings-theme-export').addEventListener('click', () => {
         void exportThemeProfile().catch(showThemeError);
     });
-    getElement<HTMLButtonElement>('settings-theme-delete').addEventListener('click', () => {
+    getEBD<HTMLButtonElement>('settings-theme-delete').addEventListener('click', () => {
         void deleteThemeProfile().catch(showThemeError);
-    });
-    getElement<HTMLButtonElement>('settings-theme-reset').addEventListener('click', () => {
-        void resetTheme().catch(showThemeError);
     });
 
     updateThemeProfileButtons();
@@ -265,8 +287,8 @@ async function initThemeEditor() {
     await refreshThemeProfiles(String(preferences['themeProfileId'] ?? ''));
 }
 
-function buildThemeInputs(overrides: Record<string, ThemeValue>) {
-    const container = getElement<HTMLDivElement>('settings-theme-variables');
+function buildThemeInputs() {
+    const container = getEBD<HTMLDivElement>('settings-theme-variables');
     container.replaceChildren();
     let section = '';
     let sectionContainer: HTMLDivElement;
@@ -285,59 +307,9 @@ function buildThemeInputs(overrides: Record<string, ThemeValue>) {
             container.append(group);
         }
 
-        const value = overrides[variable.property] ?? variable.defaultValue;
-        const id = `theme-variable-${variable.property.slice(2)}`;
-        let input: HTMLInputElement | HTMLSelectElement;
-        if (variable.type === 'select') {
-            const select = document.createElement('select');
-            select.className = 'nivix-select';
-            variable.options!.forEach(option => select.add(new Option(option, option)));
-            input = select;
-        } else {
-            const field = document.createElement('input');
-            field.className = 'nivix-input';
-            field.type = variable.type;
-            if (variable.type === 'range') {
-                field.min = String(variable.min);
-                field.max = String(variable.max);
-                field.step = String(variable.step ?? 1);
-            }
-            input = field;
-        }
-        input.id = id;
-        input.value = String(value);
-
-        const label = document.createElement('label');
-        label.htmlFor = id;
-        label.textContent = variable.name;
-        const help = document.createElement('button');
-        help.type = 'button';
-        help.className = 'tooltip-button tip-right';
-        help.textContent = 'i';
-        help.setAttribute('aria-label', `About ${variable.name}`);
-        help.dataset['tooltipContent'] = variable.description;
-        const valueLabel = document.createElement('span');
-        valueLabel.className = 'theme-variable-value';
-
-        const displayValue = (nextValue: ThemeValue) =>
-            variable.type === 'range' ? `${nextValue}${variable.unit}` : String(nextValue);
-        const updateValue = () => {
-            const nextValue = variable.type === 'range' ? (input as HTMLInputElement).valueAsNumber : input.value;
-            valueLabel.textContent = displayValue(nextValue);
-            document.documentElement.style.setProperty(variable.property, themeCssValue(variable, nextValue));
-        };
-        valueLabel.textContent = displayValue(value);
-        const control = document.createElement('div');
-        control.className = 'theme-variable-control';
-        control.append(input, valueLabel);
-        const row = document.createElement('div');
-        row.className = 'theme-variable';
-        row.append(label, help, control);
-        input.addEventListener('input', updateValue);
-        input.addEventListener('change', () => {
-            const nextValue = variable.type === 'range' ? (input as HTMLInputElement).valueAsNumber : input.value;
-            void updateThemeVariable(variable, nextValue).catch(showThemeError);
-        });
+        const row = document.createElement('button');
+        row.className = 'nivix-primary-button';
+        row.innerText = variable.name;
         sectionContainer!.append(row);
     }
 }
@@ -361,7 +333,7 @@ async function refreshThemeProfiles(selectedId = '') {
         return { ...parseThemeProfile(content), id };
     }));
 
-    const select = getElement<HTMLSelectElement>('settings-theme-profile');
+    const select = getEBD<HTMLSelectElement>('settings-theme-profile');
     select.replaceChildren(new Option('Current theme', ''));
     savedThemeProfiles.forEach(profile => select.add(new Option(profile.name, profile.id)));
     select.value = savedThemeProfiles.some(profile => profile.id === selectedId) ? selectedId : '';
@@ -369,13 +341,13 @@ async function refreshThemeProfiles(selectedId = '') {
 }
 
 function updateThemeProfileButtons() {
-    const selected = Boolean(getElement<HTMLSelectElement>('settings-theme-profile').value);
-    getElement<HTMLButtonElement>('settings-theme-export').disabled = !selected;
-    getElement<HTMLButtonElement>('settings-theme-delete').disabled = !selected;
+    const selected = Boolean(getEBD<HTMLSelectElement>('settings-theme-profile').value);
+    getEBD<HTMLButtonElement>('settings-theme-export').disabled = !selected;
+    getEBD<HTMLButtonElement>('settings-theme-delete').disabled = !selected;
 }
 
 async function selectThemeProfile() {
-    const id = getElement<HTMLSelectElement>('settings-theme-profile').value;
+    const id = getEBD<HTMLSelectElement>('settings-theme-profile').value;
     updateThemeProfileButtons();
     if (!id) return setPreferences({ themeProfileId: '' });
 
@@ -383,30 +355,11 @@ async function selectThemeProfile() {
     if (typeof content !== 'string') throw new Error('The selected theme profile could not be read.');
     const profile = parseThemeProfile(content);
     await setPreferences({ themeVariables: profile.variables, themeProfileId: id });
-    buildThemeInputs(profile.variables);
-}
-
-async function updateThemeVariable(variable: ThemeVariable, value: ThemeValue) {
-    if (!isValidThemeValue(variable, value)) throw new Error(`Invalid value for ${variable.name}.`);
-    const variables = readThemeVariables(preferences['themeVariables']);
-    if (value === variable.defaultValue) delete variables[variable.property];
-    else variables[variable.property] = value;
-
-    const profileId = String(preferences['themeProfileId'] ?? '');
-    await setPreferences({ themeVariables: variables });
-    if (profileId) {
-        const profile = savedThemeProfiles.find(item => item.id === profileId);
-        if (!profile) throw new Error('The active theme profile could not be found.');
-        const updated = { ...profile, variables };
-        if (await manageThemeFile('write', themeProfilePath(profileId), JSON.stringify(updated, null, 2)) !== true) {
-            throw new Error('The active theme profile could not be updated.');
-        }
-        profile.variables = variables;
-    }
+    buildThemeInputs();
 }
 
 async function saveThemeProfile() {
-    const nameInput = getElement<HTMLInputElement>('settings-theme-profile-name');
+    const nameInput = getEBD<HTMLInputElement>('settings-theme-profile-name');
     const name = nameInput.value.trim();
     if (!name) {
         showNotification('Enter a name for the theme profile.', 'warning');
@@ -439,12 +392,12 @@ async function importThemeProfile(file: File) {
     }
     await refreshThemeProfiles(id);
     await setPreferences({ themeVariables: profile.variables, themeProfileId: id });
-    buildThemeInputs(profile.variables);
+    buildThemeInputs();
     showNotification(`Theme profile "${profile.name}" imported.`);
 }
 
 async function exportThemeProfile() {
-    const id = getElement<HTMLSelectElement>('settings-theme-profile').value;
+    const id = getEBD<HTMLSelectElement>('settings-theme-profile').value;
     const profile = savedThemeProfiles.find(item => item.id === id);
     if (!profile) throw new Error('Select a saved theme profile to export.');
     const picker = (window as Window & { showSaveFilePicker?: ThemeSaveFilePicker }).showSaveFilePicker;
@@ -474,7 +427,7 @@ async function confirmReset(title: string, message: string) {
 }
 
 async function deleteThemeProfile() {
-    const id = getElement<HTMLSelectElement>('settings-theme-profile').value;
+    const id = getEBD<HTMLSelectElement>('settings-theme-profile').value;
     const profile = savedThemeProfiles.find(item => item.id === id);
     if (!profile || !await confirmReset('Delete Theme Profile', `Delete the "${profile.name}" theme profile? This cannot be undone.`)) return;
     if (await manageThemeFile('delete', themeProfilePath(id)) !== true) {
@@ -482,7 +435,7 @@ async function deleteThemeProfile() {
     }
     if (preferences['themeProfileId'] === id) {
         await setPreferences({ themeVariables: {}, themeProfileId: '' });
-        buildThemeInputs({});
+        buildThemeInputs();
     }
     await refreshThemeProfiles();
     showNotification(`Theme profile "${profile.name}" deleted.`);
@@ -491,7 +444,9 @@ async function deleteThemeProfile() {
 async function resetTheme() {
     if (!await confirmReset('Reset Theme', 'Clear the current theme preferences and restore the default CSS values? Saved profiles will not be deleted.')) return;
     await setPreferences({ themeVariables: {}, themeProfileId: '' });
-    buildThemeInputs({});
+    await setPreferences({ enableDarkThemeSupport: false });
+    getEBD<HTMLInputElement>('settings-enableDarkThemeSupport').checked = false;
+    buildThemeInputs();
     await refreshThemeProfiles();
     showNotification('Theme preferences have been reset.');
 }
@@ -512,8 +467,8 @@ async function resetPreferences() {
     });
     preferenceWrite = write.catch(() => undefined);
     await write;
-    buildThemeInputs({});
-    getElement<HTMLSelectElement>('settings-theme-profile').value = '';
+    buildThemeInputs();
+    getEBD<HTMLSelectElement>('settings-theme-profile').value = '';
     updateThemeProfileButtons();
     initNxLib();
 }
@@ -535,11 +490,6 @@ async function resetInventory() {
 }
 
 async function resetAllAppData() {
-    if (!await confirmReset(
-        'Reset App Data',
-        'This permanently deletes all data stored by this app on this device, including preferences, local inventory, and user files. The app will return to its default local database.'
-    )) return;
-
     try {
         if (!electroview.rpc?.request.resetAppData) throw new Error('The app-data reset service is unavailable.');
         await electroview.rpc.request.resetAppData();
@@ -552,19 +502,84 @@ async function resetAllAppData() {
 
 function initTab() {
     if (tabInitialized) return;
-    getElement<HTMLButtonElement>('settings-reset-appData').addEventListener('click', () => void resetAllAppData());
-    getElement<HTMLButtonElement>('settings-reset-resetInventory').addEventListener('click', () => void resetInventory());
-    getElement<HTMLButtonElement>('settings-reset-preferences').addEventListener('click', () => {
-        void (async () => {
-            try {
-                if (!await confirmReset('Reset Preferences', 'This restores all preferences to their default values.')) return;
-                await resetPreferences();
-                showNotification('Preferences have been reset.');
-            } catch (error) {
-                console.error('Failed to reset preferences:', error);
-                showNotification('Failed to reset preferences.', 'error');
-            }
-        })();
+    getEBD<HTMLButtonElement>('settings-reset').addEventListener('click', async () => {
+        const option = await showPopup(
+            'Choose something to reset',
+            'Choose something to reset below.',
+            'options',
+            [
+                { content: 'Everything', value: 'all' },
+                { content: 'Preferences', value: 'preferences' },
+                { content: 'Theme', value: 'theme' },
+                { content: 'Local Inventory', value: 'inventory' },
+                { content: 'Cancel', value: undefined, highlighted: true }
+            ]
+        );
+
+        switch (option) {
+            case 'all':
+                if (
+                    await showPopup(
+                        'Confirm Reset',
+                        'Are you sure you want to reset ALL app data? This cannot be undone.',
+                        'options',
+                        [
+                            { content: 'Reset', value: true },
+                            { content: 'Cancel', value: false, highlighted: true }
+                        ],
+                        undefined,
+                        true
+                    )
+                ) resetAllAppData();
+                break;
+            case 'preferences':
+                if (
+                    await showPopup(
+                        'Confirm Reset',
+                        'Are you sure you want to reset all settings? This cannot be undone.',
+                        'options',
+                        [
+                            { content: 'Reset', value: true },
+                            { content: 'Cancel', value: false, highlighted: true }
+                        ],
+                        undefined,
+                        true
+                    )
+                ) resetPreferences();
+                break;
+            case 'theme':
+                if (
+                    await showPopup(
+                        'Confirm Reset',
+                        'Are you sure you want to reset all theme settings? This cannot be undone. <br><br><span class="nivix-disclaimer">Note: You can export your themes as a file for sharing and later use.</span>',
+                        'options',
+                        [
+                            { content: 'Reset', value: true },
+                            { content: 'Cancel', value: false, highlighted: true }
+                        ],
+                        undefined,
+                        true
+                    )
+                ) resetTheme();
+                break;
+            case 'inventory':
+                if (
+                    await showPopup(
+                        'Confirm Reset',
+                        'Are you sure you want to reset your inventory? This cannot be undone. <br><br><span class="nivix-disclaimer">Note: This only applies to your local inventory. Remote database inventory systems have to be reset from the Store Remote dashboard.</span>',
+                        'options',
+                        [
+                            { content: 'Reset', value: true },
+                            { content: 'Cancel', value: false, highlighted: true }
+                        ],
+                        undefined,
+                        true
+                    )
+                ) resetInventory();
+                break;
+            default:
+                break;
+        }
     });
     tabInitialized = true;
 }

@@ -81,12 +81,11 @@
 				<button id="selectSpace-refresh" class="nivix-primary-button">Refresh</button>
 				<button id="selectSpace-create" class="nivix-primary-button primary"
 				data-tab-navigation="createSpace">Create New Space</button>
-				
 			</div>
 		</div>
 	</div>
 	
-	<div id="createSpace" class="tab" data-tab-display="flex">
+	<div id="createSpace" class="tab" data-tab-display="block">
 		<div class="center">
 			<section class="create-space-options">
 				<h1 class="nivix-accent">Create a Space</h1>
@@ -229,7 +228,7 @@
 						<button id="settings-theme-save-profile" class="nivix-primary-button">Save Profile</button>
 					</div>
 					<div class="theme-profile-actions">
-						<button id="settings-theme-import" class="nivix-primary-button">Import Theme</button>
+						<button data-input-link="settings-theme-import-file" class="nivix-primary-button">Import Theme</button>
 						<button id="settings-theme-export" class="nivix-primary-button">Export Theme</button>
 						<button id="settings-theme-delete" class="nivix-primary-button">Delete Profile</button>
 						<input id="settings-theme-import-file" type="file" accept=".storetheme,application/json" hidden>
@@ -250,10 +249,6 @@
 				<hr>
 
 				<div id="settings-theme-variables" class="theme-variables"></div>
-				<div class="theme-reset-actions">
-					<div class="filler"></div>
-					<button id="settings-theme-reset" class="nivix-primary-button danger">Reset Theme</button>
-				</div>
 			</div>
 		</div>
 		<div class="nivix-horizontal-navigation divider-top">
@@ -261,9 +256,7 @@
 			data-tab-navigation="previous, selectSpace">Back</button>
 			
 			<div class="filler"></div>
-			<button class="nivix-primary-button danger" id="settings-reset-preferences">Reset Preferences</button>
-			<button class="nivix-primary-button danger" id="settings-reset-resetInventory">Reset Inventory</button>
-			<button class="nivix-primary-button danger danger-primary" id="settings-reset-appData">Reset App Data</button>
+			<button class="nivix-primary-button danger danger-primary" id="settings-reset">Reset...</button>
 		</div>
 	</div>
 	

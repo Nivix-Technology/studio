@@ -1,4 +1,5 @@
 import { preferences } from "./settings";
+import { ColorPicker, PopupPlacer } from "./nxlib";
 
 interface NotificationItem {
     message: string;
@@ -8,9 +9,9 @@ interface NotificationItem {
 }
 
 export type ValidNotificationType =
-| "warning"
-| "info"
-| "error"
+    | "warning"
+    | "info"
+    | "error";
 
 export interface PopupOption {
     content: string;
@@ -18,20 +19,22 @@ export interface PopupOption {
     highlighted?: boolean;
 }
 
-export type ValidInputType = 
-| "text" 
-| "number" 
-| "password" 
-| "email" 
-| "url" 
-| "tel" 
-| "search" 
-| "date" 
-| "time" 
-| "datetime-local"
-| "file";
+export type ValidInputType =
+    | "text"
+    | "number"
+    | "password"
+    | "email"
+    | "url"
+    | "tel"
+    | "search"
+    | "date"
+    | "time"
+    | "datetime-local"
+    | "file"
+    | "range"
+    | "color";
 
-export type PopupType = "options" | ValidInputType;
+export type PopupType = "options" | "select" | ValidInputType;
 
 export interface PopupInputAttributes {
     placeholder?: string;
@@ -48,6 +51,7 @@ export interface PopupInputAttributes {
     autocomplete?: string;
     accept?: string;
     multiple?: boolean;
+    selectOptions?: string[];
     [key: string]: any;
 }
 
@@ -55,9 +59,9 @@ const queue: NotificationItem[] = [];
 let isProcessing = false;
 
 export function showNotification(
-    message: string, 
-    type: ValidNotificationType = "info", 
-    duration: number = 3000, 
+    message: string,
+    type: ValidNotificationType = "info",
+    duration: number = 3000,
     sticky: boolean = type === "error"
 ): void {
     queue.push({ message, type, duration, sticky });
@@ -77,7 +81,6 @@ async function processQueue(): Promise<void> {
     const current = queue.shift()!;
     
     await renderNotification(current);
-    
     processQueue();
 }
 
@@ -85,8 +88,6 @@ function renderNotification(item: NotificationItem): Promise<void> {
     return new Promise((resolve) => {
         const container = document.createElement("div");
         container.className = `notification-box ${item.type}`;
-        container.setAttribute("role", "status");
-        container.setAttribute("aria-live", "polite");
 
         const header = document.createElement("div");
         header.className = "notification-header";
@@ -101,14 +102,14 @@ function renderNotification(item: NotificationItem): Promise<void> {
         
         const closeBtn = document.createElement("button");
         closeBtn.className = "notification-close";
-        closeBtn.setAttribute("aria-label", "Dismiss notification");
         closeBtn.innerHTML = "&times;";
         
-        header.appendChild(title);
-        header.appendChild(closeBtn);
-        container.appendChild(header);
-        container.appendChild(messageOutput);
-        if (preferences['transitionAnimations']) container.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style, ease-out) forwards";
+        header.append(title, closeBtn);
+        container.append(header, messageOutput);
+        
+        if (preferences['transitionAnimations']) {
+            container.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style, ease-out) forwards";
+        }
         document.body.appendChild(container);
         
         let dismissTimer: number | null = null;
@@ -117,7 +118,6 @@ function renderNotification(item: NotificationItem): Promise<void> {
         const dismiss = (event?: MouseEvent) => {
             if (isDismissed) return;
             
-            // If shift key is held, clear out the entire notification queue
             if (event && event.shiftKey) {
                 queue.length = 0;
             }
@@ -135,16 +135,13 @@ function renderNotification(item: NotificationItem): Promise<void> {
             }
             
             container.style.animation = "nivixFadeOut 0.25s var(--transition-easing-style, ease-out) forwards";
-            
             container.addEventListener("animationend", () => {
                 container.remove();
                 resolve();
             }, { once: true });
         };
         
-        closeBtn.addEventListener("click", (event) => {
-            dismiss(event);
-        });
+        closeBtn.addEventListener("click", (event) => dismiss(event));
         
         if (!item.sticky) {
             dismissTimer = window.setTimeout(() => dismiss(), item.duration);
@@ -152,101 +149,18 @@ function renderNotification(item: NotificationItem): Promise<void> {
     });
 }
 
-const popupMargin = 5;
-let cursorX: number | null = null;
-let cursorY: number | null = null;
 let dismissActivePopup: (() => void) | null = null;
-
-document.addEventListener("mousemove", (event) => {
-    cursorX = event.clientX;
-    cursorY = event.clientY;
-});
-
-function placePopup(container: HTMLDivElement, popup: HTMLDivElement, anchor: HTMLElement | null): void {
-    popup.style.position = "fixed";
-    popup.style.left = "0px";
-    popup.style.top = "0px";
-
-    const style = getComputedStyle(popup);
-    const width = parseFloat(style.width);
-    const height = parseFloat(style.height);
-    const minX = popupMargin;
-    const minY = popupMargin;
-    const maxX = window.innerWidth - width - popupMargin;
-    const maxY = window.innerHeight - height - popupMargin;
-
-    if (![width, height, maxX, maxY].every(Number.isFinite) || maxX < minX || maxY < minY) {
-        container.classList.add("center", "popup-container-shaded");
-        popup.style.position = "";
-        popup.style.left = "";
-        popup.style.top = "";
-        return;
-    }
-
-    const triggerRect = anchor?.getBoundingClientRect();
-    const triggerX = triggerRect
-        ? triggerRect.left + triggerRect.width / 2
-        : cursorX;
-    const triggerY = triggerRect?.bottom ?? cursorY;
-
-    if (triggerX === null || triggerY === null) {
-        container.classList.add("center", "popup-container-shaded");
-        popup.style.position = "";
-        popup.style.left = "";
-        popup.style.top = "";
-        return;
-    }
-
-    popup.style.left = `${triggerX - width / 2}px`;
-    popup.style.top = `${triggerY + popupMargin}px`;
-    const positionedStyle = getComputedStyle(popup);
-    const x = parseFloat(positionedStyle.left);
-    const y = parseFloat(positionedStyle.top);
-    if (![x, y].every(Number.isFinite)) {
-        container.classList.add("center", "popup-container-shaded");
-        popup.style.position = "";
-        popup.style.left = "";
-        popup.style.top = "";
-        return;
-    }
-
-    const clampX = (x: number) => Math.max(minX, Math.min(x, maxX));
-    const clampY = (y: number) => Math.max(minY, Math.min(y, maxY));
-    const belowTrigger = { x, y };
-    const aboveTrigger = triggerRect
-        ? { x: triggerX - width / 2, y: triggerRect.top - height - popupMargin }
-        : null;
-    const candidates = [
-        belowTrigger,
-        ...(aboveTrigger ? [aboveTrigger] : []),
-        ...(triggerRect ? [
-            { x: triggerRect.right + popupMargin, y: triggerRect.top + (triggerRect.height - height) / 2 },
-            { x: triggerRect.left - width - popupMargin, y: triggerRect.top + (triggerRect.height - height) / 2 }
-        ] : [])
-    ];
-    const fallback = triggerRect && triggerRect.top > window.innerHeight / 2 && aboveTrigger
-        ? aboveTrigger
-        : belowTrigger;
-
-    const placement = candidates.find(({ x, y }) =>
-        x >= minX && x <= maxX && y >= minY && y <= maxY
-    ) ?? {
-        x: clampX(fallback.x),
-        y: clampY(fallback.y)
-    };
-    popup.style.left = `${placement.x}px`;
-    popup.style.top = `${placement.y}px`;
-}
 
 export function showPopup<T = any>(
     title: string,
-    message: string, 
+    message: string,
     type: PopupType = "options",
     options: PopupOption[] = [
         { content: "No", value: false, highlighted: false },
         { content: "Yes", value: true, highlighted: true }
     ],
-    inputProps: PopupInputAttributes = {}
+    inputProps: PopupInputAttributes = {},
+    center: boolean = false
 ): Promise<T | undefined> {
     const activeElement = document.activeElement;
     const anchor = activeElement instanceof HTMLElement
@@ -277,20 +191,37 @@ export function showPopup<T = any>(
         span.innerHTML = message;
         messageContainer.appendChild(span);
         
-        let inputElement: HTMLInputElement | null = null;
+        let inputElement: HTMLInputElement | HTMLSelectElement | null = null;
+        let colorPickerInstance: ColorPicker | null = null;
         
         if (type !== "options") {
-            inputElement = document.createElement("input");
-            inputElement.type = type;
-            inputElement.className = "nivix-input";
-            
-            Object.entries(inputProps).forEach(([key, val]) => {
-                if (val !== undefined && val !== null) {
-                    inputElement!.setAttribute(key, String(val));
-                }
-            });
-            
-            messageContainer.appendChild(inputElement);
+            if (type === "select") {
+                const selectElement = document.createElement("select");
+                inputProps.selectOptions?.forEach(option => {
+                    selectElement.add(new Option(option, option));
+                });
+                inputElement = selectElement;
+                inputElement.className = "nivix-input";
+            } else if (type === "color") {
+                colorPickerInstance = new ColorPicker(inputProps.value);
+                colorPickerInstance.mount(messageContainer);
+                inputElement = colorPickerInstance.inputElement;
+            } else {
+                inputElement = document.createElement("input");
+                inputElement.type = type;
+                inputElement.className = "nivix-input";
+            }
+
+            if (type !== "color") {
+                Object.entries(inputProps).forEach(([key, val]) => {
+                    if (key !== "selectOptions" && val !== undefined && val !== null) {
+                        if (typeof val === "boolean") inputElement!.toggleAttribute(key, val);
+                        else inputElement!.setAttribute(key, String(val));
+                    }
+                });
+                if (inputProps.value !== undefined && inputElement) inputElement.value = String(inputProps.value);
+                messageContainer.appendChild(inputElement);
+            }
         }
         
         const actionContainer = document.createElement("div");
@@ -300,34 +231,30 @@ export function showPopup<T = any>(
         const transitionAnimations = preferences['transitionAnimations'];
         let isClosing = false;
         let outsidePointerDown: ((event: PointerEvent) => void) | null = null;
-        let trapTabNavigation: ((event: KeyboardEvent) => void) | null = null;
         let dismissThisPopup: (() => void) | null = null;
+
         const clearActivePopup = () => {
             if (dismissActivePopup === dismissThisPopup) {
                 dismissActivePopup = null;
             }
         };
+
         const removeOutsideListener = () => {
             if (outsidePointerDown) {
                 document.removeEventListener("pointerdown", outsidePointerDown);
                 outsidePointerDown = null;
             }
-            if (trapTabNavigation) {
-                document.removeEventListener("keydown", trapTabNavigation);
-                trapTabNavigation = null;
-            }
         };
         
         const closePopup = (selectedValue: any, immediately = false) => {
-            if (immediately) {
-                isClosing = true;
+            if (immediately || isClosing) {
+                if (!isClosing && immediately) isClosing = true;
                 removeOutsideListener();
                 popupContainer.remove();
                 clearActivePopup();
-                resolve(undefined);
+                resolve(selectedValue as T | undefined);
                 return;
             }
-            if (isClosing) return;
             isClosing = true;
             removeOutsideListener();
             
@@ -351,9 +278,7 @@ export function showPopup<T = any>(
                 if (pendingAnimations === 0) finishClose();
             };
 
-            popup.addEventListener("animationend", () => {
-                animationEnded();
-            }, { once: true });
+            popup.addEventListener("animationend", animationEnded, { once: true });
             popup.style.animation = "nivixFadeOut 0.3s var(--transition-easing-style, ease-out) forwards";
 
             if (isShaded) {
@@ -366,6 +291,7 @@ export function showPopup<T = any>(
                 popupContainer.style.animation = "popupContainerFadeOut 0.3s var(--transition-easing-style, ease-out) forwards";
             }
         };
+
         dismissThisPopup = () => closePopup(undefined, true);
         dismissActivePopup = dismissThisPopup;
         
@@ -376,37 +302,38 @@ export function showPopup<T = any>(
               ]
             : options;
 
-        const submitInput = () => {
-            const targetOpt = effectiveOptions.find(o => o.highlighted && o.value === "inputValue") || 
-                              effectiveOptions.find(o => o.value === "inputValue") ||
-                              effectiveOptions[effectiveOptions.length - 1];
-            
-            const val = targetOpt?.value === "inputValue"
-                ? (type === "file" ? inputElement?.files : inputElement?.value)
-                : (targetOpt ? targetOpt.value : (type === "file" ? inputElement?.files : inputElement?.value));
+        const getSelectedInputValue = () => 
+            inputElement instanceof HTMLInputElement && inputElement.type === "file"
+                ? inputElement.files
+                : inputElement?.value;
+
+        const handleOptionSelection = (optValue: any) => {
+            if (type === "color" && optValue === "inputValue" &&
+                inputElement instanceof HTMLInputElement && !inputElement.reportValidity()) {
+                return;
+            }
+            const val = optValue === "inputValue" ? getSelectedInputValue() : optValue;
             closePopup(val);
         };
 
         effectiveOptions.forEach((opt) => {
             const btn = document.createElement("button");
             btn.textContent = opt.content;
-            btn.className = opt.highlighted ? "nivix-primary-button primary" : "nivix-secondary-button";
+            btn.className = opt.highlighted ? "nivix-primary-button primary" : "nivix-primary-button";
             if (opt.highlighted) highlightedButton = btn;
             
-            btn.addEventListener("click", () => {
-                const val = opt.value === "inputValue"
-                    ? (type === "file" ? inputElement?.files : inputElement?.value)
-                    : opt.value;
-                closePopup(val);
-            });
+            btn.addEventListener("click", () => handleOptionSelection(opt.value));
             actionContainer.appendChild(btn);
         });
 
-        if (inputElement) {
+        if (inputElement instanceof HTMLInputElement) {
             inputElement.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
+                if (e.key === "Enter" && !["select", "range", "color"].includes(type)) {
                     e.preventDefault();
-                    submitInput();
+                    const targetOpt = effectiveOptions.find(o => o.highlighted && o.value === "inputValue") || 
+                                      effectiveOptions.find(o => o.value === "inputValue") ||
+                                      effectiveOptions[effectiveOptions.length - 1];
+                    handleOptionSelection(targetOpt?.value);
                 }
             });
         }
@@ -416,51 +343,21 @@ export function showPopup<T = any>(
         popup.appendChild(actionContainer);
         popupContainer.appendChild(popup);
         document.body.appendChild(popupContainer);
-        placePopup(popupContainer, popup, anchor);
+
+        // Position using either center fallback or external placer
+        if (center) {
+            popupContainer.classList.add("center", "popup-container-shaded");
+        } else {
+            PopupPlacer.place(popupContainer, popup, anchor);
+        }
 
         outsidePointerDown = (event: PointerEvent) => {
             const target = event.target;
-            if (!(target instanceof Node)) return;
-            if (!popup.contains(target) && !anchor?.contains(target)) {
+            if (target instanceof Node && !popup.contains(target) && !anchor?.contains(target)) {
                 closePopup(undefined);
             }
         };
         document.addEventListener("pointerdown", outsidePointerDown);
-
-        trapTabNavigation = (event: KeyboardEvent) => {
-            if (event.key !== "Tab" || isClosing) return;
-
-            const focusableElements = Array.from(popup.querySelectorAll<HTMLElement>(
-                'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [contenteditable="true"], [tabindex]:not([tabindex="-1"])'
-            )).filter((element) =>
-                element.tabIndex >= 0 &&
-                element.getClientRects().length > 0 &&
-                getComputedStyle(element).visibility !== "hidden"
-            );
-
-            if (focusableElements.length === 0) {
-                event.preventDefault();
-                popup.tabIndex = -1;
-                popup.focus();
-                return;
-            }
-
-            const first = focusableElements[0];
-            const last = focusableElements[focusableElements.length - 1];
-            const activeIndex = focusableElements.indexOf(document.activeElement as HTMLElement);
-
-            if (event.shiftKey && activeIndex <= 0) {
-                event.preventDefault();
-                last.focus();
-            } else if (!event.shiftKey && activeIndex === focusableElements.length - 1) {
-                event.preventDefault();
-                first.focus();
-            } else if (activeIndex === -1) {
-                event.preventDefault();
-                (event.shiftKey ? last : first).focus();
-            }
-        };
-        document.addEventListener("keydown", trapTabNavigation);
 
         if (transitionAnimations) {
             popup.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style, ease-out) forwards";
