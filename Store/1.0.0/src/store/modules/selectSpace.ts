@@ -17,8 +17,8 @@ function wait(ms: number): Promise<void> {
 
 let isInitialized: boolean = false;
 
-const fadeOutAnimation = "nivixFadeOut 0.1s var(--transition-easing-style, ease-out) forwards";
-const fadeInAnimation = "nivixFadeIn 0.2s var(--transition-easing-style, ease-out) forwards";
+const fadeOutAnimation = "playpenFadeOut 0.1s var(--transition-easing-style, ease-out) forwards";
+const fadeInAnimation = "playpenFadeIn 0.2s var(--transition-easing-style, ease-out) forwards";
 const programaticAnimationDuration = 200;
 const itemDelay = 25; // Adjust this (in ms) to make the staggered pops faster or slower
 
@@ -34,11 +34,11 @@ export async function init() {
     if (isInitialized) return;
     
     sourceCodeBtn.addEventListener('click', function() {
-        window.open('https://github.com/SqueakyLlama1/nivix-studio-dev/tree/main/Store/1.0.0', '_blank');
+        window.open('https://github.com/Playpen-Technologies/studio/tree/main/Store/1.0.0', '_blank');
     });
     
     issuesBtn.addEventListener('click', function() {
-        window.open('https://github.com/SqueakyLlama1/nivix-studio-dev/issues', '_blank');
+        window.open('https://github.com/Playpen-Technologies/studio/issues', '_blank');
     });
     
     exitBtn.addEventListener('click', exit);
@@ -140,14 +140,14 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferen
         identifierEl.innerText = `ID: ${space.id}`;
         
         continueBtn.textContent = 'Open';
-        continueBtn.className = 'nivix-primary-button primary continue-button';
+        continueBtn.className = 'playpen-primary-button primary continue-button';
         continueBtn.onclick = () => gotoWorkspace(space.id);
         
         deleteBtn.textContent = 'Delete';
-        deleteBtn.className = 'nivix-secondary-button';
+        deleteBtn.className = 'playpen-secondary-button';
         
         renameBtn.textContent = 'Rename';
-        renameBtn.className = 'nivix-secondary-button';
+        renameBtn.className = 'playpen-secondary-button';
         renameBtn.onclick = async () => {
             const newName = await showPopup(
                 `Renaming Space`,

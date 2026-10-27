@@ -27,8 +27,8 @@ load.checkLoadState();
 
 export async function exit() {
     const confirmation = await showPopup(
-        "Exiting Nivix Store",
-        "Are you sure you want to exit Nivix Store?", "options", 
+        "Exiting Playpen Store",
+        "Are you sure you want to exit Playpen Store?", "options", 
         [
             { content: "Cancel", value: false, highlighted: true },
             { content: "Exit", value: true, highlighted: false }
@@ -42,7 +42,7 @@ export async function exit() {
 
 export async function restart() {
     const confirmation = await showPopup(
-        'Restart Nivix Store',
+        'Restart Playpen Store',
         `All unsaved progress will be lost.`,
         "options",
         [

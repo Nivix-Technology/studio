@@ -7,7 +7,7 @@
     
     padding: var(--resting-area-padding, 5px);
     
-    animation: nivixFadeIn 0.8s var(--transition-easing-style, ease-out) forwards;
+    animation: playpenFadeIn 0.8s var(--transition-easing-style, ease-out) forwards;
 
     .center {
         flex: 1;
@@ -19,7 +19,7 @@
     }
     
     h1 {
-        color: var(--brand-primary, #43a4eb);
+        color: var(--brand-primary, #2188d2);
         transform: scale(1.5);
         
         sup {
@@ -27,12 +27,12 @@
         }
     }
     
-    .nivix-footer {
+    .playpen-footer {
         box-sizing: border-box;
         width: 100%;
     }
 
-    .nivix-horizontal-navigation {
+    .playpen-horizontal-navigation {
         padding: 0;
     }
 }

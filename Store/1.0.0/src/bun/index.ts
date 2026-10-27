@@ -588,7 +588,7 @@ function openStore() {
 	let appliedInitialSize = false;
 	
 	storeWindow = new BrowserWindow({
-		title: "Nivix Store",
+		title: "Playpen Store",
 		url: "views://store/store.html",
 		frame: { width, height, x, y },
 		allowedProtocols: { appData: true },
@@ -612,7 +612,7 @@ function openUpdater() {
 	const { x, y } = utils.getCenterXY(width, height);
 	
 	const windowInstance = new BrowserWindow({
-		title: "Nivix Store",
+		title: "Playpen Store",
 		url: "views://updater/updater.html",
 		transparent: true,
 		titleBarStyle: "hidden",

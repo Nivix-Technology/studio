@@ -1,5 +1,5 @@
 import { electroview } from './index';
-import { init as initNxLib } from './nxlib';
+import { init as initPlaypenLib } from './playpentech';
 import { showNotification, showPopup } from './notifications';
 
 type PreferenceValues = {
@@ -32,7 +32,7 @@ type ThemeVariable = {
 };
 
 type ThemeProfile = {
-    format: 'nivix-store-theme';
+    format: 'playpen-store-theme';
     version: 1;
     name: string;
     variables: Record<string, ThemeValue>;
@@ -89,7 +89,7 @@ const themeVariables: ThemeVariable[] = [
 ];
 
 const themeDirectory = 'ThemeProfiles';
-const themeFormat = 'nivix-store-theme';
+const themeFormat = 'playpen-store-theme';
 const profileIdPattern = /^[\da-f-]{36}$/i;
 
 let currentPreferences: PreferenceValues = { ...defaultPreferences };
@@ -114,7 +114,7 @@ export async function init() {
 
     initSettingsInputs();
     applySettings();
-    initNxLib();
+    initPlaypenLib();
     initTab();
     void initThemeEditor().catch(error => {
         console.error('Failed to initialize the theme editor:', error);
@@ -299,7 +299,7 @@ function buildThemeInputs() {
             const group = document.createElement('section');
             group.className = 'theme-variable-group';
             const label = document.createElement('span');
-            label.className = 'nivix-label';
+            label.className = 'playpen-label';
             label.textContent = section;
             sectionContainer = document.createElement('div');
             sectionContainer.className = 'theme-variable-list';
@@ -308,7 +308,7 @@ function buildThemeInputs() {
         }
 
         const row = document.createElement('button');
-        row.className = 'nivix-primary-button';
+        row.className = 'playpen-primary-button';
         row.innerText = variable.name;
         sectionContainer!.append(row);
     }
@@ -411,7 +411,7 @@ async function exportThemeProfile() {
     }, null, 2);
     const file = await picker.call(window, {
         suggestedName: `${profile.name.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')}.storetheme`,
-        types: [{ description: 'Nivix Store theme', accept: { 'application/json': ['.storetheme'] } }]
+        types: [{ description: 'Playpen Store theme', accept: { 'application/json': ['.storetheme'] } }]
     });
     const writable = await file.createWritable();
     await writable.write(content);
@@ -470,7 +470,7 @@ async function resetPreferences() {
     buildThemeInputs();
     getEBD<HTMLSelectElement>('settings-theme-profile').value = '';
     updateThemeProfileButtons();
-    initNxLib();
+    initPlaypenLib();
 }
 
 async function resetInventory() {
@@ -551,7 +551,7 @@ function initTab() {
                 if (
                     await showPopup(
                         'Confirm Reset',
-                        'Are you sure you want to reset all theme settings? This cannot be undone. <br><br><span class="nivix-disclaimer">Note: You can export your themes as a file for sharing and later use.</span>',
+                        'Are you sure you want to reset all theme settings? This cannot be undone. <br><br><span class="playpen-disclaimer">Note: You can export your themes as a file for sharing and later use.</span>',
                         'options',
                         [
                             { content: 'Reset', value: true },
@@ -566,7 +566,7 @@ function initTab() {
                 if (
                     await showPopup(
                         'Confirm Reset',
-                        'Are you sure you want to reset your inventory? This cannot be undone. <br><br><span class="nivix-disclaimer">Note: This only applies to your local inventory. Remote database inventory systems have to be reset from the Store Remote dashboard.</span>',
+                        'Are you sure you want to reset your inventory? This cannot be undone. <br><br><span class="playpen-disclaimer">Note: This only applies to your local inventory. Remote database inventory systems have to be reset from the Store Remote dashboard.</span>',
                         'options',
                         [
                             { content: 'Reset', value: true },

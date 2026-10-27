@@ -3,8 +3,8 @@ import type { ElectrobunConfig } from "electrobun";
 
 export default {
 	app: {
-		name: "Nivix Store",
-		identifier: "store.nivixtech.com",
+		name: "Playpen Store",
+		identifier: "Store.playpentech.com",
 		version: "1.0.0",
 	},
 	scripts: {

@@ -143,7 +143,7 @@
             }
             
             input[type="range"] {
-                accent-color: var(--brand-primary, #43a4eb);
+                accent-color: var(--brand-primary, #2188d2);
             }
             
             .popup-color-hex-label {

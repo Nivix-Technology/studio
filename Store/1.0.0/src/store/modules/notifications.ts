@@ -1,5 +1,5 @@
 import { preferences } from "./settings";
-import { ColorPicker, PopupPlacer } from "./nxlib";
+import { ColorPicker, PopupPlacer } from "./playpentech";
 
 interface NotificationItem {
     message: string;
@@ -108,7 +108,7 @@ function renderNotification(item: NotificationItem): Promise<void> {
         container.append(header, messageOutput);
         
         if (preferences['transitionAnimations']) {
-            container.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style, ease-out) forwards";
+            container.style.animation = "playpenFadeIn 0.3s var(--transition-easing-style, ease-out) forwards";
         }
         document.body.appendChild(container);
         
@@ -134,7 +134,7 @@ function renderNotification(item: NotificationItem): Promise<void> {
                 return;
             }
             
-            container.style.animation = "nivixFadeOut 0.25s var(--transition-easing-style, ease-out) forwards";
+            container.style.animation = "playpenFadeOut 0.25s var(--transition-easing-style, ease-out) forwards";
             container.addEventListener("animationend", () => {
                 container.remove();
                 resolve();
@@ -201,7 +201,7 @@ export function showPopup<T = any>(
                     selectElement.add(new Option(option, option));
                 });
                 inputElement = selectElement;
-                inputElement.className = "nivix-input";
+                inputElement.className = "playpen-input";
             } else if (type === "color") {
                 colorPickerInstance = new ColorPicker(inputProps.value);
                 colorPickerInstance.mount(messageContainer);
@@ -209,7 +209,7 @@ export function showPopup<T = any>(
             } else {
                 inputElement = document.createElement("input");
                 inputElement.type = type;
-                inputElement.className = "nivix-input";
+                inputElement.className = "playpen-input";
             }
 
             if (type !== "color") {
@@ -279,7 +279,7 @@ export function showPopup<T = any>(
             };
 
             popup.addEventListener("animationend", animationEnded, { once: true });
-            popup.style.animation = "nivixFadeOut 0.3s var(--transition-easing-style, ease-out) forwards";
+            popup.style.animation = "playpenFadeOut 0.3s var(--transition-easing-style, ease-out) forwards";
 
             if (isShaded) {
                 const onContainerAnimationEnd = (event: AnimationEvent) => {
@@ -319,7 +319,7 @@ export function showPopup<T = any>(
         effectiveOptions.forEach((opt) => {
             const btn = document.createElement("button");
             btn.textContent = opt.content;
-            btn.className = opt.highlighted ? "nivix-primary-button primary" : "nivix-primary-button";
+            btn.className = opt.highlighted ? "playpen-primary-button primary" : "playpen-primary-button";
             if (opt.highlighted) highlightedButton = btn;
             
             btn.addEventListener("click", () => handleOptionSelection(opt.value));
@@ -360,7 +360,7 @@ export function showPopup<T = any>(
         document.addEventListener("pointerdown", outsidePointerDown);
 
         if (transitionAnimations) {
-            popup.style.animation = "nivixFadeIn 0.3s var(--transition-easing-style, ease-out) forwards";
+            popup.style.animation = "playpenFadeIn 0.3s var(--transition-easing-style, ease-out) forwards";
             if (popupContainer.classList.contains("popup-container-shaded")) {
                 popupContainer.style.animation = "popupContainerFadeIn 0.3s var(--transition-easing-style, ease-out) forwards";
             }

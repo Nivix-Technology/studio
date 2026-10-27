@@ -204,7 +204,7 @@
             }
         }
         
-        .nivix-horizontal-navigation {
+        .playpen-horizontal-navigation {
             background: transparent;
         }
     }
@@ -222,11 +222,11 @@
         
         border-radius: var(--radius, 4px);
         
-        .nivix-secondary-button {
+        .playpen-secondary-button {
             justify-content: left;
         }
         
-        .nivix-svg-checkbox-wrapper {
+        .playpen-svg-checkbox-wrapper {
             justify-content: left;
             gap: calc(var(--gap, 5px) * 2);
             font-size: 16px;
@@ -241,7 +241,7 @@
             }
         }
         
-        .nivix-bookmark {
+        .playpen-bookmark {
             width: 100%;
             border-radius: var(--radius, 4px);
             margin: 0;

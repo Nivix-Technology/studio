@@ -20,7 +20,7 @@ export function initTooltips(): void {
 
     tooltip = document.createElement('div');
     tooltip.className = 'tooltip-popup';
-    tooltip.id = 'nivix-tooltip-popup';
+    tooltip.id = 'playpen-tooltip-popup';
     tooltip.setAttribute('role', 'tooltip');
     document.body.append(tooltip);
 
