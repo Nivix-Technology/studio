@@ -4,7 +4,7 @@ import type { ElectrobunConfig } from "electrobun";
 export default {
 	app: {
 		name: "Playpen Store",
-		identifier: "Store.playpentech.com",
+		identifier: "Store.playpensoftware.com",
 		version: "1.0.0",
 	},
 	scripts: {

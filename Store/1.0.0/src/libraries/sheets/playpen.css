@@ -27,9 +27,9 @@
     --danger-darker: color-mix(in srgb, var(--danger-primary, #ff3f3f), black var(--background-color-step-amount, 12%));
     --danger-lighter: color-mix(in srgb, var(--danger-primary, #ff3f3f), white var(--background-color-step-amount, 12%));
     
-    --brand-primary: #289bee;
-    --brand-darker: color-mix(in srgb, var(--brand-primary, #2188d2), black var(--brand-color-step-amount, 20%));
-    --brand-lighter: color-mix(in srgb, var(--brand-primary, #2188d2), white var(--brand-color-step-amount, 20%));
+    --brand-primary: #2d9eef;
+    --brand-darker: color-mix(in srgb, var(--brand-primary, #2d9eef), black var(--brand-color-step-amount, 20%));
+    --brand-lighter: color-mix(in srgb, var(--brand-primary, #2d9eef), white var(--brand-color-step-amount, 20%));
     
     --text-primary: #313131;
     --text-secondary: color-mix(in srgb, var(--text-primary, #313131), white var(--text-color-step-amount));
@@ -175,8 +175,8 @@ hr {
     aspect-ratio: 1;
     border-radius: 50%;
     background:
-    radial-gradient(farthest-side, var(--brand-primary, #2188d2) 94%, #0000) top/8px 8px no-repeat,
-    conic-gradient(#0000 30%, var(--brand-primary, #2188d2));
+    radial-gradient(farthest-side, var(--brand-primary, #2d9eef) 94%, #0000) top/8px 8px no-repeat,
+    conic-gradient(#0000 30%, var(--brand-primary, #2d9eef));
     mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
     -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 8px), #000 0);
     animation: load-spin 1s infinite linear;
@@ -246,7 +246,7 @@ hr {
     }
     
     &.primary {
-        background: var(--brand-primary, #2188d2);
+        background: var(--brand-primary, #2d9eef);
         color: var(--text-tertiary, #ffffff);
         
         & svg {
@@ -254,7 +254,7 @@ hr {
         }
         
         &:active {
-            background: var(--brand-darker, color-mix(in srgb, var(--brand-primary, #2188d2), black var(--brand-color-step-amount, 20%)));
+            background: var(--brand-darker, color-mix(in srgb, var(--brand-primary, #2d9eef), black var(--brand-color-step-amount, 20%)));
         }
     }
     
@@ -302,10 +302,10 @@ hr {
     }
     
     &.primary {
-        color: var(--brand-primary, #2188d2);
+        color: var(--brand-primary, #2d9eef);
         
         & svg {
-            fill: var(--brand-primary, #2188d2);
+            fill: var(--brand-primary, #2d9eef);
         }
     }
     
@@ -367,8 +367,8 @@ hr {
         }
         
         &.primary {
-            background: var(--brand-primary, #2188d2);
-            border-color: var(--brand-primary, #2188d2);
+            background: var(--brand-primary, #2d9eef);
+            border-color: var(--brand-primary, #2d9eef);
             color: var(--text-tertiary, #ffffff);
             
             &::placeholder {
@@ -381,7 +381,7 @@ hr {
             }
             
             &:focus {
-                border-color: var(--brand-darker, color-mix(in srgb, var(--brand-primary, #2188d2), black var(--brand-color-step-amount, 20%)));
+                border-color: var(--brand-darker, color-mix(in srgb, var(--brand-primary, #2d9eef), black var(--brand-color-step-amount, 20%)));
             }
         }
         
@@ -467,8 +467,8 @@ hr {
     }
     
     &:checked {
-        border-color: var(--brand-primary, #2188d2);
-        background: var(--brand-primary, #2188d2);
+        border-color: var(--brand-primary, #2d9eef);
+        background: var(--brand-primary, #2d9eef);
         
         &::before {
             background: var(--text-tertiary, #ffffff);
@@ -484,12 +484,12 @@ hr {
     }
     
     &:checked:disabled {
-        background: var(--brand-primary, #2188d2);
+        background: var(--brand-primary, #2d9eef);
     }
 }
 
 input[type="range"] {
-    accent-color: var(--brand-primary, #2188d2);
+    accent-color: var(--brand-primary, #2d9eef);
     width: 100%;
 }
 
@@ -677,7 +677,7 @@ input[type="range"] {
     }
     
     &.primary {
-        background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") no-repeat right 0.8rem center / 1rem, var(--brand-primary, #2188d2);
+        background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") no-repeat right 0.8rem center / 1rem, var(--brand-primary, #2d9eef);
         color: var(--text-tertiary, #ffffff);
     }
     
@@ -765,7 +765,7 @@ input[type="range"] {
     }
     
     &.primary {
-        background: color-mix(in srgb, var(--brand-primary, #2188d2), white 80%);
+        background: color-mix(in srgb, var(--brand-primary, #2d9eef), white 80%);
     }
 }
 

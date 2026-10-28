@@ -1,5 +1,5 @@
 import { preferences } from "./settings";
-import { ColorPicker, PopupPlacer } from "./playpentech";
+import { ColorPicker, PopupPlacer } from "./playpen";
 
 interface NotificationItem {
     message: string;

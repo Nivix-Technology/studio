@@ -7,7 +7,6 @@ import { showPopup } from "./notifications";
 import * as load from './load';
 
 // Import all modules that listen for tabChange events, so electrobun can package them, and all top-level code is ran.
-import './connectDatabase';
 import './createSpace';
 import './selectSpace';
 

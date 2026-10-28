@@ -1,5 +1,5 @@
 import { electroview } from './index';
-import { init as initPlaypenLib } from './playpentech';
+import { init as initPlaypenLib } from './play';
 import { showNotification, showPopup } from './notifications';
 
 type PreferenceValues = {

@@ -19,7 +19,7 @@
     }
     
     h1 {
-        color: var(--brand-primary, #2188d2);
+        color: var(--brand-primary, #2d9eef);
         transform: scale(1.5);
         
         sup {

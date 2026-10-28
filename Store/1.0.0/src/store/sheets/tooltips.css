@@ -40,12 +40,12 @@
 
     /* Accent Modifier Class */
     &.primary {
-        background: var(--brand-primary, #2188d2);
+        background: var(--brand-primary, #2d9eef);
         color: var(--text-tertiary, #ffffff);
 
         &:hover,
         &:focus {
-            background: var(--brand-darker, color-mix(in srgb, var(--brand-primary, #2188d2), black var(--brand-color-step-amount, 20%)));
+            background: var(--brand-darker, color-mix(in srgb, var(--brand-primary, #2d9eef), black var(--brand-color-step-amount, 20%)));
         }
     }
 }
@@ -87,13 +87,13 @@
 
     /* Primary Accent Variant for Tooltip Box */
     &.primary {
-        background: var(--brand-primary, #2188d2);
+        background: var(--brand-primary, #2d9eef);
         color: var(--text-tertiary, #ffffff);
     }
 }
 
 .tooltip-popup.primary {
-    background: var(--brand-primary, #2188d2);
+    background: var(--brand-primary, #2d9eef);
     color: var(--text-tertiary, #ffffff);
 }
 
