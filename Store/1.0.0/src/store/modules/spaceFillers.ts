@@ -1,4 +1,4 @@
-import type { preferenceUpdateEventDetail } from '../../rpc/store-types';
+import type { preferenceUpdateEventDetail } from '../../types/store-types';
 import { preferences } from './settings';
 
 function getEBD(id: string) { return document.getElementById(id); }
@@ -72,7 +72,7 @@ export async function fillSpaceContainer() {
         [ "circle1", "triangle6", "polygon5", "triangle2", "circle7", "polygon3", "circle4", "triangle3", "polygon1", "circle3" ],
         [ "circle3", "polygon2", "triangle4", "polygon1", "triangle5", "circle2", "circle6", "polygon6", "triangle7", "circle4", "polygon5" ]
     ];
-    
+
     const transitionAnimations = preferences['transitionAnimations'];
     const spaceFillerAnimations = preferences['spaceFillerAnimations'];
 
@@ -96,7 +96,7 @@ export async function fillSpaceContainer() {
     do {
         randNum = Math.floor(Math.random() * combinations.length);
     } while (combinations.length > 1 && randNum === lastCombinationIndex);
-    
+
     lastCombinationIndex = randNum;
     const combination = combinations[randNum];
 

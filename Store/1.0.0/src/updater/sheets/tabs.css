@@ -1,15 +1,9 @@
 .tab {
-    position: fixed;
-    top: 0;
-    left: 0;
     display: none;
     opacity: 1;
 
     box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    
+
     &.previsible-flex {
         display: flex;
     }

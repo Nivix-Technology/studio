@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Background Container -->
+  <rect x="0" y="0" width="512" height="512" rx="96" ry="96" fill="#000000" />
+  
+  <g fill="#FFFFFF">
+    <!-- Home / Creative Element (Roof / House shape) -->
+    <path d="M 256,150 L 360,230 L 330,250 L 256,194 L 182,250 L 152,230 Z" />
+    
+    <!-- Business / Professional Element (Solid Base Building Block) -->
+    <rect x="166" y="270" width="180" height="92" rx="20" />
+    
+    <!-- Connecting Bridge / Portal dot in center -->
+    <circle cx="256" cy="236" r="14" fill="#000000" />
+  </g>
+</svg>

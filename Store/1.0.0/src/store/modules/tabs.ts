@@ -1,5 +1,5 @@
 import { preferences } from './settings';
-import { type TabOptions } from '../../rpc/store-types';
+import { type TabOptions } from './types';
 
 interface NavigationHistoryItem {
     id: string;
@@ -35,7 +35,7 @@ window.addEventListener('tabChange', ((event: CustomEvent<{ tabId: string }>) =>
     highlightButtons.forEach((button) => {
         const navAttr = button.dataset['tabNavigation'] ?? '';
         const navIds = navAttr.split(',').map((id) => id.trim());
-        
+
         if (navIds.includes(activeTabId)) {
             button.classList.add('primary');
         } else {
@@ -140,6 +140,13 @@ async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
     }
 
     const targetTree = getTree(id);
+    if (!targetTree) {
+        console.error(`[PLAYPEN TABS] Tab not found "${id}"`);
+        return;
+    }
+
+    console.log(`[PLAYPEN TABS] Navigating to tab: "${id}"`);
+
     let tabsHidden = 0;
     let lastHiddenTab: NavigationHistoryItem | undefined;
 
@@ -151,7 +158,7 @@ async function gotoNow(id: string, options: TabOptions = {}): Promise<void> {
         if (!existingTabElement) return;
 
         const existingTree = getTree(existingTab.id);
-        
+
         // Keep ancestors visible
         if (targetTree.includes(existingTab.id)) return;
 
@@ -236,5 +243,17 @@ export async function show(id: string, options: TabOptions = {}): Promise<void> 
     await waitForAnimation(thisElement, instant);
 
     thisElement.classList.remove('is-fading-in');
-    if (isSubTab(id)) focusFirstFocusable(thisElement);
+}
+
+export function navigateFromURLParams() {
+    const search = window.location.search;
+    const urlParams = new URLSearchParams(search);
+
+    const tabValue = urlParams.get('tab-navigation');
+    if (tabValue) {
+        goto(tabValue);
+        console.log(`[PLAYPEN TABS] Navigated to "${tabValue}" due to URL params`);
+        return true;
+    }
+    return false;
 }

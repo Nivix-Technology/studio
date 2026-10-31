@@ -9,9 +9,9 @@ import Database from 'bun:sqlite';
 
 import * as updater from "./updater";
 import * as utils from "./updater-utils";
-import { type UpdaterRPCType } from '../rpc/updater-rpc-types';
-import { type StoreRPCType } from '../rpc/store-rpc-types';
-import type { DatabaseType } from '../rpc/store-types';
+import { type UpdaterRPCType } from '../types/updater-rpc-types';
+import { type StoreRPCType } from '../types/store-rpc-types';
+import type { DatabaseType } from '../types/store-types';
 
 const legacyStudioPath = path.join(os.homedir(), 'nvxstdo');
 const legacyStorePath = path.join(legacyStudioPath, 'store');
@@ -349,7 +349,7 @@ async function configureDatabase(database: DatabaseType, databasePath?: string):
 		}
 		return;
 	}
-	
+
 	throw new Error('Database not recognized.');
 }
 
@@ -572,7 +572,7 @@ function getWindowSize() {
 	const screen = Screen.getPrimaryDisplay();
 	const width = screen.workArea.width;
 	const height = screen.workArea.height;
-	
+
 	const margin = 50;
 	let returnWidth = 1200;
 	let returnHeight = 675;
@@ -586,7 +586,7 @@ function openStore() {
 	const { width, height } = getWindowSize();
 	const { x, y } = utils.getCenterXY(width, height);
 	let appliedInitialSize = false;
-	
+
 	storeWindow = new BrowserWindow({
 		title: "Playpen Store",
 		url: "views://store/store.html",
@@ -594,9 +594,9 @@ function openStore() {
 		allowedProtocols: { appData: true },
 		rpc: storeRPC
 	});
-	
+
 	const windowInstance = storeWindow;
-	
+
 	windowInstance.webview.on("dom-ready", () => {
 		if (appliedInitialSize) return;
 		appliedInitialSize = true;
@@ -610,7 +610,7 @@ function openUpdater() {
 	const width = 700;
 	const height = 400;
 	const { x, y } = utils.getCenterXY(width, height);
-	
+
 	const windowInstance = new BrowserWindow({
 		title: "Playpen Store",
 		url: "views://updater/updater.html",
@@ -624,9 +624,9 @@ function openUpdater() {
 		},
 		rpc: updaterRPC
 	});
-	
+
 	updaterWindow = windowInstance;
-	
+
 	windowInstance.webview.on('dom-ready', () => {
 		void init().catch(error => console.error('Failed to initialize application:', error));
 	});

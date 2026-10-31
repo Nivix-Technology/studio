@@ -34,11 +34,11 @@ export function init(): Promise<void> {
 
 async function initialize() {
     versionLabel!.innerText = `v${index.store.sessionVersion}` || "Failed to get session version";
-    
+
     initTooltips();
-    
+
     let loadMenuDelay: number = 750;
-    
+
     // Load User Preferences
     try {
         await settings.init();
@@ -47,7 +47,7 @@ async function initialize() {
         const message = err as string;
         notifications.showNotification(`Non-Critical Error: Failed to load user preferences: ${message}`, 'warning');
     }
-    
+
     // Replace SVG Placeholders with SVGs
     try {
         await populateSVGs((path) => electroview.rpc!.request.readFile({ path }));
@@ -59,12 +59,12 @@ async function initialize() {
             notifications?.showNotification(`Non-Critical Error: Failed to replace icon placeholders: ${message}`, 'warning');
         }
     }
-    
+
     // Attempt to bind tab-navigation fix.
     try {
         document.addEventListener('keydown', (event: KeyboardEvent): void => {
             if (event.key !== 'Tab') return;
-            
+
             const selector = 'a[href], button, input, textarea, select, [tabindex]:not([tabindex="-1"])';
             const focusables = Array.from(
                 document.querySelectorAll<HTMLElement>(selector)
@@ -73,13 +73,13 @@ async function initialize() {
                 const isNotDisabled = !el.hasAttribute('disabled');
                 return isVisible && isNotDisabled;
             });
-            
+
             if (focusables.length === 0) return;
-            
+
             const firstEl = focusables[0];
             const lastEl = focusables[focusables.length - 1];
             const activeElement = document.activeElement as HTMLElement | null;
-            
+
             if (event.shiftKey && activeElement === firstEl) {
                 lastEl.focus();
                 event.preventDefault();
@@ -92,7 +92,7 @@ async function initialize() {
         const message = err as string;
         notifications?.showNotification(`Non-Critical Error: Failed to load keyboard navigation fix: ${message}`, 'warning');
     }
-    
+
     // Initialize space filler shapes
     try {
         spaceFillers.init();
@@ -100,7 +100,7 @@ async function initialize() {
         const message = err as string;
         notifications?.showNotification(`Non-Critical Error: Failed to load space filler shapes: ${message}`, 'warning');
     }
-    
+
     delayTimeout = setTimeout(finishLoading, loadMenuDelay);
     skipDelayBtn.classList.remove('hidden');
     skipDelayBtn.addEventListener('click', () => {
@@ -112,16 +112,8 @@ async function initialize() {
 async function finishLoading() {
     if (isFinishing) return;
     isFinishing = true;
-    
-    tabs.goto('selectSpace', { logPrevious: false, removePrevious: true });
-}
 
-export function checkLoadState() {
-    if (document.readyState === 'complete') {
-        void init();
-    } else {
-        window.addEventListener('load', () => void init(), { once: true });
-    }
+    tabs.goto('selectSpace', { logPrevious: false, removePrevious: true });
 }
 
 window.addEventListener('DOMContentLoaded', () => {

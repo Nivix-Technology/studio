@@ -1,7 +1,7 @@
 import * as tabs from './tabs';
 
 import { electroview } from './index';
-import type { tabChangeEventDetail } from '../../rpc/store-types';
+import type { tabChangeEventDetail } from '../../types/store-types';
 
 function getEBD<T extends HTMLElement>(id: string): T {
     const element = document.getElementById(id);
@@ -67,7 +67,7 @@ export function createRandomSpace(): Promise<{ name: string; id: number | bigint
 
 export async function init() {
     if (isInitialized) return;
-    
+
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
         if (continueBtn.disabled) return;
@@ -106,7 +106,7 @@ export async function init() {
         selectedIcon = null;
         iconInput.value = '';
     });
-    
+
     cancelBtn.addEventListener('click', function() {
         errorOutput.innerText = '';
         nameInput.value = '';

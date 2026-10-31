@@ -1,6 +1,11 @@
 // @ts-expect-error Electrobun's SDK modules are provided by the build toolchain.
 import { Electroview } from "electrobun/view";
-import { type UpdaterRPCType } from "../../rpc/updater-rpc-types";
+import { type UpdaterRPCType } from "../../types/updater-rpc-types";
+
+// Import CSS
+import '../sheets/index.css';
+import '../sheets/playpen.css';
+import '../sheets/tabs.css';
 
 const rpc = Electroview.defineRPC<UpdaterRPCType>({
     handlers: {
@@ -21,13 +26,13 @@ function wait(ms: number) {return new Promise((resolve) => { setTimeout(resolve,
 async function displayDebug(message: string, type = '') {
     console.log(`Display Debug Function Recieved: ${message}, ${type}`);
     const outputElement = getEBD('debug-output') as HTMLSpanElement;
-    
+
     const messageElement = document.createElement('span') as HTMLElement;
     messageElement.className = type;
     messageElement.innerText = message;
-    
+
     outputElement?.replaceChildren(messageElement);
-    
+
     if (type === 'error') {
         const loader = getEBD('loader');
         // Remove loader to indicate a fatal error, and that the app is no longer loading and will not progress further.
@@ -40,11 +45,11 @@ async function displayDebug(message: string, type = '') {
 
 async function init() {
     const quitBtn = getEBD('quitBtn');
-    
+
     quitBtn?.addEventListener('click', () => {
         electroview.rpc?.request.close();
     });
-    
+
     displayDebug('Checking for updates...');
     const updateAvailable = await electroview.rpc?.request.checkUpdate();
     if (updateAvailable) {

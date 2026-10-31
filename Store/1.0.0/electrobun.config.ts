@@ -4,17 +4,10 @@ import type { ElectrobunConfig } from "electrobun";
 export default {
 	app: {
 		name: "Playpen Store",
-		identifier: "Store.playpensoftware.com",
+		identifier: "store.playpensoftware.com",
 		version: "1.0.0",
 	},
-	scripts: {
-		preBuild: "scripts/pre-build.ts"
-	},
 	build: {
-		// Set bytecode to false to disable obfuscation/javascript compilation
-		cottontail: {
-			bytecode: true,
-		},
 		bun: {
 			entrypoint: "src/bun/index.ts"
 		},
@@ -41,7 +34,7 @@ export default {
 		},
 		win: {
 			bundleCEF: false,
-			icon: "src/assets/favicon.ico"
+			icon: "src/build/favicon.ico"
 		},
 	},
 } satisfies ElectrobunConfig;

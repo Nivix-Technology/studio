@@ -70,21 +70,21 @@ const themeVariables: ThemeVariable[] = [
     { name: 'Light Text', property: '--text-tertiary', section: 'Colors', description: 'Text shown on colored or dark backgrounds.', type: 'color', defaultValue: '#ffffff' },
 
     { name: 'Corner Radius', property: '--radius', section: 'Shape & spacing', description: 'How round corners are on things like buttons and menus.', type: 'range', defaultValue: 4, min: 0, max: 24, unit: 'px' },
-    
+
     { name: 'Resting Area Padding', property: '--resting-area-padding', section: 'Shape & spacing', description: 'How much space there is around the inside of panels and other menus.', type: 'range', defaultValue: 5, min: 0, max: 24, unit: 'px' },
 
     { name: 'Element Gap', property: '--gap', section: 'Shape & spacing', description: 'The space between elements in lists, both left-right and top-bottom.', type: 'range', defaultValue: 5, min: 0, max: 24, unit: 'px' },
-    
+
     { name: 'Clickable Area Vertical Padding', property: '--clickable-area-padding-y', section: 'Shape & spacing', description: 'How much space there is between the text and the top and bottom of buttons and other clickable elements.', type: 'range', defaultValue: 0.4, min: 0, max: 2, step: 0.04, unit: 'rem' },
-    
+
     { name: 'Clickable Area Horizontal Padding', property: '--clickable-area-padding-x', section: 'Shape & spacing', description: 'How much space there is between the text and the left and right of buttons and other clickable elements.', type: 'range', defaultValue: 1, min: 0, max: 3, step: 0.05, unit: 'rem' },
-    
+
     { name: 'Outline Thickness', property: '--outline-width', section: 'Accessibility', description: 'How thick the line around an item is when said item is clicked or focused on with the TAB key.', type: 'range', min: 2, defaultValue: 1.5, max: 10, step: 0.5, unit: 'px' },
-    
+
     { name: 'Outline Color', property: '--outline-color', section: 'Accessibility', description: 'The color of the line around an item is when said item is clicked or focused on with the TAB key.', type: 'color', defaultValue: '#ff6b00' },
-    
+
     { name: 'Transition Speed', property: '--transition-speed', section: 'Effects & motion', description: 'How long transition animations like fading and switching tabs take.', type: 'range', defaultValue: 0.2, min: 0.2, max: 10, step: 0.05, unit: 's' },
-    
+
     { name: 'Transition Easing Style', property: '--transition-easing-style', section: 'Effects & motion', description: '<strong>Linear:</strong> Animation is the same speed until the end.<br><strong>Ease In:</strong> Animation starts slow and ends fast.<br><strong>Ease Out:</strong> Animation starts fast and ends slow.<br><strong>Ease In Out:</strong> Starts slow, middle is fast, ends slow.', type: 'select', defaultValue: 'ease-out', options: ['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out'] }
 ];
 

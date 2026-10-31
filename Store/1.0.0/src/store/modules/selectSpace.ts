@@ -3,8 +3,7 @@ import { showNotification, showPopup } from "./notifications";
 import { preferences } from "./settings";
 
 import { electroview, exit, restart } from "./index";
-import { type tabChangeEventDetail } from "../../rpc/store-types";
-import { gotoWorkspace } from "./workspace";
+import { type tabChangeEventDetail } from "../../types/store-types";
 import { createRandomSpace } from "./createSpace";
 
 function getEBD<T extends HTMLElement = HTMLElement>(id: string): T {
@@ -32,15 +31,15 @@ const searchInput = getEBD<HTMLInputElement>('selectSpace-search');
 
 export async function init() {
     if (isInitialized) return;
-    
+
     sourceCodeBtn.addEventListener('click', function() {
         window.open('https://github.com/Playpen-Technologies/studio/tree/main/Store/1.0.0', '_blank');
     });
-    
+
     issuesBtn.addEventListener('click', function() {
         window.open('https://github.com/Playpen-Technologies/studio/issues', '_blank');
     });
-    
+
     exitBtn.addEventListener('click', exit);
     restartBtn.addEventListener('click', restart);
 
@@ -57,18 +56,18 @@ export async function init() {
             showNotification(`Failed to create random space: ${message}`, 'error');
         }
     });
-    
+
     refreshBtn.addEventListener('click', (e: MouseEvent) => {
         populateSpacesList(true, preferences['transitionAnimations'] && !e.shiftKey);
     });
     searchInput.addEventListener('input', updateSpaceSearch);
-    
+
     isInitialized = true;
 }
 
 async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferences['transitionAnimations']): Promise<void> {
     const spacesList = getEBD<HTMLDivElement>('selectSpace-list');
-    
+
     // Smoothly fade out existing items
     if (fadeOut && animate) {
         const existingItems = spacesList.querySelectorAll<HTMLElement>('.item');
@@ -76,22 +75,28 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferen
             existingItems.forEach((item) => {
                 item.style.animation = fadeOutAnimation;
             });
-            
+
             await wait(programaticAnimationDuration);
             existingItems.forEach((item) => item.remove());
         }
     }
-    
+
     // Clear any remaining elements
     spacesList.innerHTML = '';
-    
+
     // Fetch spaces list via RPC
     const spaces = await electroview.rpc!.request.listSpaces();
     if (!spaces.length) {
-        spacesList.innerHTML = `<div class="center"${animate ? ` style="animation: ${fadeInAnimation}"` : ''}>You have no spaces. Click 'Create New Space' at the bottom right of this menu to get started!</div>`;
+        spacesList.innerHTML = `
+        <div class="center standalone"${animate ? ` style="animation: ${fadeInAnimation}"` : ''}>
+            <svgPlaceholder class="playpen-standalone-icon fill">assets/svg/selectSpace/empty.svg</svgPlaceholder>
+            <p>You have no spaces. Click 'Create New Space' at the bottom right of this menu to get started!</p>
+        </div>
+        `;
         createBtn.focus();
+        populateSVGs();
     }
-    
+
     // Sequentially build and append items so they pop up one by one
     for (const space of spaces) {
         const containerEl = document.createElement('div');
@@ -107,45 +112,45 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferen
         const deleteBtn = document.createElement('button');
         const renameBtn = document.createElement('button');
         const dividerEl = document.createElement('hr');
-        
+
         containerEl.className = 'item center';
         containerEl.dataset['spaceName'] = space.name;
         containerEl.dataset['spaceId'] = String(space.id);
         headerEl.className = 'space-header';
-        
+
         iconButtonEl.type = 'button';
         iconButtonEl.className = 'space-icon-button';
-        
+
         iconEl.className = 'space-icon';
         const defaultIconSrc = new URL('assets/favicon.png', import.meta.url).href;
         const spaceImage = space.imageBase64;
         iconEl.src = typeof spaceImage === 'string' && spaceImage.trim()
-            ? spaceImage
-            : defaultIconSrc;
+        ? spaceImage
+        : defaultIconSrc;
         iconEl.onerror = () => {
             iconEl.onerror = null;
             if (iconEl.src !== defaultIconSrc) iconEl.src = defaultIconSrc;
         };
         iconEl.alt = '';
-        
+
         editIndicatorEl.className = 'space-icon-edit';
         editSvgPlaceholderEl.textContent = 'assets/svg/edit.svg';
         editIndicatorEl.appendChild(editSvgPlaceholderEl);
         iconButtonEl.append(iconEl, editIndicatorEl);
-        
+
         nameEl.className = 'name-column';
         nameEl.innerText = space.name;
-        
+
         identifierEl.className = 'id-column';
         identifierEl.innerText = `ID: ${space.id}`;
-        
+
         continueBtn.textContent = 'Open';
         continueBtn.className = 'playpen-primary-button primary continue-button';
-        continueBtn.onclick = () => gotoWorkspace(space.id);
-        
+        // continueBtn.onclick = () => gotoWorkspace(space.id);
+
         deleteBtn.textContent = 'Delete';
         deleteBtn.className = 'playpen-secondary-button';
-        
+
         renameBtn.textContent = 'Rename';
         renameBtn.className = 'playpen-secondary-button';
         renameBtn.onclick = async () => {
@@ -156,7 +161,7 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferen
                 undefined,
                 { placeholder: 'New Name', maxlength: 128 }
             );
-            
+
             if (newName && newName !== space.name) {
                 try {
                     await electroview.rpc!.request.updateSpace({ id: space.id, updates: { name: newName } });
@@ -167,9 +172,9 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferen
                 }
             }
         };
-        
+
         let firstItemAppended = false;
-        
+
         deleteBtn.onclick = async (e: MouseEvent) => {
             const verified = e.shiftKey ? true : await showPopup(
                 'Confirm Space Deletion?', `Name: "${space.name}"<br>ID: ${space.id}<br></div><br><b>This cannot be undone.</b>`,
@@ -179,7 +184,7 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferen
                     { content: 'Delete', value: true, highlighted: false }
                 ]
             );
-            
+
             if (verified) {
                 try {
                     await electroview.rpc!.request.deleteSpace(space.id);
@@ -191,7 +196,7 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferen
                 }
             }
         };
-        
+
         iconButtonEl.onclick = async () => {
             const files = await showPopup(
                 `Set an image for space '${space.name}'`,
@@ -214,10 +219,10 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferen
                 populateSpacesList();
                 return;
             }
-            
+
             if (files && files.length > 0) {
                 const file = files[0];
-                
+
                 try {
                     const imageBase64 = await convertFileToBase64(file);
                     await electroview.rpc!.request.updateSpace({
@@ -230,34 +235,34 @@ async function populateSpacesList(fadeOut?: boolean, animate: boolean = preferen
                     showNotification(`Failed to update space image: ${message}`, 'error');
                 }
             }
-            
+
             function convertFileToBase64(file: File): Promise<string> {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    
+
                     reader.onload = () => resolve(reader.result as string);
                     reader.onerror = (error) => reject(error);
-                    
+
                     reader.readAsDataURL(file);
                 });
             }
         };
-        
+
         headerEl.append(iconButtonEl, nameEl, identifierEl);
-        
+
         actionsContainerEl.className = 'actions';
         actionsContainerEl.append(deleteBtn, renameBtn, continueBtn);
-        
+
         dividerEl.className = 'tile-divider';
         containerEl.append(headerEl, dividerEl, actionsContainerEl);
-        
+
         if (animate) containerEl.style.animation = fadeInAnimation;
         spacesList.appendChild(containerEl);
-        
+
         if (!firstItemAppended) firstItemAppended = true;
         if (animate && firstItemAppended) await wait(itemDelay);
     }
-    
+
     populateSVGs();
     updateSpaceSearch();
 }
@@ -272,7 +277,7 @@ function updateSpaceSearch(): void {
     let matchingItems = 0;
     for (const item of items) {
         const searchableText = `${item.dataset['spaceName'] ?? ''} ${item.dataset['spaceId'] ?? ''}`
-            .toLocaleLowerCase();
+        .toLocaleLowerCase();
         item.hidden = !searchableText.includes(searchTerm);
         item.style.display = item.hidden ? 'none' : '';
         if (!item.hidden) matchingItems++;

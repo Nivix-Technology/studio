@@ -1,52 +1,3 @@
-interface CheckboxDependency {
-    source: HTMLInputElement;
-    expectedValue: 'checked' | 'unchecked';
-}
-
-interface CheckboxDependencyListener extends CheckboxDependency {
-    handler: () => void;
-}
-
-const dependencyListeners = new WeakMap<HTMLInputElement, CheckboxDependencyListener>();
-
-function getCheckboxDependency(dependentCheckbox: HTMLInputElement): CheckboxDependency | null {
-    const dependency = dependentCheckbox.dataset['depends'] ?? '';
-    const separatorIndex = dependency.indexOf(':');
-    if (separatorIndex < 1) {
-        console.error(`Invalid checkbox data-depends value: "${dependency}". Expected "id:checked" or "id:unchecked".`);
-        return null;
-    }
-
-    const dependencyId = dependency.slice(0, separatorIndex).trim();
-    const expectedValue = dependency.slice(separatorIndex + 1).trim();
-    if (!dependencyId || (expectedValue !== 'checked' && expectedValue !== 'unchecked')) {
-        console.error(`Invalid checkbox data-depends value: "${dependency}". Expected "id:checked" or "id:unchecked".`);
-        return null;
-    }
-
-    const source = document.getElementById(dependencyId);
-    if (!(source instanceof HTMLInputElement) || source.type !== 'checkbox') {
-        console.error(`Checkbox dependency "${dependencyId}" does not reference a checkbox element.`);
-        return null;
-    }
-
-    return { source, expectedValue };
-}
-
-function initInputButtonLink() {
-    const buttons = document.querySelectorAll<HTMLButtonElement>('button[data-input-link]');
-    
-    buttons.forEach(function(button) {
-        const linkedElID = button.getAttribute('data-input-link') || "";
-
-        const linkedEl = document.getElementById(linkedElID);
-        
-        button.addEventListener('click', function() {
-            linkedEl?.click();
-        });
-    });
-}
-
 export function init(): void {
     const dependentCheckboxes = document.querySelectorAll<HTMLInputElement>(
         'input[type="checkbox"][data-depends]'
@@ -93,6 +44,65 @@ export function init(): void {
     PopupPlacer.init();
 }
 
+const dependencyListeners = new WeakMap<HTMLInputElement, CheckboxDependencyListener>();
+
+export async function waitForLoad(): Promise<void> {
+    if (document.readyState !== 'complete') {
+        await new Promise<void>((resolve) => {
+            window.addEventListener('load', () => resolve(), { once: true });
+        });
+    }
+
+    await document.fonts.ready;
+}
+
+function initInputButtonLink() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('button[data-input-link]');
+
+    buttons.forEach(function(button) {
+        const linkedElID = button.getAttribute('data-input-link') || "";
+
+        const linkedEl = document.getElementById(linkedElID);
+
+        button.addEventListener('click', function() {
+            linkedEl?.click();
+        });
+    });
+}
+
+function getCheckboxDependency(dependentCheckbox: HTMLInputElement): CheckboxDependency | null {
+    const dependency = dependentCheckbox.dataset['depends'] ?? '';
+    const separatorIndex = dependency.indexOf(':');
+    if (separatorIndex < 1) {
+        console.error(`Invalid checkbox data-depends value: "${dependency}". Expected "id:checked" or "id:unchecked".`);
+        return null;
+    }
+
+    const dependencyId = dependency.slice(0, separatorIndex).trim();
+    const expectedValue = dependency.slice(separatorIndex + 1).trim();
+    if (!dependencyId || (expectedValue !== 'checked' && expectedValue !== 'unchecked')) {
+        console.error(`Invalid checkbox data-depends value: "${dependency}". Expected "id:checked" or "id:unchecked".`);
+        return null;
+    }
+
+    const source = document.getElementById(dependencyId);
+    if (!(source instanceof HTMLInputElement) || source.type !== 'checkbox') {
+        console.error(`Checkbox dependency "${dependencyId}" does not reference a checkbox element.`);
+        return null;
+    }
+
+    return { source, expectedValue };
+}
+
+interface CheckboxDependency {
+    source: HTMLInputElement;
+    expectedValue: 'checked' | 'unchecked';
+}
+
+interface CheckboxDependencyListener extends CheckboxDependency {
+    handler: () => void;
+}
+
 export class ColorPicker {
     public container: HTMLDivElement;
     public previewBox: HTMLDivElement;
@@ -100,7 +110,7 @@ export class ColorPicker {
     public hueSlider: HTMLInputElement;
     public inputElement: HTMLInputElement;
     public hexLabel: HTMLLabelElement;
-    
+
     private svCtx: CanvasRenderingContext2D | null;
     private currentHex: string;
     private currentH: number;
@@ -109,8 +119,8 @@ export class ColorPicker {
 
     constructor(initialValue?: string | number) {
         this.currentHex = typeof initialValue === "string" && /^#[\da-f]{6}$/i.test(initialValue)
-            ? initialValue
-            : "#000000";
+        ? initialValue
+        : "#000000";
 
         const hsv = this.hexToHsv(this.currentHex);
         this.currentH = hsv.h;
@@ -207,11 +217,11 @@ export class ColorPicker {
 
         const handleSVInteraction = (e: MouseEvent | TouchEvent) => {
             const rect = this.svCanvas.getBoundingClientRect();
-            const clientX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX;
-            const clientY = 'touches' in e ? e.touches[0].clientY : (e as MouseEvent).clientY;
+            const clientX = 'touches' in e ? e.touches[0]?.clientX : (e as MouseEvent).clientX;
+            const clientY = 'touches' in e ? e.touches[0]?.clientY : (e as MouseEvent).clientY;
 
-            let x = Math.max(0, Math.min(clientX - rect.left, rect.width));
-            let y = Math.max(0, Math.min(clientY - rect.top, rect.height));
+            let x = Math.max(0, Math.min(clientX ? clientX - rect.left : 0, rect.width));
+            let y = Math.max(0, Math.min(clientY ? clientY - rect.top : 0, rect.height));
 
             this.currentS = (x / rect.width) * 100;
             this.currentV = (1 - y / rect.height) * 100;
@@ -329,8 +339,8 @@ export class PopupPlacer {
         const clampY = (val: number) => Math.max(minY, Math.min(val, maxY));
 
         const aboveTrigger = triggerRect
-            ? { x: triggerX - width / 2, y: triggerRect.top - height - this.popupMargin }
-            : null;
+        ? { x: triggerX - width / 2, y: triggerRect.top - height - this.popupMargin }
+        : null;
 
         const candidates = [
             { x, y },
@@ -342,8 +352,8 @@ export class PopupPlacer {
         ];
 
         const fallbackPos = triggerRect && triggerRect.top > window.innerHeight / 2 && aboveTrigger
-            ? aboveTrigger
-            : { x, y };
+        ? aboveTrigger
+        : { x, y };
 
         const placement = candidates.find(pos => pos.x >= minX && pos.x <= maxX && pos.y >= minY && pos.y <= maxY) ?? {
             x: clampX(fallbackPos.x),
